@@ -38,11 +38,18 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
         let areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
         let areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
         let count = 0;
-        while ((areaPercent0 < 0.01 || areaPercent1 < 0.01 || areaPercent2 < 0.01) && count++ < 100) {
-            polygon[n - 1] = baseCal();
-            areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
-            areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
-            areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
+        let max = 0;
+        // 尝试10次，如果还是不行，就去10次中的面积最大的那个
+
+        while ((areaPercent0 < 0.01 || areaPercent1 < 0.01 || areaPercent2 < 0.01) && count++ < 10) {
+            const worst = Math.min(areaPercent0, areaPercent1, areaPercent2);
+            if (worst > max) {
+                max = worst;
+                polygon[n - 1] = baseCal();
+                areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
+                areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
+                areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
+            }
         }
     }
 
@@ -72,7 +79,7 @@ export function getCurves(polygon: vec2[], smoothPercent = 1, isDebug: boolean):
         const midPoint = vec2.lerp(vec2.create(), pointBefore, pointAfter, 0.5);
         midPointArr.push(midPoint);
     }
-    const ratio = smoothPercent * 2 / 3;
+    const ratio = (smoothPercent * 2) / 3;
     for (let i = 0; i < n; i++) {
         const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
         const endPoint: vec2 = midPointArr[(i + 1) % n];
@@ -80,7 +87,7 @@ export function getCurves(polygon: vec2[], smoothPercent = 1, isDebug: boolean):
 
         const controlPoint1 = vec2.lerp(vec2.create(), startPoint, mid, ratio);
         const controlPoint2 = vec2.lerp(vec2.create(), endPoint, mid, ratio);
-        
+
         curves.push(new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint));
         // const pointBefore = vec2.fromValues(polygon[i][0], polygon[i][1]);
         // const pointAfter = vec2.fromValues(polygon[(i + 1) % n][0], polygon[(i + 1) % n][1]);
@@ -99,7 +106,7 @@ export function getBezierCurvesBBox(curves: Curve[]): BBox {
     let yMax = -Infinity;
     for (const curve of curves) {
         const bbox = curve.getBBox();
-        
+
         xMin = Math.min(xMin, bbox.x);
         yMin = Math.min(yMin, bbox.y);
         xMax = Math.max(xMax, bbox.x + bbox.width);

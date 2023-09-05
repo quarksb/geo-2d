@@ -4,7 +4,7 @@ import twitterLogo from "/twitter.svg";
 import downloadLogo from "/download.png";
 import codeLogo from "/code.png";
 import { getSvgPathBySize } from "../src/core/svg";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { downloadCore, copySvgCode } from "./utils";
 
 const msg = "quark_china";
@@ -14,7 +14,11 @@ const href = `http://twitter.com/intent/tweet?url=${url}&text=${text}&original_r
 const size = 500;
 const width = size;
 const height = size;
-const viewBox = `0 0 ${width} ${height}`;
+let blur = ref(5);
+const viewBox = computed(() => {
+    const blurExpands = blur.value * 2;
+    return `${-blurExpands} ${-blurExpands} ${width + 2 * blurExpands} ${height + 2 * blurExpands}`;
+});
 let color = ref("#03fef2");
 let d = ref("");
 let polygonNum = ref(6);
@@ -22,9 +26,12 @@ let ramada = ref(0.5);
 let randomSeed = ref(0.314);
 let isDebug = ref(false);
 let smoothPercent = ref(1);
-function renderSvgPath() {
-    const path = getSvgPathBySize({ width, height, polygonNum: polygonNum.value, ramada: ramada.value, randomSeed: randomSeed.value, isDebug: isDebug.value, smoothPercent: smoothPercent.value });
+function renderSvgPath(ramada: number) {
+    const path = getSvgPathBySize({ width, height, polygonNum: polygonNum.value, ramada, randomSeed: randomSeed.value, isDebug: isDebug.value, smoothPercent: smoothPercent.value });
     d.value = path;
+}
+function smoothRender() {
+    renderSvgPath(ramada.value);
 }
 function download(isPng: boolean) {
     const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
@@ -53,21 +60,21 @@ function randomAll() {
     // smoothPercent.value = Math.random();
 }
 // 页面加载完成之后添加svg
-renderSvgPath();
+smoothRender();
 watch(polygonNum, () => {
-    renderSvgPath();
+    smoothRender();
 });
 watch(ramada, () => {
-    renderSvgPath();
+    smoothRender();
 });
 watch(randomSeed, () => {
-    renderSvgPath();
+    smoothRender();
 });
 watch(isDebug, () => {
-    renderSvgPath();
+    smoothRender();
 });
 watch(smoothPercent, () => {
-    renderSvgPath();
+    smoothRender();
 });
 </script>
 
@@ -94,7 +101,10 @@ watch(smoothPercent, () => {
             </nav>
             <body class="body">
                 <svg id="targetSvg" :viewBox="viewBox" focusable="false" role="presentation" class="css-1im46kq">
-                    <path id="target" :fill="color" :d="d"></path>
+                    <filter id="blurMe" v-if="blur>0">
+                        <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
+                    </filter>
+                    <path id="target" :fill="color" :d="d" filter="url(#blurMe)"></path>
                 </svg>
                 <button class="button">
                     <img src="/rand.svg" alt="random" @click="randomAll" />
@@ -116,6 +126,10 @@ watch(smoothPercent, () => {
                 <div class="control">
                     <div class="param">smooth</div>
                     <input type="range" v-model="smoothPercent" min="0.5" max="1" step="0.01" />
+                </div>
+                <div class="control">
+                    <div class="param">blur</div>
+                    <input type="range" v-model="blur" min="0" max="20" step="1" />
                 </div>
                 <div class="control">
                     <button
@@ -283,6 +297,7 @@ watch(smoothPercent, () => {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
+                border-radius: 5px;
                 // border-bottom: 1px solid #00000033;
                 .color-pick {
                     width: 100%;
@@ -293,11 +308,10 @@ watch(smoothPercent, () => {
                     cursor: pointer;
                 }
                 .param {
-                    width: 50px;
-                    font-size: 24px;
-                    text-align: center;
                     width: 100px;
-                    margin-right: 20px;
+                    font-size: 20px;
+                    text-align: center;
+                    margin-right: 10px;
                     text-align: left;
                 }
                 input {
@@ -319,6 +333,9 @@ watch(smoothPercent, () => {
                         margin-right: 10px;
                     }
                 }
+            }
+            .control:hover {
+                background-color: #cececeaa;
             }
         }
         // .footer {
