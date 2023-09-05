@@ -7,7 +7,6 @@ import { getSvgPathBySize } from "../src/core/svg";
 import { ref, watch } from "vue";
 import { downloadCore, copySvgCode } from "./utils";
 
-
 const msg = "quark_china";
 const url = "https://freesvg.win";
 const text = encodeURIComponent(`Make organic SVG shapes with $FreeSvg by @${msg}`);
@@ -45,6 +44,13 @@ function download(isPng: boolean) {
         const blob = new Blob([svgXML], { type: "image/svg+xml" });
         downloadCore(blob, "image.svg");
     }
+}
+function randomAll() {
+    randomSeed.value = Math.random();
+    polygonNum.value = Math.floor(Math.random() * 8) + 3;
+    ramada.value = Math.random();
+    // color.value = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    // smoothPercent.value = Math.random();
 }
 // 页面加载完成之后添加svg
 renderSvgPath();
@@ -90,6 +96,9 @@ watch(smoothPercent, () => {
                 <svg id="targetSvg" :viewBox="viewBox" focusable="false" role="presentation" class="css-1im46kq">
                     <path id="target" :fill="color" :d="d"></path>
                 </svg>
+                <button class="button">
+                    <img src="/rand.svg" alt="random" @click="randomAll" />
+                </button>
             </body>
             <aside class="aside">
                 <div class="control">
@@ -106,7 +115,7 @@ watch(smoothPercent, () => {
                 </div>
                 <div class="control">
                     <div class="param">smooth</div>
-                    <input type="range" v-model="smoothPercent" min="0" max="1" step="0.01" />
+                    <input type="range" v-model="smoothPercent" min="0.5" max="1" step="0.01" />
                 </div>
                 <div class="control">
                     <button
@@ -117,7 +126,7 @@ watch(smoothPercent, () => {
                             }
                         "
                     >
-                        Generate
+                        Random
                     </button>
                 </div>
 
@@ -164,6 +173,8 @@ watch(smoothPercent, () => {
         width: 100%;
         max-width: 1000px;
         height: 100vh;
+        color: #393535;
+        font-family: Inter, system-ui, sans-serif;
         display: grid;
         gap: 5px;
         grid-template-columns: auto 300px;
@@ -231,6 +242,7 @@ watch(smoothPercent, () => {
         .body {
             grid-area: body;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             // background-position: 0px 0px, 10px 10px;
@@ -240,6 +252,23 @@ watch(smoothPercent, () => {
                 width: 500px;
                 height: 500px;
                 border: 3px dashed #00000033;
+            }
+            .button {
+                margin-top: 30px;
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: none;
+                background-color: #eee;
+                cursor: pointer;
+                img {
+                    width: 50px;
+                    height: 50px;
+                    background-color: #eee;
+                }
             }
         }
         .aside {
