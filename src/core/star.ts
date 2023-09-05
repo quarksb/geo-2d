@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { BBox, Curve } from "./curve/curve";
 import { getRandomGenerate, getTriangleArea } from "./math";
-import { LineCurve, QuadraticCurve } from "./curve";
+import { BezierCurve, LineCurve } from "./curve";
 
 export function getPolygon(width: number, height: number, n: number, ramada = 0, randomSeed = 0.1): vec2[] {
     const polygon: vec2[] = [];
@@ -53,7 +53,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
  * use bezier curve to smooth the polygon
  * @param polygon points of the polygon
  */
-export function getCurves(polygon: vec2[], isDebug: boolean): Curve[] {
+export function getCurves(polygon: vec2[], smoothPercent = 1, isDebug: boolean): Curve[] {
     const curves: Curve[] = [];
     const n = polygon.length;
     if (isDebug) {
@@ -72,12 +72,16 @@ export function getCurves(polygon: vec2[], isDebug: boolean): Curve[] {
         const midPoint = vec2.lerp(vec2.create(), pointBefore, pointAfter, 0.5);
         midPointArr.push(midPoint);
     }
-
+    const ratio = smoothPercent * 2 / 3;
     for (let i = 0; i < n; i++) {
-        let startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
-        let endPoint: vec2 = midPointArr[(i + 1) % n];
-        let controlPoint1 = polygon[(i + 1) % n];
-        curves.push(new QuadraticCurve(startPoint, controlPoint1, endPoint));
+        const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
+        const endPoint: vec2 = midPointArr[(i + 1) % n];
+        const mid = polygon[(i + 1) % n];
+
+        const controlPoint1 = vec2.lerp(vec2.create(), startPoint, mid, ratio);
+        const controlPoint2 = vec2.lerp(vec2.create(), endPoint, mid, ratio);
+        
+        curves.push(new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint));
         // const pointBefore = vec2.fromValues(polygon[i][0], polygon[i][1]);
         // const pointAfter = vec2.fromValues(polygon[(i + 1) % n][0], polygon[(i + 1) % n][1]);
 
@@ -88,13 +92,14 @@ export function getCurves(polygon: vec2[], isDebug: boolean): Curve[] {
     return curves;
 }
 
-export function getBezierCurvesBBox(bezierCurves: Curve[]): BBox {
+export function getBezierCurvesBBox(curves: Curve[]): BBox {
     let xMin = Infinity;
     let yMin = Infinity;
     let xMax = -Infinity;
     let yMax = -Infinity;
-    for (const bezierCurve of bezierCurves) {
-        const bbox = bezierCurve.getBBox();
+    for (const curve of curves) {
+        const bbox = curve.getBBox();
+        
         xMin = Math.min(xMin, bbox.x);
         yMin = Math.min(yMin, bbox.y);
         xMax = Math.max(xMax, bbox.x + bbox.width);

@@ -8,3 +8,9 @@ export function downloadCore(blob: Blob, fileName: string) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+export function copySvgCode() {
+    const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
+    const svgXML = new XMLSerializer().serializeToString(svgElement);
+    navigator.clipboard.writeText(svgXML);
+}

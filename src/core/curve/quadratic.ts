@@ -53,8 +53,8 @@ export class QuadraticCurve extends Curve {
         const yDerivation = [2 * (y0 - 2 * y1 + y2), 2 * (y1 - y2)];
         const xRoots = getRoots(xDerivation);
         const yRoots = getRoots(yDerivation);
-        const xRootsFiltered = xRoots.filter((root) => root >= 0 && root <= 1).concat([0, 1]);
-        const yRootsFiltered = yRoots.filter((root) => root >= 0 && root <= 1).concat([0, 1]);
+        const xRootsFiltered = xRoots.filter((root) => root > 0 && root < 1).concat([0, 1]);
+        const yRootsFiltered = yRoots.filter((root) => root > 0 && root < 1).concat([0, 1]);
         const xValues = xRootsFiltered.map((root) => this.getPosition(root)[0]);
         const yValues = yRootsFiltered.map((root) => this.getPosition(root)[1]);
         const xMin = Math.min(...xValues);

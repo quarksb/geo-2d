@@ -5,9 +5,17 @@ export function getRoots(derivation: number[]) {
         case 1:
             return [0];
         case 2:
-            return [-derivation[1] / derivation[0]];
+            if (derivation[0] === 0) {
+                return [];
+            } else {
+                return [-derivation[1] / derivation[0]];
+            }
         case 3:
-            return getQuadraticRoots(derivation);
+            if (derivation[0] === 0) {
+                return getRoots(derivation.slice(1));
+            } else {
+                return getQuadraticRoots(derivation);
+            }
         default:
             throw new Error("Not implemented");
     }
@@ -20,11 +28,7 @@ function getQuadraticRoots(derivation: number[]) {
     const delta = b * b - 4 * a * c;
     if (delta < 0) {
         return [];
-    }
-    else if (delta === 0) {
-        return [-b / (2 * a)];
-    }
-    else {
+    } else {
         const sqrtDelta = Math.sqrt(delta);
         return [(-b + sqrtDelta) / (2 * a), (-b - sqrtDelta) / (2 * a)];
     }

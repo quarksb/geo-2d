@@ -9,7 +9,6 @@ export class BezierCurve extends QuadraticCurve {
     constructor(startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
         super(startPoint, controlPoint1, endPoint);
         this.controlPoint2 = controlPoint2;
-        this.endPoint = endPoint;
     }
 
     applyFFD(ffd: FFD): void {
@@ -56,8 +55,9 @@ export class BezierCurve extends QuadraticCurve {
         const yDerivation = [3 * y0 - 9 * y1 + 9 * y2 - 3 * y3, 6 * y1 - 12 * y2 + 6 * y3, 3 * y2 - 3 * y3];
         const xRoots = getRoots(xDerivation);
         const yRoots = getRoots(yDerivation);
-        const xRootsFiltered = xRoots.filter((root) => root >= 0 && root <= 1).concat([0, 1]);
-        const yRootsFiltered = yRoots.filter((root) => root >= 0 && root <= 1).concat([0, 1]);
+        
+        const xRootsFiltered = xRoots.filter((root) => root > 0 && root < 1).concat([0, 1]);
+        const yRootsFiltered = yRoots.filter((root) => root > 0 && root < 1).concat([0, 1]);
         const xValues = xRootsFiltered.map((root) => this.getPosition(root)[0]);
         const yValues = yRootsFiltered.map((root) => this.getPosition(root)[1]);
         const xMin = Math.min(...xValues);
