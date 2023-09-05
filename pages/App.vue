@@ -245,11 +245,20 @@ watch(isDebug, () => {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #00000033;
+            // border-bottom: 1px solid #00000033;
+            .color-pick {
+                width: 100%;
+                height: 100%;
+                border: none;
+                border-radius: 5px;
+                background-color: #eee;
+                cursor: pointer;
+            }
             .param {
                 width: 50px;
-                font-size: 30px;
+                font-size: 24px;
                 text-align: center;
+                width: 100px;
                 margin-right: 20px;
             }
             input {

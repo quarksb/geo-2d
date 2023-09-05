@@ -8,7 +8,6 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     const halfWidth = width / 2;
     const halfHeight = height / 2;
     const randomGenerate = getRandomGenerate(randomSeed);
-    console.log(randomSeed);
     let angle = randomGenerate() * 2 * Math.PI;
     let baseCal = () => {
         let sb = randomGenerate();
@@ -28,7 +27,6 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
                 point = baseCal();
                 areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
             }
-            console.log("area:", areaPercent);
         }
 
         polygon.push(point);

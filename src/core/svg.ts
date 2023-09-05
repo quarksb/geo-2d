@@ -1,4 +1,3 @@
-import { QuadraticCurve } from "./curve";
 import { getCurves, getPolygon, resizeCurvesByBBox } from "./star";
 
 export function createSvgByPath(pathStr: string): SVGSVGElement {
