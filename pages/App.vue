@@ -6,6 +6,7 @@ import codeLogo from "/code.png";
 import { getSvgPathBySize } from "../src/core/svg";
 import { ref, watch, computed } from "vue";
 import { downloadCore, copySvgCode } from "./utils";
+import { gradientArr } from "./data";
 
 const msg = "quark_china";
 const url = "https://freesvg.win";
@@ -14,12 +15,14 @@ const href = `http://twitter.com/intent/tweet?url=${url}&text=${text}&original_r
 const size = 500;
 const width = size;
 const height = size;
-let blur = ref(5);
+let blur = ref(2);
 const viewBox = computed(() => {
     const blurExpands = blur.value * 2;
     return `${-blurExpands} ${-blurExpands} ${width + 2 * blurExpands} ${height + 2 * blurExpands}`;
 });
-let color = ref("#03fef2");
+let rotate = ref(45);
+let color0 = ref(gradientArr[1][0]);
+let color1 = ref(gradientArr[1][1]);
 let d = ref("");
 let polygonNum = ref(6);
 let ramada = ref(0.5);
@@ -42,7 +45,7 @@ function download(isPng: boolean) {
         canvas.height = height;
         const ctx = canvas.getContext("2d")!;
         const path = new Path2D(d.value);
-        ctx.fillStyle = color.value;
+        ctx.fillStyle = color0.value;
         ctx.fill(path);
         canvas.toBlob((blob) => {
             downloadCore(blob!, "image.png");
@@ -56,7 +59,10 @@ function randomAll() {
     randomSeed.value = Math.random();
     polygonNum.value = Math.floor(Math.random() * 8) + 3;
     ramada.value = Math.random();
-    // color.value = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    const gradient = gradientArr[Math.floor(Math.random() * gradientArr.length)];
+    color0.value = gradient[0];
+    color1.value = gradient[1];
+    rotate.value = Math.floor(Math.random() * 360);
     // smoothPercent.value = Math.random();
 }
 // 页面加载完成之后添加svg
@@ -101,10 +107,16 @@ watch(smoothPercent, () => {
             </nav>
             <body class="body">
                 <svg id="targetSvg" :viewBox="viewBox" focusable="false" role="presentation" class="css-1im46kq">
-                    <filter id="blurMe" v-if="blur>0">
-                        <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
-                    </filter>
-                    <path id="target" :fill="color" :d="d" filter="url(#blurMe)"></path>
+                    <defs>
+                        <linearGradient id="myGradient" :gradientTransform="`rotate(${rotate})`">
+                            <stop offset="5%" :stop-color="color0" />
+                            <stop offset="95%" :stop-color="color1" />
+                        </linearGradient>
+                        <filter id="blurMe" v-if="blur > 0">
+                            <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
+                        </filter>
+                    </defs>
+                    <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)"></path>
                 </svg>
                 <button class="button">
                     <img src="/rand.svg" alt="random" @click="randomAll" />
@@ -113,7 +125,9 @@ watch(smoothPercent, () => {
             <aside class="aside">
                 <div class="control">
                     <div class="param">color</div>
-                    <input class="color-pick" type="color" v-model="color" />
+                    <input class="color-picker" type="color" v-model="color0" />
+                    <input class="color-picker" type="color" v-model="color1" />
+                    <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
                 </div>
                 <div class="control">
                     <div class="param">num</div>
@@ -259,9 +273,6 @@ watch(smoothPercent, () => {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            // background-position: 0px 0px, 10px 10px;
-            //     background-size: 10px 10px;
-            //     background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee 100%), linear-gradient(145deg, #eee 25%, white 25%, white 75%, #eee 75%, #eee 100%);
             svg {
                 width: 500px;
                 height: 500px;
@@ -290,36 +301,37 @@ watch(smoothPercent, () => {
             border-left: 1px solid #00000033;
             display: flex;
             flex-direction: column;
-            padding: 10px;
+
             .control {
+                padding: 2px 12px;
                 height: 40px;
                 margin-bottom: 10px;
                 display: flex;
+                flex-direction: row;
                 align-items: center;
-                justify-content: space-between;
                 border-radius: 5px;
                 // border-bottom: 1px solid #00000033;
-                .color-pick {
-                    width: 100%;
-                    height: 100%;
-                    border: none;
-                    border-radius: 5px;
-                    background-color: #eee;
-                    cursor: pointer;
-                }
+
                 .param {
-                    width: 100px;
+                    width: 80px;
                     font-size: 20px;
                     text-align: center;
                     margin-right: 10px;
                     text-align: left;
                 }
+                .color-picker {
+                    width: 30px;
+                    height: 30px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
                 input {
-                    width: 100%;
+                    width: 180px;
                 }
                 button {
                     width: 100%;
-                    height: 30px;
+                    height: 40px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
