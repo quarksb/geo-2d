@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import logoUrl from "/logo.png";
-import twitterLogo from "/twitter.svg";
-import downloadLogo from "/download.png";
-import codeLogo from "/code.png";
 import { getSvgPathBySize } from "../src/core/svg";
 import { ref, watch, computed } from "vue";
 import { downloadCore, copySvgCode } from "./utils";
@@ -16,8 +12,9 @@ const size = 500;
 const width = size;
 const height = size;
 let blur = ref(2);
+const blurExpandRatio = 2.4;
 const viewBox = computed(() => {
-    const blurExpands = blur.value * 2;
+    const blurExpands = blur.value * blurExpandRatio;
     return `${-blurExpands} ${-blurExpands} ${width + 2 * blurExpands} ${height + 2 * blurExpands}`;
 });
 let rotate = ref(45);
@@ -46,7 +43,15 @@ function download(isPng: boolean) {
         canvas.height = height;
         const ctx = canvas.getContext("2d")!;
         const path = new Path2D(d.value);
-        ctx.fillStyle = color0.value;
+        const gradient = ctx.createLinearGradient(0, 0, width * Math.cos(rotate.value), height * Math.sin(rotate.value));
+        gradient.addColorStop(0.05, color0.value);
+        gradient.addColorStop(0.95, color1.value);
+        ctx.fillStyle = gradient;
+        const blurExpands = blur.value * blurExpandRatio;
+        const scaleX = width / (width + 2 * blurExpands);
+        const scaleY = height / (height + 2 * blurExpands);
+        ctx.setTransform(scaleX, 0, 0, scaleY, blurExpands, blurExpands);
+        ctx.filter = `blur(${blur.value}px)`;
         ctx.fill(path);
         canvas.toBlob((blob) => {
             downloadCore(blob!, "image.png");
@@ -94,7 +99,7 @@ watch(smoothPercent, () => {
             </header>
             <nav class="nav">
                 <div class="logo-container">
-                    <img alt="quark" :src="logoUrl" />
+                    <img alt="quark" src="/quark.png" />
                     <h1>
                         By
                         <a href="https://github.com/quarksb" target="_blank">{{ msg }}</a>
@@ -103,7 +108,7 @@ watch(smoothPercent, () => {
                 <a type="button" :href="href" class="share-button"
                     >Share
                     <div class="logo">
-                        <img :src="twitterLogo" />
+                        <img src="/twitter.svg" />
                     </div>
                 </a>
             </nav>
@@ -120,9 +125,14 @@ watch(smoothPercent, () => {
                     </defs>
                     <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)"></path>
                 </svg>
-                <button class="button">
-                    <img src="/rand.svg" alt="random" @click="randomAll" />
-                </button>
+                <div class="row-container">
+                    <button class="button">
+                        <img src="/rand.svg" alt="random" @click="randomAll" />
+                    </button>
+                    <button class="button">
+                        <img src="/download.png" alt="download" @click="download(false)" />
+                    </button>
+                </div>
             </body>
             <aside class="aside">
                 <div class="control">
@@ -162,19 +172,19 @@ watch(smoothPercent, () => {
 
                 <div class="control">
                     <button type="button" @click="download(false)">
-                        <img :src="downloadLogo" alt="download" />
+                        <img src="/download.png" alt="download" />
                         svg
                     </button>
                 </div>
                 <div class="control">
                     <button type="button" @click="download(true)">
-                        <img :src="downloadLogo" alt="download" />
+                        <img src="/download.png" alt="download" />
                         png
                     </button>
                 </div>
                 <div class="control">
                     <button type="button" @click="copySvgCode">
-                        <img :src="codeLogo" alt="copy" />
+                        <img src="/code.png" alt="copy" />
                         copy
                     </button>
                 </div>
@@ -280,21 +290,32 @@ watch(smoothPercent, () => {
                 height: 500px;
                 border: 3px dashed #00000033;
             }
-            .button {
-                margin-top: 30px;
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
+            .row-container {
+                width: 40%;
                 display: flex;
-                justify-content: center;
+                flex-direction: row;
+                justify-content: space-between;
                 align-items: center;
-                border: none;
-                background-color: #eee;
-                cursor: pointer;
-                img {
-                    width: 50px;
-                    height: 50px;
+                
+                .button {
+                    margin-top: 30px;
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border: none;
                     background-color: #eee;
+                    cursor: pointer;
+                    img {
+                        width: 50px;
+                        height: 50px;
+                        background-color: #eee;
+                    }
+                    &:hover {
+                        box-shadow: 0 0 1em #00000033;
+                    }
                 }
             }
         }
@@ -315,21 +336,21 @@ watch(smoothPercent, () => {
                 // border-bottom: 1px solid #00000033;
 
                 .param {
-                    width: 80px;
+                    width: 30%;
                     font-size: 20px;
                     text-align: center;
                     margin-right: 10px;
                     text-align: left;
                 }
                 .color-picker {
-                    width: 30px;
-                    height: 30px;
+                    width: 35px;
+                    height: 35px;
                     border: none;
                     border-radius: 5px;
                     cursor: pointer;
                 }
                 input {
-                    width: 180px;
+                    width: 60%;
                 }
                 button {
                     width: 100%;
@@ -355,6 +376,16 @@ watch(smoothPercent, () => {
         // .footer {
         //     grid-area: footer;
         // }
+    }
+    @media screen and (max-width: 768px) {
+        .root {
+            grid-template-columns: auto;
+            grid-template-areas:
+                "header"
+                "nav"
+                "body"
+                "aside";
+        }
     }
 }
 </style>
