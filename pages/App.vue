@@ -36,6 +36,7 @@ function renderSvgPath(ramada: number) {
 function smoothRender() {
     renderSvgPath(ramada.value);
 }
+
 function download(isPng: boolean) {
     const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
     const svgXML = new XMLSerializer().serializeToString(svgElement);
@@ -62,7 +63,8 @@ function randomAll() {
     const gradient = gradientArr[Math.floor(Math.random() * gradientArr.length)];
     color0.value = gradient[0];
     color1.value = gradient[1];
-    rotate.value = Math.floor(Math.random() * 360);
+    // 变化矩阵以原点为中心旋转
+    rotate.value = Math.floor(Math.random() * 90);
     // smoothPercent.value = Math.random();
 }
 // 页面加载完成之后添加svg
