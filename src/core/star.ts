@@ -8,7 +8,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     const halfWidth = width / 2;
     const halfHeight = height / 2;
     const randomGenerate = getRandomGenerate(randomSeed);
-    let angle = randomGenerate() * 2 * Math.PI;
+    let angle = randomGenerate() * Math.PI;
     let baseCal = () => {
         let sb = randomGenerate();
         const r = sb * ramada + (1 - ramada);
@@ -60,7 +60,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
  * use bezier curve to smooth the polygon
  * @param polygon points of the polygon
  */
-export function getCurves(polygon: vec2[], smoothPercent = 1, isDebug: boolean): Curve[] {
+export function getCurves(polygon: vec2[], smoothPercent = 1, isDebug = false): Curve[] {
     const curves: Curve[] = [];
     const n = polygon.length;
     if (isDebug) {

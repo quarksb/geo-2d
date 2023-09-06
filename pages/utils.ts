@@ -14,3 +14,14 @@ export function copySvgCode() {
     const svgXML = new XMLSerializer().serializeToString(svgElement);
     navigator.clipboard.writeText(svgXML);
 }
+
+export function throttle(fn: Function, delay: number) {
+    let lastTime = 0;
+    return function (this: any, ...args: any[]) {
+        const nowTime = Date.now();
+        if (nowTime - lastTime > delay) {
+            fn.apply(this, args);
+            lastTime = nowTime;
+        }
+    };
+}

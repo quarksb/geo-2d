@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { getSvgPathBySize } from "../src/core/svg";
+import { getPathStr, interpolatePolygon } from "../src/core/svg";
 import { ref, watch, computed } from "vue";
-import { downloadCore, copySvgCode } from "./utils";
+import { downloadCore, copySvgCode, throttle } from "./utils";
 import { gradientArr } from "./data";
+import { getPolygon, getCurves, resizeCurvesByBBox } from "../src/core/star";
+import { getEaseElasticOut } from "../src/core/math";
+import { vec2 } from "gl-matrix";
 
 const msg = "quark_china";
 const url = "https://quarksb.com";
@@ -26,13 +29,53 @@ let ramada = ref(0.5);
 let randomSeed = ref(0.314);
 let isDebug = ref(false);
 let smoothPercent = ref(1);
-function renderSvgPath(ramada: number) {
-    const path = getSvgPathBySize({ width, height, polygonNum: polygonNum.value, ramada, randomSeed: randomSeed.value, isDebug: isDebug.value, smoothPercent: smoothPercent.value });
-    d.value = path;
+let currentState: {
+    polygon: vec2[];
+    polygonNum: number;
+} = { polygon: [], polygonNum: polygonNum.value };
+let handle: number | null = null;
+
+// 生成svg path, 并赋值给d, 如果有旧数据，则利用新旧数据插值生成动画
+function renderSvgPath() {
+    if (handle) {
+        cancelAnimationFrame(handle);
+        handle = null;
+    }
+    if (currentState.polygon.length > 0 && currentState.polygonNum === polygonNum.value) {
+        const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
+
+        const animationTime = 2000;
+        let initTime = performance.now();
+
+        const baseRender = (time: number) => {
+            const t = getEaseElasticOut((time - initTime) / animationTime);
+            const tempPolygon = interpolatePolygon(currentState.polygon, polygon, t);
+            const curves = getCurves(tempPolygon, smoothPercent.value);
+            resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+            d.value = getPathStr(curves);
+            handle = requestAnimationFrame(baseRender);
+        };
+        handle = requestAnimationFrame(baseRender);
+
+        setTimeout(() => {
+            if (handle) {
+                cancelAnimationFrame(handle);
+                currentState.polygon = polygon;
+                currentState.polygonNum = polygonNum.value;
+                handle = null;
+            }
+        }, animationTime);
+    } else {
+        const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
+        const curves = getCurves(polygon, smoothPercent.value);
+        resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+        d.value = getPathStr(curves);
+        currentState.polygon = polygon;
+        currentState.polygonNum = polygonNum.value;
+    }
 }
-function smoothRender() {
-    renderSvgPath(ramada.value);
-}
+
+const smoothRender = throttle(renderSvgPath, 100);
 
 function download(isPng: boolean) {
     const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
@@ -63,7 +106,7 @@ function download(isPng: boolean) {
 }
 function randomAll() {
     randomSeed.value = Math.random();
-    polygonNum.value = Math.floor(Math.random() * 8) + 3;
+    // polygonNum.value = Math.floor(Math.random() * 8) + 3;
     ramada.value = Math.random();
     const gradient = gradientArr[Math.floor(Math.random() * gradientArr.length)];
     color0.value = gradient[0];
