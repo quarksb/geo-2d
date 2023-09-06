@@ -5,7 +5,7 @@ import { downloadCore, copySvgCode } from "./utils";
 import { gradientArr } from "./data";
 
 const msg = "quark_china";
-const url = "https://freesvg.win";
+const url = "https://quarksb.com";
 const text = encodeURIComponent(`Make organic SVG shapes with $FreeSvg by @${msg}`);
 const href = `http://twitter.com/intent/tweet?url=${url}&text=${text}&original_referer=${url}`;
 const size = 500;
