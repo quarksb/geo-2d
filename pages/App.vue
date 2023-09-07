@@ -15,7 +15,7 @@ const size = 500;
 const width = size;
 const height = size;
 let blur = ref(2);
-let isBlurSelected = ref(false);
+let isBlurSelected = ref(true);
 const blurExpandRatio = 2.4;
 const viewBox = computed(() => {
     const blurExpands = blur.value * blurExpandRatio;
@@ -25,11 +25,11 @@ let rotate = ref(45);
 let isRotateSelected = ref(false);
 let color0 = ref(gradientArr[1][0]);
 let color1 = ref(gradientArr[1][1]);
-let isColorSelected = ref(false);
+let isColorSelected = ref(true);
 let d = ref("");
-let polygonNum = ref(6);
+let polygonNum = ref(8);
 let isPolygonNumSelected = ref(false);
-let ramada = ref(0.5);
+let ramada = ref(0.8);
 let isRamadaSelected = ref(false);
 let randomSeed = ref(0.314);
 let isDebug = ref(false);
@@ -174,7 +174,7 @@ watch(isDebug, () => {
                                 <stop offset="5%" :stop-color="color0" />
                                 <stop offset="95%" :stop-color="color1" />
                             </linearGradient>
-                            <filter id="blurMe" v-if="blur > 0">
+                            <filter id="blurMe">
                                 <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
                             </filter>
                         </defs>
