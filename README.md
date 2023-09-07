@@ -18,8 +18,8 @@ Organic-Svg is an open-source tool for generating random blob shapes.
 
 You can customize the following parameters when generating a blob:
 
-- `num`: Size of the blob (default is 100).
-- `flex`: Complexity of the blob (default is 5).
+- `num`: The number of base points of the graph.
+- `flex`: The irregular shape of a figure
 - `color`: Color of the blob (default is a random color).
 
 ## Export
