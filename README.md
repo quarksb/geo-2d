@@ -1,18 +1,59 @@
-# Vue 3 + TypeScript + Vite
+# Organic-Svg
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Organic-Svg is an open-source tool for generating random blob shapes.
 
-## Recommended IDE Setup
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+![Organic-Svg Demo](https://f005.backblazeb2.com/file/app-image/c3cdb884-1dbc-43f6-8146-b137a03d49c2.gif)
+[Oline Demo](https://flexsvg.quarksb.com/)
 
-## Type Support For `.vue` Imports in TS
+## Features
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+- Generate random blob shapes.
+- Customize blob color, size, and complexity.
+- Export blobs to the SVG/PNG file format.
+- User-friendly graphical interface and API.
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
 
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+## Configuration
+
+You can customize the following parameters when generating a blob:
+
+- `num`: Size of the blob (default is 100).
+- `flex`: Complexity of the blob (default is 5).
+- `color`: Color of the blob (default is a random color).
+
+## Export
+
+You can export generated blobs as SVG files for use in other applications. You have the option to export blobs both in the graphical user interface and when using the API.
+
+## Contributing
+
+If you find issues or would like to contribute code to Organic-Svg, please check out our [contribution guidelines](CONTRIBUTING.md).
+
+## License
+
+Organic-Svg is released under the GPL License. See the [LICENSE](/gpl-3.0.txt) file for more information.
+
+## Authors
+
+- quarksb
+
+## Support
+
+If you have any questions or need support, please email us at support@example.com.
+
+## Acknowledgments
+
+We'd like to thank all the contributors to this project!
+
+## Additional Resources
+
+- [Organic-Svg Official Website](https://www.flexsvg.quarksb.com)
+
+## Follow Us
+
+Please follow us on [Twitter](https://twitter.com/quark_china) for the latest updates and notifications!
+
+If you have any suggestions or feedback regarding Organic-Svg, feel free to contact us anytime.
+
+**Note:** Customize the README file according to your project's specific needs. The content in this example is for reference, and you can add, modify, or remove information as required for your project.
