@@ -31,12 +31,13 @@ export function getPathStr(curves: Curve[], digits = 1): string {
 }
 
 // 给定两多边形，和一个小数，返回这两多边形的插值多边形
-export function interpolatePolygon(polygon1: vec2[], polygon2: vec2[], percent: number): vec2[] {
+export function interpolatePolygon(startPolygon: vec2[], endPolygon: vec2[], percent: number): vec2[] {
     const polygon: vec2[] = [];
-    const len = polygon1.length;
+    const l = startPolygon.length;
+    const len = endPolygon.length;
     for (let i = 0; i < len; i++) {
-        const point1 = polygon1[i];
-        const point2 = polygon2[i];
+        const point1 = startPolygon[i % l];
+        const point2 = endPolygon[i];
         const point = vec2.lerp(vec2.create(), point1, point2, percent);
         polygon.push(point);
     }

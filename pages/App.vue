@@ -23,15 +23,16 @@ const viewBox = computed(() => {
 });
 let rotate = ref(45);
 let isRotateSelected = ref(false);
-let color0 = ref(gradientArr[1][0]);
-let color1 = ref(gradientArr[1][1]);
+let colorIndex = 2;
+let color0 = ref(gradientArr[colorIndex][0]);
+let color1 = ref(gradientArr[colorIndex][1]);
 let isColorSelected = ref(true);
 let d = ref("");
 let polygonNum = ref(8);
 let isPolygonNumSelected = ref(false);
 let ramada = ref(0.8);
 let isRamadaSelected = ref(false);
-let randomSeed = ref(0.314);
+let randomSeed = ref(0.3649);
 let isDebug = ref(false);
 let currentState: {
     polygon: vec2[];
@@ -45,7 +46,7 @@ function renderSvgPath() {
         cancelAnimationFrame(handle);
         handle = null;
     }
-    if (currentState.polygon.length > 0 && currentState.polygonNum === polygonNum.value) {
+    if (currentState.polygon.length > 0) {
         const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
 
         const animationTime = 3000;
@@ -378,13 +379,14 @@ watch(isDebug, () => {
                             background-color: #eee;
                         }
                         &:hover {
-                            box-shadow: 0 0 1em #00000033;
+                            transition-duration: 0.5s;
+                            background-color: #3a3a3a;
+                            box-shadow: 0 0 10px #050505;
+                            img {
+                                filter: invert(86%);
+                                transition-duration: 0.5s;
+                            }
                         }
-                    }
-
-                    .button:hover {
-                        transition-duration: 0.1s;
-                        background-color: #3a3a3a;
                     }
 
                     .button:after {
