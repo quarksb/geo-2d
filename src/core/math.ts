@@ -24,3 +24,15 @@ export function getEaseElasticOut(t: number): number {
     const p = 0.9;
     return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1;
 }
+
+export function getEaseElasticInOut(t: number): number {
+    const p = 0.9;
+    return t < 0.5
+        ? 0.5 *
+              Math.pow(2, 20 * t - 10) *
+              Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p)
+        : 0.5 *
+              (2 -
+                  Math.pow(2, -20 * t + 10) *
+                      Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
+}

@@ -11,10 +11,10 @@ export function createSvgByPath(pathStr: string): SVGSVGElement {
 }
 
 export function getSvgPathBySize(param: { width: number; height: number; polygonNum: number; ramada: number; randomSeed: number; smoothPercent: number; isDebug?: boolean }): string {
-    const { width, height, polygonNum, ramada, randomSeed, smoothPercent = 1, isDebug = false } = param;
+    const { width, height, polygonNum, ramada, randomSeed, isDebug = false } = param;
     const polygon = getPolygon(width, height, polygonNum, ramada, randomSeed);
 
-    const curves = getCurves(polygon, smoothPercent, isDebug);
+    const curves = getCurves(polygon, isDebug);
 
     resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
     return getPathStr(curves);

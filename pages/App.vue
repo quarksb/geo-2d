@@ -15,20 +15,24 @@ const size = 500;
 const width = size;
 const height = size;
 let blur = ref(2);
+let isBlurSelected = ref(false);
 const blurExpandRatio = 2.4;
 const viewBox = computed(() => {
     const blurExpands = blur.value * blurExpandRatio;
     return `${-blurExpands} ${-blurExpands} ${width + 2 * blurExpands} ${height + 2 * blurExpands}`;
 });
 let rotate = ref(45);
+let isRotateSelected = ref(false);
 let color0 = ref(gradientArr[1][0]);
 let color1 = ref(gradientArr[1][1]);
+let isColorSelected = ref(false);
 let d = ref("");
 let polygonNum = ref(6);
+let isPolygonNumSelected = ref(false);
 let ramada = ref(0.5);
+let isRamadaSelected = ref(false);
 let randomSeed = ref(0.314);
 let isDebug = ref(false);
-let smoothPercent = ref(1);
 let currentState: {
     polygon: vec2[];
     polygonNum: number;
@@ -44,13 +48,13 @@ function renderSvgPath() {
     if (currentState.polygon.length > 0 && currentState.polygonNum === polygonNum.value) {
         const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
 
-        const animationTime = 2000;
+        const animationTime = 3000;
         let initTime = performance.now();
 
         const baseRender = (time: number) => {
             const t = getEaseElasticOut((time - initTime) / animationTime);
             const tempPolygon = interpolatePolygon(currentState.polygon, polygon, t);
-            const curves = getCurves(tempPolygon, smoothPercent.value);
+            const curves = getCurves(tempPolygon);
             resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
             d.value = getPathStr(curves);
             handle = requestAnimationFrame(baseRender);
@@ -67,7 +71,7 @@ function renderSvgPath() {
         }, animationTime);
     } else {
         const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
-        const curves = getCurves(polygon, smoothPercent.value);
+        const curves = getCurves(polygon);
         resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
         d.value = getPathStr(curves);
         currentState.polygon = polygon;
@@ -104,16 +108,26 @@ function download(isPng: boolean) {
         downloadCore(blob, "image.svg");
     }
 }
-function randomAll() {
+function randomSelect() {
+    if (isBlurSelected.value) {
+        blur.value = Math.floor(Math.random() * 20);
+    }
+    if (isRotateSelected.value) {
+        rotate.value = Math.floor(Math.random() * 90);
+    }
+    if (isColorSelected.value) {
+        const gradient = gradientArr[Math.floor(Math.random() * gradientArr.length)];
+        color0.value = gradient[0];
+        color1.value = gradient[1];
+    }
+    if (isPolygonNumSelected.value) {
+        polygonNum.value = Math.floor(Math.random() * 8) + 3;
+    }
+    if (isRamadaSelected.value) {
+        ramada.value = Math.random();
+    }
+
     randomSeed.value = Math.random();
-    // polygonNum.value = Math.floor(Math.random() * 8) + 3;
-    ramada.value = Math.random();
-    const gradient = gradientArr[Math.floor(Math.random() * gradientArr.length)];
-    color0.value = gradient[0];
-    color1.value = gradient[1];
-    // 变化矩阵以原点为中心旋转
-    rotate.value = Math.floor(Math.random() * 90);
-    // smoothPercent.value = Math.random();
 }
 // 页面加载完成之后添加svg
 smoothRender();
@@ -127,9 +141,6 @@ watch(randomSeed, () => {
     smoothRender();
 });
 watch(isDebug, () => {
-    smoothRender();
-});
-watch(smoothPercent, () => {
     smoothRender();
 });
 </script>
@@ -171,7 +182,7 @@ watch(smoothPercent, () => {
                     </svg>
                     <div class="row-container">
                         <button class="button">
-                            <img src="/rand.svg" alt="random" @click="randomAll" />
+                            <img src="/rand.svg" alt="random" @click="randomSelect" />
                         </button>
                         <button class="button">
                             <img src="/download.png" alt="download" @click="download(false)" />
@@ -181,38 +192,35 @@ watch(smoothPercent, () => {
 
                 <aside class="aside">
                     <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isColorSelected" />
                         <div class="param">color</div>
                         <input class="color-picker" type="color" v-model="color0" />
                         <input class="color-picker" type="color" v-model="color1" />
                         <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
                     </div>
                     <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isRotateSelected" />
+                        <div class="param">rotate</div>
+                        <input class="range" type="range" v-model="rotate" min="0" max="90" step="1" />
+                        <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
+                    </div>
+                    <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isPolygonNumSelected" />
                         <div class="param">num</div>
-                        <input type="range" v-model="polygonNum" min="3" max="10" step="1" />
+                        <input class="range" type="range" v-model="polygonNum" min="3" max="10" step="1" />
                     </div>
                     <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isRamadaSelected" />
                         <div class="param">flex</div>
-                        <input type="range" v-model="ramada" min="0" max="1" step="0.01" />
+                        <input class="range" type="range" v-model="ramada" min="0" max="1" step="0.01" />
                     </div>
                     <div class="control">
-                        <div class="param">smooth</div>
-                        <input type="range" v-model="smoothPercent" min="0.5" max="1" step="0.01" />
-                    </div>
-                    <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isBlurSelected" />
                         <div class="param">blur</div>
-                        <input type="range" v-model="blur" min="0" max="20" step="1" />
+                        <input class="range" type="range" v-model="blur" min="0" max="20" step="1" />
                     </div>
                     <div class="control">
-                        <button
-                            type="button"
-                            @click="
-                                () => {
-                                    randomSeed = Math.random();
-                                }
-                            "
-                        >
-                            Random
-                        </button>
+                        <button type="button" @click="randomSelect">Random Select</button>
                     </div>
 
                     <div class="control">
@@ -389,6 +397,11 @@ watch(smoothPercent, () => {
                     border-radius: 5px;
                     // border-bottom: 1px solid #00000033;
 
+                    .checkbox {
+                        width: 20px;
+                        height: 20px;
+                        margin-right: 10px;
+                    }
                     .param {
                         width: 30%;
                         font-size: 20px;
@@ -403,7 +416,7 @@ watch(smoothPercent, () => {
                         border-radius: 5px;
                         cursor: pointer;
                     }
-                    input {
+                    .range {
                         width: 60%;
                     }
                     button {
