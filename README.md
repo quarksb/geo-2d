@@ -26,9 +26,6 @@ You can customize the following parameters when generating a blob:
 
 You can export generated blobs as SVG files for use in other applications. You have the option to export blobs both in the graphical user interface and when using the API.
 
-## Contributing
-
-If you find issues or would like to contribute code to Organic-Svg, please check out our [contribution guidelines](CONTRIBUTING.md).
 
 ## License
 
@@ -48,12 +45,10 @@ We'd like to thank all the contributors to this project!
 
 ## Additional Resources
 
-- [Organic-Svg Official Website](https://www.flexsvg.quarksb.com)
+- [Organic-Svg Official Website](https://flexsvg.quarksb.com)
 
 ## Follow Us
 
 Please follow us on [Twitter](https://twitter.com/quark_china) for the latest updates and notifications!
 
 If you have any suggestions or feedback regarding Organic-Svg, feel free to contact us anytime.
-
-**Note:** Customize the README file according to your project's specific needs. The content in this example is for reference, and you can add, modify, or remove information as required for your project.
