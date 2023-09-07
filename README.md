@@ -37,7 +37,7 @@ Organic-Svg is released under the GPL License. See the [LICENSE](/gpl-3.0.txt) f
 
 ## Support
 
-If you have any questions or need support, please email us at support@example.com.
+If you have any questions or need support, please email us at caodahong@gmail.com.
 
 ## Acknowledgments
 
