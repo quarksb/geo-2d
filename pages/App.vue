@@ -15,7 +15,7 @@ const size = 500;
 const width = size;
 const height = size;
 let blur = ref(2);
-let isBlurSelected = ref(true);
+let isBlurSelected = ref(false);
 const blurExpandRatio = 2.4;
 const viewBox = computed(() => {
     const blurExpands = blur.value * blurExpandRatio;
@@ -23,16 +23,16 @@ const viewBox = computed(() => {
 });
 let rotate = ref(45);
 let isRotateSelected = ref(false);
-let colorIndex = 2;
+let colorIndex = 6;
 let color0 = ref(gradientArr[colorIndex][0]);
 let color1 = ref(gradientArr[colorIndex][1]);
 let isColorSelected = ref(true);
 let d = ref("");
-let polygonNum = ref(8);
+let polygonNum = ref(7);
 let isPolygonNumSelected = ref(false);
 let ramada = ref(0.8);
 let isRamadaSelected = ref(false);
-let randomSeed = ref(0.3649);
+let randomSeed = ref(0.3619);
 let isDebug = ref(false);
 let currentState: {
     polygon: vec2[];
@@ -160,12 +160,18 @@ watch(isDebug, () => {
                         <a href="https://github.com/quarksb" target="_blank">{{ msg }}</a>
                     </h1>
                 </div>
-                <a type="button" :href="href" class="share-button"
-                    >Share
-                    <div class="logo">
-                        <img src="/twitter.svg" />
-                    </div>
-                </a>
+                <div class="logo-container">
+                    <a type="button" href="https://github.com/quarksb/organic-svg" class="share-button">
+                        <div class="logo">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" />
+                        </div>
+                    </a>
+                    <a type="button" :href="href" class="share-button">
+                        <div class="logo">
+                            <img src="/twitter.svg" />
+                        </div>
+                    </a>
+                </div>
             </nav>
             <div class="flex">
                 <body class="body">
@@ -309,23 +315,27 @@ watch(isDebug, () => {
                         text-decoration: underline;
                     }
                 }
-            }
-            .share-button {
-                display: flex;
-                height: 80%;
-                align-items: center;
-                justify-content: center;
-                padding: 0 1em;
-                border-radius: 5px;
-                color: #1b1717;
-                text-decoration: none;
-                &:hover {
-                    background-color: #cececeaa;
-                }
-                img {
-                    width: 35px;
-                    height: 35px;
-                    margin-left: 15px;
+                .share-button {
+                    display: flex;
+                    // height: 80%;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 5px;
+                    border-radius: 5px;
+                    color: #1b1717;
+                    text-decoration: none;
+                    &:hover {
+                        box-shadow: 0 0 10px #00000033;
+                    }
+                    .logo {
+                        width: 35px;
+                        height: 35px;
+                        img {
+                            width: 35px;
+                            height: 35px;
+                            margin-right: 0px;
+                        }
+                    }
                 }
             }
         }

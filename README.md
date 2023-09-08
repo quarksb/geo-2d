@@ -4,7 +4,7 @@ Organic-Svg is an open-source tool for generating random blob shapes.
 
 
 ![Organic-Svg Demo](https://f005.backblazeb2.com/file/app-image/c3cdb884-1dbc-43f6-8146-b137a03d49c2.gif)
-[Online Demo](https://flexsvg.quarksb.com/)
+[Online Demo](https://organic-svg.quarksb.com/)
 
 ## Features
 
@@ -45,7 +45,7 @@ We'd like to thank all the contributors to this project!
 
 ## Additional Resources
 
-- [Organic-Svg Official Website](https://flexsvg.quarksb.com)
+- [The author's github page](https://github.com/quarksb)
 
 ## Follow Us
 
