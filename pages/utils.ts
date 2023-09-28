@@ -9,6 +9,46 @@ export function downloadCore(blob: Blob, fileName: string) {
     URL.revokeObjectURL(url);
 }
 
+export interface ShapesParams {
+    width: number;
+    height: number;
+    d: string;
+    rotate: number;
+    blur: number;
+    blurExpandRatio?: number;
+    color0: string;
+    color1: string;
+}
+
+export function downloadByParams(params: ShapesParams, isPng = false) {
+    const { width = 500, height = 500, d, rotate, blur, blurExpandRatio = 2.5, color0, color1 } = params;
+    const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
+    const svgXML = new XMLSerializer().serializeToString(svgElement);
+    if (isPng) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        const path = new Path2D(d);
+        const gradient = ctx.createLinearGradient(0, 0, width * Math.cos(rotate), height * Math.sin(rotate));
+        gradient.addColorStop(0.05, color0);
+        gradient.addColorStop(0.95, color1);
+        ctx.fillStyle = gradient;
+        const blurExpands = blur * blurExpandRatio;
+        const scaleX = width / (width + 2 * blurExpands);
+        const scaleY = height / (height + 2 * blurExpands);
+        ctx.setTransform(scaleX, 0, 0, scaleY, blurExpands, blurExpands);
+        ctx.filter = `blur(${blur}px)`;
+        ctx.fill(path);
+        canvas.toBlob((blob) => {
+            downloadCore(blob!, "image.png");
+        });
+    } else {
+        const blob = new Blob([svgXML], { type: "image/svg+xml" });
+        downloadCore(blob, "image.svg");
+    }
+}
+
 export function copySvgCode() {
     const svgElement: SVGSVGElement = document.querySelector("#targetSvg")!;
     const svgXML = new XMLSerializer().serializeToString(svgElement);
@@ -24,4 +64,19 @@ export function throttle(fn: Function, delay: number) {
             lastTime = nowTime;
         }
     };
+}
+
+export function parseSvgFromUrl(url: string) {
+    return new Promise<SVGSVGElement>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url);
+        xhr.responseType = "document";
+        xhr.onload = () => {
+            resolve(xhr.responseXML!.documentElement as unknown as SVGSVGElement);
+        };
+        xhr.onerror = () => {
+            reject(new Error("parse svg error"));
+        };
+        xhr.send();
+    });
 }

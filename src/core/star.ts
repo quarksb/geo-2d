@@ -37,10 +37,10 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
         let areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
         let areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
         let areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
+
         let count = 0;
         let max = 0;
         // 尝试10次，如果还是不行，就去10次中的面积最大的那个
-
         while ((areaPercent0 < 0.01 || areaPercent1 < 0.01 || areaPercent2 < 0.01) && count++ < 10) {
             const worst = Math.min(areaPercent0, areaPercent1, areaPercent2);
             if (worst > max) {
@@ -60,7 +60,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
  * use bezier curve to smooth the polygon
  * @param polygon points of the polygon
  */
-export function getCurves(polygon: vec2[], isDebug = false): Curve[] {
+export function getCurvesByPolygon(polygon: vec2[], isDebug = false): Curve[] {
     const curves: Curve[] = [];
     const n = polygon.length;
     if (isDebug) {

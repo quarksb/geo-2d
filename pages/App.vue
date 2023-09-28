@@ -3,7 +3,7 @@ import { getPathStr, interpolatePolygon } from "../src/core/svg";
 import { ref, watch, computed } from "vue";
 import { downloadCore, copySvgCode, throttle } from "./utils";
 import { gradientArr } from "./data";
-import { getPolygon, getCurves, resizeCurvesByBBox } from "../src/core/star";
+import { getPolygon, getCurvesByPolygon, resizeCurvesByBBox } from "../src/core/star";
 import { getEaseElasticOut } from "../src/core/math";
 import { vec2 } from "gl-matrix";
 
@@ -55,7 +55,7 @@ function renderSvgPath() {
         const baseRender = (time: number) => {
             const t = getEaseElasticOut((time - initTime) / animationTime);
             const tempPolygon = interpolatePolygon(currentState.polygon, polygon, t);
-            const curves = getCurves(tempPolygon);
+            const curves = getCurvesByPolygon(tempPolygon);
             resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
             d.value = getPathStr(curves);
             handle = requestAnimationFrame(baseRender);
@@ -72,7 +72,7 @@ function renderSvgPath() {
         }, animationTime);
     } else {
         const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
-        const curves = getCurves(polygon);
+        const curves = getCurvesByPolygon(polygon);
         resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
         d.value = getPathStr(curves);
         currentState.polygon = polygon;
