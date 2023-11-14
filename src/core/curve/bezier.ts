@@ -166,6 +166,12 @@ export class BezierCurve extends QuadraticCurve {
             digits
         )} ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
     }
+
+    toDebugPathString(digits?: number | undefined): string {
+        return `M ${this.startPoint[0].toFixed(digits)} ${this.startPoint[1].toFixed(digits)} L ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} L ${this.controlPoint2[0].toFixed(digits)} ${this.controlPoint2[1].toFixed(
+            digits
+        )} L ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`
+    }
 }
 
 // 源码内的测试套件

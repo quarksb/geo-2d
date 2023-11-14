@@ -2,6 +2,8 @@ import { vec2 } from "gl-matrix";
 import { BBox, Curve } from "./curve/curve";
 import { getRandomGenerate, getTriangleArea } from "./math";
 import { LineCurve, BezierCurve, QuadraticCurve } from "./curve";
+// import { interpolate } from "./temp";
+import { interpolate } from "./curve";
 
 /**
  * get the vertexes of a polygon
@@ -17,6 +19,8 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     const polygon: vec2[] = [];
     const halfWidth = width / 2;
     const halfHeight = height / 2;
+    console.log("randomSeed", randomSeed);
+
     const randomGenerate = getRandomGenerate(randomSeed);
     let baseCal = (radian: number) => {
         let sb = randomGenerate();
@@ -41,27 +45,6 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
         polygon.push(point);
     }
 
-    // 检查最后一个点、倒数第二个点和第一个点构成的三角形的面积是否过小
-    if (n >= 5) {
-        let areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
-        let areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
-        let areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
-
-        let count = 0;
-        let max = 0;
-        // 尝试10次，如果还是不行，就去10次中的面积最大的那个
-        while ((areaPercent0 < 0.01 || areaPercent1 < 0.01 || areaPercent2 < 0.01) && count++ < 10) {
-            const worst = Math.min(areaPercent0, areaPercent1, areaPercent2);
-            if (worst > max) {
-                max = worst;
-                polygon[n - 1] = baseCal(2 * Math.PI * (angle + (n - 1) / n));
-                areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
-                areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
-                areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
-            }
-        }
-    }
-
     return polygon;
 }
 
@@ -71,20 +54,18 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
  */
 export function getCurvesByPolygon(polygon: vec2[], isDebug = false): Curve[] {
     const curves: Curve[] = [];
-    const n = polygon.length;
-    if (isDebug) {
-        for (let i = 0; i < n; i++) {
-            const pointBefore = vec2.fromValues(polygon[i][0], polygon[i][1]);
-            const pointAfter = vec2.fromValues(polygon[(i + 1) % n][0], polygon[(i + 1) % n][1]);
-            curves.push(new LineCurve(pointBefore, pointAfter));
-        }
-        return curves;
+    const n = 100;
+
+    const degree = 3;
+    const interpolatePoints = new Array<vec2>(100);
+    for (let i = 0; i < n; i++) {
+        interpolatePoints[i] = interpolate(0.01 * i, degree, polygon as number[][]);
     }
 
-    let midPointArr: vec2[] = [];
+    const midPointArr: vec2[] = [];
     for (let i = 0; i < n; i++) {
-        const pointBefore = vec2.fromValues(polygon[i][0], polygon[i][1]);
-        const pointAfter = vec2.fromValues(polygon[(i + 1) % n][0], polygon[(i + 1) % n][1]);
+        const pointBefore = vec2.fromValues(interpolatePoints[i][0], interpolatePoints[i][1]);
+        const pointAfter = vec2.fromValues(interpolatePoints[(i + 1) % n][0], interpolatePoints[(i + 1) % n][1]);
         const midPoint = vec2.lerp(vec2.create(), pointBefore, pointAfter, 0.5);
         midPointArr.push(midPoint);
     }
@@ -101,7 +82,7 @@ export function getCurvesByPolygon(polygon: vec2[], isDebug = false): Curve[] {
         const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
         const endPoint: vec2 = midPointArr[(i + 1) % n];
 
-        const controlPoint1 = polygon[(i + 1) % n];
+        const controlPoint1 = interpolatePoints[(i + 1) % n];
         curves.push(new QuadraticCurve(startPoint, controlPoint1, endPoint));
     }
     return curves;

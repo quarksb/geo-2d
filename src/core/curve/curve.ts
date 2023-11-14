@@ -18,6 +18,7 @@ export abstract class Curve {
     abstract applyFn(fn: (point: vec2) => vec2): void;
     abstract applyFFDFn(fn: (point: vec2) => vec2): void;
     abstract toPathString(digits?: number): string;
+    abstract toDebugPathString(digits?: number): string;
     abstract divideAt(t?: number): Curve[];
     abstract split(splitData: SplitData): Curve[];
     abstract divideAtArray(tArr: number[]): Curve[];

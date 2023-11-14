@@ -134,4 +134,7 @@ export class LineCurve extends Curve {
     toPathString(digits = 0): string {
         return `L ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
     }
+    toDebugPathString(digits?: number | undefined): string {
+        return this.toPathString(digits);
+    }
 }

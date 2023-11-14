@@ -30,6 +30,15 @@ export function getPathStr(curves: Curve[], digits = 1): string {
     return pathStr;
 }
 
+export function getDebugPathStr(curves: Curve[], digits = 1): string {
+    const startPoint = curves[0].startPoint;
+    let pathStr = `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
+    curves.forEach((curve) => {
+        pathStr += curve.toDebugPathString(digits) + " ";
+    });
+    return pathStr;
+}
+
 // 将单条 pathStr(只含一个M)拆分成一个个子命令
 export function pathStringToPathCommands(pathStr: string): { type: string; args: number[] }[] {
     const commands: { type: string; args: number[] }[] = [];

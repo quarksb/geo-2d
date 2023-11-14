@@ -175,4 +175,9 @@ export class QuadraticCurve extends Curve {
     toPathString(digits = 0): string {
         return `Q ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
     }
+    toDebugPathString(digits?: number | undefined): string {
+        return `M ${this.startPoint[0].toFixed(digits)} ${this.startPoint[1].toFixed(digits)} L ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} L ${this.endPoint[0].toFixed(
+            digits
+        )} ${this.endPoint[1].toFixed(digits)}`;
+    }
 }

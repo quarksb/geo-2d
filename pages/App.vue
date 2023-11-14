@@ -28,19 +28,23 @@ let color0 = ref(gradientArr[colorIndex][0]);
 let color1 = ref(gradientArr[colorIndex][1]);
 let isColorSelected = ref(false);
 let d = ref("");
-let polygonNum = ref(7);
+const minPolygonNum = 4;
+const maxPolygonNum = 20;
+let polygonNum = ref(6);
 let isPolygonNumSelected = ref(false);
-let ramada = ref(0.8);
+let ramada = ref(0.5);
 let isRamadaSelected = ref(false);
-let randomSeed = ref(0.3619);
+let randomSeed = ref(.8859102140559103);
 let isDebug = ref(false);
-let isScaleToEdge = ref(false);
+let isScaleToEdge = ref(true);
 let currentState: {
     polygon: vec2[];
     polygonNum: number;
 } = { polygon: [], polygonNum: polygonNum.value };
 let handle: number | null = null;
+let timeOutId: number | null = null;
 let tempPolygon: vec2[] = [];
+
 
 // 生成svg path, 并赋值给d, 如果有旧数据，则利用新旧数据插值生成动画
 function renderSvgPath() {
@@ -48,12 +52,15 @@ function renderSvgPath() {
         if (handle) {
             cancelAnimationFrame(handle);
             currentState.polygon = tempPolygon;
-            currentState.polygonNum = polygonNum.value;
             handle = null;
         }
     };
     if (handle) {
         resetPolygonState();
+    }
+    if (timeOutId) {
+        clearTimeout(timeOutId);
+        timeOutId = null;
     }
     const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
     if (currentState.polygon.length > 0) {
@@ -73,7 +80,7 @@ function renderSvgPath() {
         };
         handle = requestAnimationFrame(baseRender);
 
-        setTimeout(resetPolygonState, animationTime);
+        timeOutId = setTimeout(resetPolygonState, animationTime) as unknown as number;
     } else {
         const curves = getCurvesByPolygon(targetPolygon);
         if (isScaleToEdge.value) {
@@ -81,7 +88,6 @@ function renderSvgPath() {
         }
         d.value = getPathStr(curves);
         currentState.polygon = targetPolygon;
-        currentState.polygonNum = polygonNum.value;
     }
 }
 
@@ -127,13 +133,14 @@ function randomSelect() {
         color1.value = gradient[1];
     }
     if (isPolygonNumSelected.value) {
-        polygonNum.value = Math.floor(Math.random() * 8) + 3;
+        polygonNum.value = Math.round(Math.random() * (maxPolygonNum - minPolygonNum)) + minPolygonNum;
     }
     if (isRamadaSelected.value) {
         ramada.value = Math.random();
     }
 
     randomSeed.value = Math.random();
+    
 }
 // 页面加载完成之后添加svg
 smoothRender();
@@ -185,6 +192,7 @@ smoothRender();
                             </filter>
                         </defs>
                         <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)"></path>
+
                     </svg>
                     <div class="row-container">
                         <button class="button">
@@ -217,7 +225,7 @@ smoothRender();
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isPolygonNumSelected" />
                         <div class="param">num</div>
-                        <input class="range" type="range" v-model="polygonNum" min="3" max="10" step="1" />
+                        <input class="range" type="range" v-model="polygonNum" :min="minPolygonNum" :max="maxPolygonNum" step="1" />
                     </div>
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isRamadaSelected" />
