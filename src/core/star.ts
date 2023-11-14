@@ -52,7 +52,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
  * use bezier curve to smooth the polygon
  * @param polygon points of the polygon
  */
-export function getCurvesByPolygon(polygon: vec2[], isDebug = false): Curve[] {
+export function getCurvesByPolygon(polygon: vec2[]): Curve[] {
     const curves: Curve[] = [];
     const n = 100;
 
