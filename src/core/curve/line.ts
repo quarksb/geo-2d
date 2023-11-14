@@ -1,18 +1,32 @@
 import { vec2 } from "gl-matrix";
 import { BBox, Curve, SplitData } from "./curve";
-import { FFD } from "./ffd";
 
 export class LineCurve extends Curve {
     _normal: vec2 | null = null;
     _tangent: vec2 | null = null;
 
-    divideAt(t: number): [Curve, Curve] {
+    divideAt(t: number): LineCurve[] {
         const startPoint = this.startPoint;
         const endPoint = this.endPoint;
         const middlePoint = vec2.lerp(vec2.create(), startPoint, endPoint, t);
         const leftCurve = new LineCurve(startPoint, middlePoint);
         const rightCurve = new LineCurve(vec2.clone(middlePoint), endPoint);
         return [leftCurve, rightCurve];
+    }
+    divideAtArray(tArr: number[]): LineCurve[] {
+        tArr.sort((a, b) => a - b);
+        const startPoint = this.startPoint;
+        const curves: LineCurve[] = [];
+        let currentPoint = startPoint;
+        tArr.forEach((t) => {
+            const endPoint = this.getPosition(t);
+            const leftCurve = new LineCurve(currentPoint, endPoint);
+            curves.push(leftCurve);
+            currentPoint = vec2.clone(endPoint);
+        });
+        const rightCurve = new LineCurve(vec2.clone(currentPoint), this.endPoint);
+        curves.push(rightCurve);
+        return curves;
     }
     get tangent(): vec2 {
         if (this._tangent === null) {
@@ -29,11 +43,7 @@ export class LineCurve extends Curve {
     constructor(startPoint: vec2, endPoint: vec2) {
         super(startPoint, endPoint);
     }
-    applyFFD(ffd: FFD): void {
-        this.startPoint = ffd.transformPoint(this.startPoint);
-        this.endPoint = ffd.transformPoint(this.endPoint);
-        this._isDirty = true;
-    }
+
     getPosition(t: number): vec2 {
         const x = this.startPoint[0] + (this.endPoint[0] - this.startPoint[0]) * t;
         const y = this.startPoint[1] + (this.endPoint[1] - this.startPoint[1]) * t;
@@ -110,39 +120,18 @@ export class LineCurve extends Curve {
         return [];
     }
 
-    applyTransform(fn: (point: vec2) => void): void {
+    applyFn(fn: (point: vec2, ratio?:number) => void): void {
         fn(this.startPoint);
         fn(this.endPoint);
+    }
+    applyFFDFn(fn: (point: vec2) => vec2): void {
+        this.applyFn(fn);
+    }
+    split(splitData: SplitData): LineCurve[] {
+        const tArr = this.getSplitT(splitData);
+        return this.divideAtArray(tArr);
     }
     toPathString(digits = 0): string {
         return `L ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
     }
-}
-
-// 计算两条线段的交点
-export function lineInterSection(p0: vec2, p1: vec2, p2: vec2, p3: vec2) {
-    const [x1, y1] = p0;
-    const [x2, y2] = [p1[0] - p0[0], p1[1] - p0[1]];
-    const [x3, y3] = p2;
-    const [x4, y4] = [p3[0] - p2[0], p3[1] - p2[1]];
-
-    // solve equation x1 + t*x2 = x3 + u * x4; y1 + t*y2 = y3 + u * y4
-
-    const denominator = x4 * y2 - x2 * y4;
-    console.log(denominator);
-
-    if (denominator < 1e-6 && denominator > -1e-6) {
-        // 射线平行，没有交点
-        return null;
-    }
-
-    const t = ((x1 - x3) * y4 - (y1 - y3) * x4) / denominator;
-    const u = ((x1 - x3) * y2 - (y1 - y3) * x2) / denominator;
-
-    console.log(p0.toString(), p1.toString(), p2.toString(), p3.toString());
-    console.log(t, u);
-    if (t > 0 && t < 1 && u > 0 && u < 1) {
-        return vec2.fromValues(x1 + t * x2, y1 + t * y2);
-    }
-    return null;
 }

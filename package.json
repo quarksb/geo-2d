@@ -1,22 +1,51 @@
 {
-  "name": "geometry",
-  "private": true,
-  "version": "1.0.0",
+  "name": "organic-shape",
+  "version": "1.0.0-beta.5",
   "type": "module",
+  "typings": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/organic-shape.umd.js",
+  "module": "dist/organic-shape.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/organic-shape.es.js",
+      "require": "./dist/organic-shape.umd.js"
+    },
+    "./package.json": "./package.json",
+    "./README.md": "./README.md"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "gl-matrix": "^3.4.3",
-    "vue": "^3.3.4"
+    "build": "pnpm run build:demo",
+    "build:demo": "vue-tsc && vite build --mode demo",
+    "build:lib": "tsc && vite build --mode lib",
+    "preview": "vite preview",
+    "publish": "tsc && vite build --mode lib && vite publish",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
     "less": "^4.2.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
+    "vite-plugin-dts": "^3.6.3",
+    "vitest": "^0.34.6",
+    "vue": "^3.3.4",
     "vue-tsc": "^1.8.5"
+  },
+  "peerDependencies": {
+    "gl-matrix": "^3.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quarksb/organic-svg"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
   }
 }

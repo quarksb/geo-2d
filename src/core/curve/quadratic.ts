@@ -1,12 +1,10 @@
 import { vec2 } from "gl-matrix";
-import { LineCurve, lineInterSection } from "./line";
+import { LineCurve } from "./line";
 import { BBox, Curve, SplitData } from "./curve";
-import { FFD } from "./ffd.js";
 import { getRoots } from "./equation";
 
 export class QuadraticCurve extends Curve {
     controlPoint1: vec2;
-    controlPointOffsetScale = 2;
     constructor(startPoint: vec2, controlPoint1: vec2, endPoint: vec2) {
         super(startPoint, endPoint);
         this.controlPoint1 = controlPoint1;
@@ -18,7 +16,7 @@ export class QuadraticCurve extends Curve {
         const controlPoint1 = vec2.fromValues((startPoint[0] + endPoint[0]) / 2, (startPoint[1] + endPoint[1]) / 2);
         return new QuadraticCurve(startPoint, controlPoint1, endPoint);
     }
-    divideAt(t: number): [QuadraticCurve, QuadraticCurve] {
+    divideAt(t: number): QuadraticCurve[] {
         const startPoint = this.startPoint;
         const endPoint = this.endPoint;
         const controlPoint1 = this.controlPoint1;
@@ -29,18 +27,31 @@ export class QuadraticCurve extends Curve {
         const rightCurve = new QuadraticCurve(vec2.clone(middlePoint), middlePoint2, endPoint);
         return [leftCurve, rightCurve];
     }
-    applyFFD(ffd: FFD): void {
-        this.startPoint = ffd.transformPoint(this.startPoint);
-        this.endPoint = ffd.transformPoint(this.endPoint);
-        const newPoint = ffd.transformPoint(this.controlPoint1);
-        const diff = vec2.sub(newPoint, newPoint, this.startPoint);
-        vec2.scale(diff, diff, this.controlPointOffsetScale);
-        this.controlPoint1 = vec2.add(this.controlPoint1, this.controlPoint1, diff);
+    divideAtArray(tArr: number[]): QuadraticCurve[] {
+        tArr.sort((a, b) => a - b);
+        let currentCurve: QuadraticCurve = this;
+        const curves: QuadraticCurve[] = [];
+        tArr.forEach((t) => {
+            const [leftCurve, rightCurve] = currentCurve.divideAt(t);
+            curves.push(leftCurve);
+            currentCurve = rightCurve;
+        });
+        curves.push(currentCurve);
+        return curves;
     }
-    applyTransform(fn: (point: vec2) => void): void {
+
+    applyFn(fn: (point: vec2, ratio?: number) => vec2): void {
         fn(this.startPoint);
-        fn(this.controlPoint1);
         fn(this.endPoint);
+        fn(this.controlPoint1);
+        this._isDirty = true;
+    }
+
+    applyFFDFn(fn: (point: vec2) => vec2): void {
+        this.applyFn(fn);
+        const diff = vec2.fromValues(this.controlPoint1[0] - 0.5 * (this.startPoint[0] + this.endPoint[0]), this.controlPoint1[1] - 0.5 * (this.startPoint[1] + this.endPoint[1]));
+        vec2.add(this.controlPoint1, this.controlPoint1, diff);
+        this._isDirty = true;
     }
 
     getRoughBBox(): BBox {
@@ -146,10 +157,7 @@ export class QuadraticCurve extends Curve {
         const normal = vec2.fromValues(y, -x);
         return normal;
     }
-    // 分割贝塞尔曲线，计算起点、中点、拆分点延其法向量偏移的位置，返回根据这些点确定的两条贝塞尔曲线
-    offset(distance: number): QuadraticCurve[] {
-        return this.splitAndOffset(distance);
-    }
+
     baseOffset(distance: number): QuadraticCurve {
         const startPointAfterOffset = vec2.scaleAndAdd(vec2.create(), this.startPoint, this.getNormal(0), distance);
         const endPointAfterOffset = vec2.scaleAndAdd(vec2.create(), this.endPoint, this.getNormal(1), distance);
@@ -160,20 +168,9 @@ export class QuadraticCurve extends Curve {
         const controlPoint1AfterOffset = vec2.subtract(centerAfterOffsetScala2, centerAfterOffsetScala2, midPoint);
         return new QuadraticCurve(startPointAfterOffset, controlPoint1AfterOffset, endPointAfterOffset);
     }
-    split(t: number): QuadraticCurve[] {
-        const p0 = vec2.clone(this.startPoint);
-        const p1 = this.controlPoint1;
-        const p2 = vec2.clone(this.endPoint);
-        const p01 = vec2.lerp(vec2.create(), p0, p1, t);
-        const p12 = vec2.lerp(vec2.create(), p1, p2, t);
-        const p012 = vec2.lerp(vec2.create(), p01, p12, t);
-        return [new QuadraticCurve(p0, p01, p012), new QuadraticCurve(p012, p12, p2)];
-    }
-    splitAndOffset(distance: number): QuadraticCurve[] {
-        const [curve1, curve2] = this.split(0.5);
-        const curve1AfterOffset = curve1.baseOffset(distance);
-        const curve2AfterOffset = curve2.baseOffset(distance);
-        return [curve1AfterOffset, curve2AfterOffset];
+    split(splitData: SplitData): QuadraticCurve[] {
+        const tArr = this.getSplitT(splitData);
+        return this.divideAtArray(tArr);
     }
     toPathString(digits = 0): string {
         return `Q ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;

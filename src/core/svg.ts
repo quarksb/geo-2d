@@ -69,14 +69,12 @@ export function pathStringToPathCommands(pathStr: string): { type: string; args:
 }
 
 // 给定两多边形，和一个小数，返回这两多边形的插值多边形
-export function interpolatePolygon(startPolygon: vec2[], endPolygon: vec2[], percent: number): vec2[] {
+export function interpolatePolygon(startPolygon: vec2[], targetPolygon: vec2[], percent: number): vec2[] {
     const polygon: vec2[] = [];
     const l = startPolygon.length;
-    const len = endPolygon.length;
+    const len = targetPolygon.length;
     for (let i = 0; i < len; i++) {
-        const point1 = startPolygon[i % l];
-        const point2 = endPolygon[i];
-        const point = vec2.lerp(vec2.create(), point1, point2, percent);
+        const point = vec2.lerp(vec2.create(), startPolygon[i % l], targetPolygon[i], percent);
         polygon.push(point);
     }
     return polygon;

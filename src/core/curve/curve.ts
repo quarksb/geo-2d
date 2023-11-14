@@ -1,5 +1,4 @@
 import { vec2 } from "gl-matrix";
-import { FFD } from "./ffd";
 
 export abstract class Curve {
     startPoint: vec2;
@@ -15,17 +14,20 @@ export abstract class Curve {
     abstract getTangent(t: number | null): vec2;
     abstract getNormal(t: number | null): vec2;
     abstract getLen(): number;
-    abstract applyFFD(ffd: FFD): void;
     abstract getBBox(): BBox;
-    abstract applyTransform(fn: (point: vec2) => void): void;
+    abstract applyFn(fn: (point: vec2) => vec2): void;
+    abstract applyFFDFn(fn: (point: vec2) => vec2): void;
     abstract toPathString(digits?: number): string;
-    abstract divideAt(t: number): [Curve, Curve];
+    abstract divideAt(t?: number): Curve[];
+    abstract split(splitData: SplitData): Curve[];
+    abstract divideAtArray(tArr: number[]): Curve[];
     // 只考虑一个交点情况
     abstract getSplitT(data: SplitData): number[];
 }
 
 export interface SplitData {
-    mode: "x" | "y"; val: number;
+    mode: "x" | "y";
+    val: number;
 }
 
 export interface BBox {

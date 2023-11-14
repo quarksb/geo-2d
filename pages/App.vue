@@ -14,9 +14,9 @@ const href = `http://twitter.com/intent/tweet?url=${url}&text=${text}&original_r
 const size = 500;
 const width = size;
 const height = size;
-let blur = ref(2);
+let blur = ref(0);
 let isBlurSelected = ref(false);
-const blurExpandRatio = 2.4;
+const blurExpandRatio = 3;
 const viewBox = computed(() => {
     const blurExpands = blur.value * blurExpandRatio;
     return `${-blurExpands} ${-blurExpands} ${width + 2 * blurExpands} ${height + 2 * blurExpands}`;
@@ -26,7 +26,7 @@ let isRotateSelected = ref(false);
 let colorIndex = 6;
 let color0 = ref(gradientArr[colorIndex][0]);
 let color1 = ref(gradientArr[colorIndex][1]);
-let isColorSelected = ref(true);
+let isColorSelected = ref(false);
 let d = ref("");
 let polygonNum = ref(7);
 let isPolygonNumSelected = ref(false);
@@ -34,48 +34,53 @@ let ramada = ref(0.8);
 let isRamadaSelected = ref(false);
 let randomSeed = ref(0.3619);
 let isDebug = ref(false);
+let isScaleToEdge = ref(false);
 let currentState: {
     polygon: vec2[];
     polygonNum: number;
 } = { polygon: [], polygonNum: polygonNum.value };
 let handle: number | null = null;
+let tempPolygon: vec2[] = [];
 
 // 生成svg path, 并赋值给d, 如果有旧数据，则利用新旧数据插值生成动画
 function renderSvgPath() {
+    const resetPolygonState = () => {
+        if (handle) {
+            cancelAnimationFrame(handle);
+            currentState.polygon = tempPolygon;
+            currentState.polygonNum = polygonNum.value;
+            handle = null;
+        }
+    };
     if (handle) {
-        cancelAnimationFrame(handle);
-        handle = null;
+        resetPolygonState();
     }
+    const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
     if (currentState.polygon.length > 0) {
-        const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
-
         const animationTime = 3000;
         let initTime = performance.now();
-
         const baseRender = (time: number) => {
+            // const t = (time - initTime) / animationTime;
             const t = getEaseElasticOut((time - initTime) / animationTime);
-            const tempPolygon = interpolatePolygon(currentState.polygon, polygon, t);
+            tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
             const curves = getCurvesByPolygon(tempPolygon);
-            resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+            if (isScaleToEdge.value) {
+                resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+            }
+
             d.value = getPathStr(curves);
             handle = requestAnimationFrame(baseRender);
         };
         handle = requestAnimationFrame(baseRender);
 
-        setTimeout(() => {
-            if (handle) {
-                cancelAnimationFrame(handle);
-                currentState.polygon = polygon;
-                currentState.polygonNum = polygonNum.value;
-                handle = null;
-            }
-        }, animationTime);
+        setTimeout(resetPolygonState, animationTime);
     } else {
-        const polygon = getPolygon(width, height, polygonNum.value, ramada.value, randomSeed.value);
-        const curves = getCurvesByPolygon(polygon);
-        resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+        const curves = getCurvesByPolygon(targetPolygon);
+        if (isScaleToEdge.value) {
+            resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+        }
         d.value = getPathStr(curves);
-        currentState.polygon = polygon;
+        currentState.polygon = targetPolygon;
         currentState.polygonNum = polygonNum.value;
     }
 }
@@ -132,17 +137,11 @@ function randomSelect() {
 }
 // 页面加载完成之后添加svg
 smoothRender();
-watch(polygonNum, () => {
-    smoothRender();
-});
-watch(ramada, () => {
-    smoothRender();
-});
-watch(randomSeed, () => {
-    smoothRender();
-});
-watch(isDebug, () => {
-    smoothRender();
+// 监听参数变化，重新渲染svg
+[blur, rotate, color0, color1, polygonNum, ramada, randomSeed, isDebug, isScaleToEdge].forEach((item) => {
+    watch(item, () => {
+        smoothRender();
+    });
 });
 </script>
 
@@ -154,7 +153,7 @@ watch(isDebug, () => {
             </header> -->
             <nav class="nav">
                 <div class="logo-container">
-                    <img alt="quark" src="/quark.png" />
+                    <img alt="quark" src="./assets/quark.png" />
                     <h1>
                         By
                         <a href="https://github.com/quarksb" target="_blank">{{ msg }}</a>
@@ -168,7 +167,7 @@ watch(isDebug, () => {
                     </a>
                     <a type="button" :href="href" class="share-button">
                         <div class="logo">
-                            <img src="/twitter.svg" />
+                            <img src="./assets/twitter.svg" />
                         </div>
                     </a>
                 </div>
@@ -189,10 +188,10 @@ watch(isDebug, () => {
                     </svg>
                     <div class="row-container">
                         <button class="button">
-                            <img src="/rand.svg" alt="random" @click="randomSelect" />
+                            <img src="./assets/rand.svg" alt="random" @click="randomSelect" />
                         </button>
                         <button class="button">
-                            <img src="/download.png" alt="download" @click="download(false)" />
+                            <img src="./assets/download.png" alt="download" @click="download(false)" />
                         </button>
                     </div>
                 </body>
@@ -204,6 +203,10 @@ watch(isDebug, () => {
                         <input class="color-picker" type="color" v-model="color0" />
                         <input class="color-picker" type="color" v-model="color1" />
                         <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
+                    </div>
+                    <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isScaleToEdge" />
+                        <div class="param">isScale</div>
                     </div>
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isRotateSelected" />
@@ -232,19 +235,19 @@ watch(isDebug, () => {
 
                     <div class="control">
                         <button type="button" @click="download(false)">
-                            <img src="/download.png" alt="download" />
+                            <img src="./assets/download.png" alt="download" />
                             svg
                         </button>
                     </div>
                     <div class="control">
                         <button type="button" @click="download(true)">
-                            <img src="/download.png" alt="download" />
+                            <img src="./assets/download.png" alt="download" />
                             png
                         </button>
                     </div>
                     <div class="control">
                         <button type="button" @click="copySvgCode">
-                            <img src="/code.png" alt="copy" />
+                            <img src="./assets/code.png" alt="copy" />
                             copy
                         </button>
                     </div>
@@ -450,7 +453,7 @@ watch(isDebug, () => {
                         margin-right: 10px;
                     }
                     .param {
-                        width: 30%;
+                        width: 20%;
                         font-size: 20px;
                         text-align: center;
                         margin-right: 10px;

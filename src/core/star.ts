@@ -1,30 +1,39 @@
 import { vec2 } from "gl-matrix";
 import { BBox, Curve } from "./curve/curve";
 import { getRandomGenerate, getTriangleArea } from "./math";
-import { LineCurve, BezierCurve } from "./curve";
+import { LineCurve, BezierCurve, QuadraticCurve } from "./curve";
 
-export function getPolygon(width: number, height: number, n: number, ramada = 0, randomSeed = 0.1): vec2[] {
+/**
+ * get the vertexes of a polygon
+ * @param width width of the basic rectangle
+ * @param height height of the basic rectangle
+ * @param n number of the polygon vertex (>= 3)
+ * @param ramada scale of the polygon vertex (0, 1]
+ * @param angle angle of the polygon [0, 1)
+ * @param randomSeed random seed of the random generator (0, 1)
+ * @returns vertexes of the polygon
+ */
+export function getPolygon(width: number, height: number, n: number, ramada = 0, angle = 0, randomSeed = 0.1): vec2[] {
     const polygon: vec2[] = [];
     const halfWidth = width / 2;
     const halfHeight = height / 2;
     const randomGenerate = getRandomGenerate(randomSeed);
-    let angle = randomGenerate() * Math.PI;
-    let baseCal = () => {
+    let baseCal = (radian: number) => {
         let sb = randomGenerate();
         const r = sb * ramada + (1 - ramada);
-        let x = (r * Math.cos(angle) + 1) * halfWidth;
-        let y = (r * Math.sin(angle) + 1) * halfHeight;
+        let x = (r * Math.cos(radian) + 1) * halfWidth;
+        let y = (r * Math.sin(radian) + 1) * halfHeight;
         return vec2.fromValues(x, y);
     };
+
     const ratio = 1 / (width * height);
     for (let i = 0; i < n; i++) {
-        angle += (2 * Math.PI) / n;
-        let point = baseCal();
+        let point = baseCal(2 * Math.PI * (angle + i / n));
         if (i >= 2) {
             let areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
             let count = 0;
             while (areaPercent < 0.008 && count++ < 20) {
-                point = baseCal();
+                point = baseCal(2 * Math.PI * (angle + i / n));
                 areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
             }
         }
@@ -45,7 +54,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
             const worst = Math.min(areaPercent0, areaPercent1, areaPercent2);
             if (worst > max) {
                 max = worst;
-                polygon[n - 1] = baseCal();
+                polygon[n - 1] = baseCal(2 * Math.PI * (angle + (n - 1) / n));
                 areaPercent0 = getTriangleArea([polygon[n - 3], polygon[n - 2], polygon[1]]) * ratio;
                 areaPercent1 = getTriangleArea([polygon[n - 2], polygon[n - 1], polygon[0]]) * ratio;
                 areaPercent2 = getTriangleArea([polygon[n - 1], polygon[0], polygon[1]]) * ratio;
@@ -81,28 +90,29 @@ export function getCurvesByPolygon(polygon: vec2[], isDebug = false): Curve[] {
     }
 
     for (let i = 0; i < n; i++) {
-        const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
-        const endPoint: vec2 = midPointArr[(i + 1) % n];
-        const mid = polygon[(i + 1) % n];
-        const ratio = 0.66;
-        const controlPoint1 = vec2.lerp(vec2.create(), startPoint, mid, ratio);
-        const controlPoint2 = vec2.lerp(vec2.create(), endPoint, mid, ratio);
-        curves.push(new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint));
-
         // const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
         // const endPoint: vec2 = midPointArr[(i + 1) % n];
+        // const mid = polygon[(i + 1) % n];
+        // const ratio = 0.66;
+        // const controlPoint1 = vec2.lerp(vec2.create(), startPoint, mid, ratio);
+        // const controlPoint2 = vec2.lerp(vec2.create(), endPoint, mid, ratio);
+        // curves.push(new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint));
 
-        // const controlPoint1 = polygon[(i + 1) % n];
-        // curves.push(new QuadraticCurve(startPoint, controlPoint1, endPoint));
+        const startPoint: vec2 = vec2.fromValues(midPointArr[i][0], midPointArr[i][1]);
+        const endPoint: vec2 = midPointArr[(i + 1) % n];
+
+        const controlPoint1 = polygon[(i + 1) % n];
+        curves.push(new QuadraticCurve(startPoint, controlPoint1, endPoint));
     }
     return curves;
 }
 
 export function getBezierCurvesBBox(curves: Curve[]): BBox {
-    let xMin = Infinity;
-    let yMin = Infinity;
-    let xMax = -Infinity;
-    let yMax = -Infinity;
+    let xMin = Infinity,
+        yMin = Infinity,
+        xMax = -Infinity,
+        yMax = -Infinity;
+
     for (const curve of curves) {
         const bbox = curve.getBBox();
 
@@ -119,15 +129,17 @@ export function getBezierCurvesBBox(curves: Curve[]): BBox {
     };
 }
 
-export function resizeCurvesByBBox(bezierCurves: Curve[], targetBBox: BBox): void {
-    const bbox = getBezierCurvesBBox(bezierCurves);
+export function resizeCurvesByBBox(curves: Curve[], targetBBox: BBox): void {
+    const bbox = getBezierCurvesBBox(curves);
 
     const scaleX = targetBBox.width / bbox.width;
     const scaleY = targetBBox.height / bbox.height;
-    bezierCurves.forEach((bezierCurve) => {
-        bezierCurve.applyTransform((point) => {
+    curves.forEach((curve) => {
+        curve.applyFn((point) => {
             point[0] = (point[0] - bbox.x) * scaleX + targetBBox.x;
             point[1] = (point[1] - bbox.y) * scaleY + targetBBox.y;
+            return point;
         });
     });
+    const bbox2 = getBezierCurvesBBox(curves);
 }

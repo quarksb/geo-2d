@@ -3,7 +3,7 @@ const a = 1103515245;
 const b = 12345;
 const m = 2147483647;
 
-export function getRandomGenerate(x: number = 0.314): () => number {
+export function getRandomGenerate(x = 0.314) {
     // create the next random number
     let cur = (a * x + b) % m;
     return () => {
@@ -27,12 +27,5 @@ export function getEaseElasticOut(t: number): number {
 
 export function getEaseElasticInOut(t: number): number {
     const p = 0.9;
-    return t < 0.5
-        ? 0.5 *
-              Math.pow(2, 20 * t - 10) *
-              Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p)
-        : 0.5 *
-              (2 -
-                  Math.pow(2, -20 * t + 10) *
-                      Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
+    return t < 0.5 ? 0.5 * Math.pow(2, 20 * t - 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p) : 0.5 * (2 - Math.pow(2, -20 * t + 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
 }
