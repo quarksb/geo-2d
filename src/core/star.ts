@@ -21,6 +21,7 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     const halfHeight = height / 2;
 
     const randomGenerate = getRandomGenerate(randomSeed);
+    // 是否有更好的基础点生成方法？
     let baseCal = (radian: number) => {
         let sb = randomGenerate();
         const r = sb * ramada + (1 - ramada);
@@ -29,18 +30,14 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
         return vec2.fromValues(x, y);
     };
 
-    const ratio = 1 / (width * height);
-    for (let i = 0; i < n; i++) {
-        let point = baseCal(2 * Math.PI * (angle + i / n));
-        if (i >= 2) {
-            // let areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
-            let count = 0;
-            // while (areaPercent < 0.008 && count++ < 20) {
-                point = baseCal(2 * Math.PI * (angle + i / n));
-            //     areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
-            // }
-        }
+    // const angleArr = new Array<number>(n);
+    // for (let i = 0; i < n; i++) {
+    //     angleArr[i] = randomGenerate();
+    // }
+    // angleArr.sort((a, b) => a - b);
 
+    for (let i = 0; i < n; i++) {
+        let point = baseCal(2 * Math.PI * (i / n + angle));
         polygon.push(point);
     }
 
