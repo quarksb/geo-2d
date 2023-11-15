@@ -19,7 +19,6 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     const polygon: vec2[] = [];
     const halfWidth = width / 2;
     const halfHeight = height / 2;
-    console.log("randomSeed", randomSeed);
 
     const randomGenerate = getRandomGenerate(randomSeed);
     let baseCal = (radian: number) => {
@@ -34,12 +33,12 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
     for (let i = 0; i < n; i++) {
         let point = baseCal(2 * Math.PI * (angle + i / n));
         if (i >= 2) {
-            let areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
+            // let areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
             let count = 0;
-            while (areaPercent < 0.008 && count++ < 20) {
+            // while (areaPercent < 0.008 && count++ < 20) {
                 point = baseCal(2 * Math.PI * (angle + i / n));
-                areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
-            }
+            //     areaPercent = getTriangleArea([polygon[i - 2], polygon[i - 1], point]) * ratio;
+            // }
         }
 
         polygon.push(point);
@@ -56,7 +55,7 @@ export function getCurvesByPolygon(polygon: vec2[]): Curve[] {
     const curves: Curve[] = [];
     const n = 100;
 
-    const degree = 3;
+    const degree = 4;
     const interpolatePoints = new Array<vec2>(100);
     for (let i = 0; i < n; i++) {
         interpolatePoints[i] = interpolate(0.01 * i, degree, polygon as number[][]);

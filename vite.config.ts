@@ -19,11 +19,6 @@ export default ({ mode }) => {
                 },
                 outDir: "dist",
                 emptyOutDir: true,
-                rollupOptions: {
-                    input: {
-                        index: "./src/index.ts",
-                    },
-                },
             },
         });
         userConfig.plugins.push(dts());

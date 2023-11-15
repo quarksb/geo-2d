@@ -30,13 +30,13 @@ let isColorSelected = ref(false);
 let d = ref("");
 const minPolygonNum = 4;
 const maxPolygonNum = 20;
-let polygonNum = ref(6);
+let polygonNum = ref(10);
 let isPolygonNumSelected = ref(false);
 let ramada = ref(0.5);
 let isRamadaSelected = ref(false);
 let randomSeed = ref(.8859102140559103);
 let isDebug = ref(false);
-let isScaleToEdge = ref(true);
+let isScaleToEdge = ref(false);
 let currentState: {
     polygon: vec2[];
     polygonNum: number;
