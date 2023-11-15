@@ -214,7 +214,7 @@ smoothRender();
                     </div>
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isScaleToEdge" />
-                        <div class="param">isScale</div>
+                        <div class="param">isScaleToEdge</div>
                     </div>
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isRotateSelected" />
