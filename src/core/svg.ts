@@ -13,7 +13,6 @@ export function createSvgByPath(pathStr: string): SVGSVGElement {
 export function getSvgPathBySize(param: { width: number; height: number; polygonNum: number; ramada: number; randomSeed: number; smoothPercent: number; isDebug?: boolean }): string {
     const { width, height, polygonNum, ramada, randomSeed } = param;
     const polygon = getPolygon(width, height, polygonNum, ramada, randomSeed);
-Í
     const curves = getCurvesByPolygon(polygon);
 
     resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });

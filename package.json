@@ -1,6 +1,6 @@
 {
   "name": "organic-shape",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "type": "module",
   "typings": "dist/src/index.d.ts",
   "files": [
@@ -22,7 +22,7 @@
     "build:demo": "vue-tsc && vite build --mode demo",
     "build:lib": "tsc && vite build --mode lib",
     "preview": "vite preview",
-    "publish": "tsc && vite build --mode lib && vite publish",
+    "publish": "tsc && vite build --mode lib && npm publish",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
