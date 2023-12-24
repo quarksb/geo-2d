@@ -10,10 +10,7 @@ export function interpolate(t: number, degree: number, points: number[][], knots
 
     if (!weights) {
         // build weight vector of length [n]
-        weights = [];
-        for (let i = 0; i < pointNum; i++) {
-            weights[i] = 1;
-        }
+        weights = new Array(pointNum).fill(1);
     }
 
     if (!knots) {
@@ -24,6 +21,16 @@ export function interpolate(t: number, degree: number, points: number[][], knots
         }
     } else {
         if (knots.length !== pointNum + degree + 1) throw new Error("bad knot vector length");
+    }
+
+    // convert points to homogeneous coordinates
+    const pointDataArr: number[][] = [];
+    for (let i = 0; i < pointNum; i++) {
+        pointDataArr[i] = [];
+        for (let j = 0; j < dimensionality; j++) {
+            pointDataArr[i][j] = points[i % (pointNum - degree)][j] * weights[i];
+        }
+        pointDataArr[i][dimensionality] = weights[i];
     }
 
     // remap t to the domain where the spline is defined
@@ -39,16 +46,6 @@ export function interpolate(t: number, degree: number, points: number[][], knots
         if (t >= knots[segmentIndex] && t <= knots[segmentIndex + 1]) {
             break;
         }
-    }
-
-    // convert points to homogeneous coordinates
-    const pointDataArr: number[][] = [];
-    for (let i = 0; i < pointNum; i++) {
-        pointDataArr[i] = [];
-        for (let j = 0; j < dimensionality; j++) {
-            pointDataArr[i][j] = points[i % (pointNum - degree)][j] * weights[i];
-        }
-        pointDataArr[i][dimensionality] = weights[i];
     }
 
     // console.log("knots", knots);
@@ -70,6 +67,8 @@ export function interpolate(t: number, degree: number, points: number[][], knots
         }
     }
 
+    console.log("pointDataArr", pointDataArr);
+
     // convert back to cartesian and return
     let result: number[] = [];
     for (let i = 0; i < dimensionality; i++) {
@@ -77,5 +76,66 @@ export function interpolate(t: number, degree: number, points: number[][], knots
     }
 
     return vec2.fromValues(result[0], result[1]);
+}
 
+/**
+ * 获取B样条曲线
+ * @param points 基础曲线的控制点
+ * @param degree 基础曲线的阶数 (degree must be at least 1 (linear) and less than or equal to point count - 1)
+ * @returns 返回B样条曲线函数
+ */
+export function getBSpline(points: vec2[], degree: number) {
+    const { length } = points;
+
+    if (degree < 1) throw new Error("degree must be at least 1 (linear)");
+    if (degree + 1 > length) throw new Error("degree must be less than or equal to point count - 1");
+
+    const xNums = new Array(length);
+    const yNums = new Array(length);
+
+    for (let i = 0; i < length; i++) {
+        xNums[i] = points[i][0];
+        yNums[i] = points[i][1];
+    }
+
+    /**t ∈ [0,1] */
+    return (t: number) => {
+        if (t < 0 || t > 1) throw new Error("out of bounds");
+        t = t * length + degree;
+        const x = getNum(xNums, degree, t);
+        const y = getNum(yNums, degree, t);
+        return vec2.fromValues(x, y);
+    };
+}
+
+function getNum(points: number[], degree: number, t: number) {
+    const { length } = points;
+    const l = length + degree;
+    const baseIndex = Math.floor(t);
+    const data: number[] = new Array(l);
+    for (let i = 0; i < l; i++) {
+        data[i] = points[i % length];
+    }
+
+    // console.log(
+    //     "data",
+    //     data.map((v) => v.toFixed(1))
+    // );
+    
+    for (let i = 0; i < degree; i++) {
+        // build level l of the pyramid
+        for (let k = baseIndex; k > baseIndex - degree + i; k--) {
+            const lamoda = (t - k) / (degree - i);
+            // console.log(k, lamoda.toFixed(2), data[k - 1].toFixed(1), data[k].toFixed(1));
+            data[k] = (1 - lamoda) * data[k - 1] + lamoda * data[k];
+        }
+        // console.log(
+        //     "data",
+        //     data.map((v) => v.toFixed(1))
+        // );
+    }
+
+    // console.log("baseIndex", baseIndex, data[baseIndex].toFixed(1));
+
+    return data[baseIndex];
 }

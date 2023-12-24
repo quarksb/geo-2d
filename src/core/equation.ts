@@ -1,3 +1,4 @@
+const TOL = 1e-12;
 export function getRoots(derivation: number[]) {
     switch (derivation.length) {
         case 0:
@@ -5,19 +6,19 @@ export function getRoots(derivation: number[]) {
         case 1:
             return [0];
         case 2:
-            if (derivation[0] === 0) {
+            if (Math.abs(derivation[0]) < TOL) {
                 return [];
             } else {
                 return [-derivation[1] / derivation[0]];
             }
         case 3:
-            if (derivation[0] === 0) {
+            if (Math.abs(derivation[0]) < TOL) {
                 return getRoots(derivation.slice(1));
             } else {
                 return getQuadraticRoots(derivation);
             }
         case 4:
-            if (derivation[0] === 0) {
+            if (Math.abs(derivation[0]) < TOL) {
                 return getRoots(derivation.slice(1));
             } else {
                 return getCubicRoots(derivation);

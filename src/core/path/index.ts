@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
-import { Curve, LineCurve, BezierCurve, QuadraticCurve, SplitData } from "../curve";
+import { Curve, LineCurve, BezierCurve, QuadraticCurve, SplitData, PointFn } from "../curve";
 import { pathStringToPathCommands } from "../svg";
-import { isVec2DirectionClose } from "./uilts";
+import { isVec2DirectionClose } from "./utils";
+import { Bounds, createBounds } from "..";
 
 declare type WindingRule = "NONZERO" | "EVENODD";
 export class Shape {
@@ -65,7 +66,12 @@ export class Shape {
         const firstTangent = this.curves[0].getTangent(0);
         this.isSmoothArr.push(isVec2DirectionClose(firstTangent, this.currentTangent));
     }
-    split(splitData:SplitData) {
+    split(splitData: SplitData) {
+        const newCurves = [];
+        for (const curve of this.curves) {
+            const curves = curve.split(splitData);
+            newCurves.push(...curves);
+        }
         const curves = this.curves
             .map((curve) => {
                 return curve.split(splitData);
@@ -73,36 +79,39 @@ export class Shape {
             .flat();
         this.curves = curves;
     }
+
+    divideAtByNum(count: number = 10) {
+        const arr = new Array(count - 1);
+        for (let i = 1; i < count; i++) {
+            arr[i - 1] = i / count;
+        }
+        const { length } = this.curves;
+        const newCurves = new Array(length * count);
+        for (let i = 0; i < length; i++) {
+            const curve = this.curves[i];
+            const curves = curve.divideAtArray(arr);
+            newCurves.splice(i * count, count, ...curves);
+        }
+        this.curves = newCurves;
+    }
+
     toPathString(digits = 0): string {
-        // const { curves } = this;
-        // let pathStr = `M ${curves[0].startPoint[0].toFixed(digits)} ${curves[0].startPoint[1].toFixed(digits)} `;
-        // for (let i = 1; i < this.curves.length; i++) {
-        //     pathStr += curves[i].toPathString(digits) + " ";
-        // }
-        let pathStr = "";
-        this.curves.forEach((curve, i) => {
-            if (i === 0) {
-                pathStr += `M ${curve.startPoint[0].toFixed(digits)} ${curve.startPoint[1].toFixed(digits)} `;
-            }
+        const fistPoint = this.curves[0].startPoint;
+        let pathStr = `M ${fistPoint[0].toFixed(digits)} ${fistPoint[1].toFixed(digits)} `;
+        for (const curve of this.curves) {
             pathStr += curve.toPathString(digits) + " ";
-        });
+        }
         pathStr += "Z";
         return pathStr;
     }
-    getBounds(): { xMin: number; xMax: number; yMin: number; yMax: number } {
-        const bounds = {
-            xMin: Infinity,
-            xMax: -Infinity,
-            yMin: Infinity,
-            yMax: -Infinity,
-        };
-        this.curves.forEach((curve) => {
-            const { x, y, width, height } = curve.bbox;
+    getBounds(bounds = createBounds()): Bounds {
+        for (const { bbox } of this.curves) {
+            const { x, y, width, height } = bbox;
             bounds.xMin = Math.min(bounds.xMin, x);
             bounds.xMax = Math.max(bounds.xMax, x + width);
             bounds.yMin = Math.min(bounds.yMin, y);
             bounds.yMax = Math.max(bounds.yMax, y + height);
-        });
+        }
         return bounds;
     }
 }
@@ -118,7 +127,7 @@ export class ShapeGroup {
         const pathGroup = new ShapeGroup([], windingRule);
         const commands = pathStringToPathCommands(pathStr);
         let currentPath: Shape | null = null;
-        commands.forEach((command: { type: any; args: any }) => {
+        for (const command of commands) {
             const { type, args } = command;
             switch (type) {
                 case "M":
@@ -145,41 +154,32 @@ export class ShapeGroup {
                     currentPath!.closePath();
                     break;
             }
-        });
+        }
+
         if (currentPath) {
             pathGroup.shapes.push(currentPath);
         }
         return pathGroup;
     }
-    getBounds(): { xMin: number; xMax: number; yMin: number; yMax: number } {
-        const bounds = {
-            xMin: Infinity,
-            xMax: -Infinity,
-            yMin: Infinity,
-            yMax: -Infinity,
-        };
-        this.shapes.forEach((shape) => {
-            const { xMin, xMax, yMin, yMax } = shape.getBounds();
-            bounds.xMin = Math.min(bounds.xMin, xMin);
-            bounds.xMax = Math.max(bounds.xMax, xMax);
-            bounds.yMin = Math.min(bounds.yMin, yMin);
-            bounds.yMax = Math.max(bounds.yMax, yMax);
-        });
+    getBounds(bounds = createBounds()): Bounds {
+        for (const shape of this.shapes) {
+            shape.getBounds(bounds);
+        }
         return bounds;
     }
 
-    applyTransform(fn: (point: vec2, ratio?: number) => vec2) {
-        this.shapes.forEach((shape) => {
-            shape.curves.forEach((curve) => {
-                curve.applyFn(fn);
-            });
-        });
+    applyFn(fn: PointFn) {
+        for (const shape of this.shapes) {
+            for (const curve of shape.curves) {
+                curve.applyFFDFn(fn);
+            }
+        }
     }
 
-    split(splitData:SplitData) {
-        this.shapes.forEach((shape) => {
+    split(splitData: SplitData) {
+        for (const shape of this.shapes) {
             shape.split(splitData);
-        });
+        }
     }
 
     clone() {
@@ -200,6 +200,10 @@ export class ShapeGroup {
     }
 
     toPathString(digits = 0): string {
-        return this.shapes.map((shape) => shape.toPathString(digits)).join(" ");
+        let path = "";
+        for (const shape of this.shapes) {
+            path += shape.toPathString(digits);
+        }
+        return path;
     }
 }

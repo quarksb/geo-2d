@@ -1,5 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { BBox, Curve, SplitData } from "./curve";
+import { Curve, PointFn, SplitData } from "./curve";
+import { BBox } from "../BBox";
 
 export class LineCurve extends Curve {
     _normal: vec2 | null = null;
@@ -120,11 +121,11 @@ export class LineCurve extends Curve {
         return [];
     }
 
-    applyFn(fn: (point: vec2, ratio?:number) => void): void {
+    applyFn(fn: PointFn): void {
         fn(this.startPoint);
         fn(this.endPoint);
     }
-    applyFFDFn(fn: (point: vec2) => vec2): void {
+    applyFFDFn(fn: PointFn): void {
         this.applyFn(fn);
     }
     split(splitData: SplitData): LineCurve[] {

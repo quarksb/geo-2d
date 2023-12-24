@@ -1,5 +1,7 @@
 import { vec2 } from "gl-matrix";
+import { BBox } from "../BBox";
 
+export type PointFn = (vec: vec2) => void;
 export abstract class Curve {
     startPoint: vec2;
     endPoint: vec2;
@@ -15,8 +17,8 @@ export abstract class Curve {
     abstract getNormal(t: number | null): vec2;
     abstract getLen(): number;
     abstract getBBox(): BBox;
-    abstract applyFn(fn: (point: vec2) => vec2): void;
-    abstract applyFFDFn(fn: (point: vec2) => vec2): void;
+    abstract applyFn(fn: PointFn): void;
+    abstract applyFFDFn(fn: PointFn): void;
     abstract toPathString(digits?: number): string;
     abstract toDebugPathString(digits?: number): string;
     abstract divideAt(t?: number): Curve[];
@@ -31,9 +33,3 @@ export interface SplitData {
     val: number;
 }
 
-export interface BBox {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}

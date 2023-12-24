@@ -29,3 +29,12 @@ export function getEaseElasticInOut(t: number): number {
     const p = 0.9;
     return t < 0.5 ? 0.5 * Math.pow(2, 20 * t - 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p) : 0.5 * (2 - Math.pow(2, -20 * t + 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
 }
+
+/**
+ * 根据尺寸返回推荐的精度
+ * @param num 尺寸, 必须大于0
+ * @returns 推荐的精度值，给 Number.toFixed() 使用
+ */
+export function getDigit(num: number, scale = 4): number {
+    return Math.max(scale - Math.floor(Math.log10(num)), 0);
+}

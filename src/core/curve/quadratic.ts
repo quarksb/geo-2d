@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { LineCurve } from "./line";
-import { BBox, Curve, SplitData } from "./curve";
-import { getRoots } from "./equation";
+import { Curve, PointFn, SplitData } from "./curve";
+import { getRoots } from "../equation";
+import { BBox } from "../BBox";
 
 export class QuadraticCurve extends Curve {
     controlPoint1: vec2;
@@ -40,14 +41,14 @@ export class QuadraticCurve extends Curve {
         return curves;
     }
 
-    applyFn(fn: (point: vec2, ratio?: number) => vec2): void {
+    applyFn(fn: PointFn): void {
         fn(this.startPoint);
         fn(this.endPoint);
         fn(this.controlPoint1);
         this._isDirty = true;
     }
 
-    applyFFDFn(fn: (point: vec2) => vec2): void {
+    applyFFDFn(fn: PointFn): void {
         this.applyFn(fn);
         const diff = vec2.fromValues(this.controlPoint1[0] - 0.5 * (this.startPoint[0] + this.endPoint[0]), this.controlPoint1[1] - 0.5 * (this.startPoint[1] + this.endPoint[1]));
         vec2.add(this.controlPoint1, this.controlPoint1, diff);
