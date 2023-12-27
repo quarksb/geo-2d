@@ -50,12 +50,11 @@ let count = 0;
  * use bezier curve to smooth the polygon
  * @param polygon points of the polygon
  */
-export function getCurvesByPolygon(polygon: vec2[]): Curve[] {
+export function getCurvesByPolygon(polygon: vec2[], degree = 3): Curve[] {
     const curves: Curve[] = [];
     const n = 100;
-    const degree = 3;
     const interpolatePoints = new Array<vec2>(n);
-    const bSpline = getBSpline(polygon, degree);
+    const bSpline = getBSpline(polygon,  Number(degree));
     const time = performance.now();
     for (let i = 0; i < n; i++) {
         interpolatePoints[i] = bSpline(i / n);

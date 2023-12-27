@@ -88,7 +88,9 @@ export function getBSpline(points: vec2[], degree: number) {
     const { length } = points;
 
     if (degree < 1) throw new Error("degree must be at least 1 (linear)");
-    if (degree + 1 > length) throw new Error("degree must be less than or equal to point count - 1");
+    if (degree > length - 1) {
+        throw new Error(`degree:${degree} must be less than or equal to point count - 1(${length - 1})`);
+    }
 
     const xNums = new Array(length);
     const yNums = new Array(length);
@@ -121,13 +123,13 @@ function getNum(points: number[], degree: number, t: number) {
     //     "data",
     //     data.map((v) => v.toFixed(1))
     // );
-    
+
     for (let i = 0; i < degree; i++) {
         // build level l of the pyramid
         for (let k = baseIndex; k > baseIndex - degree + i; k--) {
             const lamoda = (t - k) / (degree - i);
             // console.log(k, lamoda.toFixed(2), data[k - 1].toFixed(1), data[k].toFixed(1));
-            data[k] = (1 - lamoda) * data[k - 1] + lamoda * data[k];
+            data[k] = lamoda * data[k] + (1 - lamoda) * data[k - 1];
         }
         // console.log(
         //     "data",

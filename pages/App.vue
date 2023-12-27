@@ -30,11 +30,14 @@ let isColorSelected = ref(false);
 let d = ref("");
 const minPolygonNum = 4;
 const maxPolygonNum = 20;
+
 let polygonNum = ref(10);
 let isPolygonNumSelected = ref(false);
+let degree = ref(3);
+let isDegreeSelected = ref(false);
 let ramada = ref(0.5);
 let isRamadaSelected = ref(false);
-let randomSeed = ref(.8859102140559103);
+let randomSeed = ref(0.8859102140559103);
 let isDebug = ref(false);
 let isScaleToEdge = ref(false);
 let currentState: {
@@ -44,7 +47,6 @@ let currentState: {
 let handle: number | null = null;
 let timeOutId: number | null = null;
 let tempPolygon: vec2[] = [];
-
 
 // 生成svg path, 并赋值给d, 如果有旧数据，则利用新旧数据插值生成动画
 function renderSvgPath() {
@@ -62,6 +64,8 @@ function renderSvgPath() {
         clearTimeout(timeOutId);
         timeOutId = null;
     }
+    console.log(typeof polygonNum.value);
+    
     const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
     if (currentState.polygon.length > 0) {
         const animationTime = 3000;
@@ -70,7 +74,9 @@ function renderSvgPath() {
             // const t = (time - initTime) / animationTime;
             const t = getEaseElasticOut((time - initTime) / animationTime);
             tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
-            const curves = getCurvesByPolygon(tempPolygon);
+            console.log(degree.value);
+            
+            const curves = getCurvesByPolygon(tempPolygon,degree.value);
             if (isScaleToEdge.value) {
                 resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
             }
@@ -82,7 +88,7 @@ function renderSvgPath() {
 
         timeOutId = setTimeout(resetPolygonState, animationTime) as unknown as number;
     } else {
-        const curves = getCurvesByPolygon(targetPolygon);
+        const curves = getCurvesByPolygon(targetPolygon, degree.value);
         if (isScaleToEdge.value) {
             resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
         }
@@ -135,17 +141,19 @@ function randomSelect() {
     if (isPolygonNumSelected.value) {
         polygonNum.value = Math.round(Math.random() * (maxPolygonNum - minPolygonNum)) + minPolygonNum;
     }
+    if (isDegreeSelected.value) {
+        degree.value = Math.round(Math.random() * (5 - 1)) + 1;
+    }
     if (isRamadaSelected.value) {
         ramada.value = Math.random();
     }
 
     randomSeed.value = Math.random();
-    
 }
 // 页面加载完成之后添加svg
 smoothRender();
 // 监听参数变化，重新渲染svg
-[blur, rotate, color0, color1, polygonNum, ramada, randomSeed, isDebug, isScaleToEdge].forEach((item) => {
+[blur, rotate, color0, color1, polygonNum, degree, ramada, randomSeed, isDebug, isScaleToEdge].forEach((item) => {
     watch(item, () => {
         smoothRender();
     });
@@ -191,8 +199,7 @@ smoothRender();
                                 <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
                             </filter>
                         </defs>
-                        <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)"></path>
-
+                        <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)" stroke="red"></path>
                     </svg>
                     <div class="row-container">
                         <button class="button">
@@ -221,6 +228,11 @@ smoothRender();
                         <div class="param">rotate</div>
                         <input class="range" type="range" v-model="rotate" min="0" max="90" step="1" />
                         <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
+                    </div>
+                    <div class="control">
+                        <input class="checkbox" type="checkbox" v-model="isDegreeSelected" />
+                        <div class="param">degree</div>
+                        <input class="range" type="range" v-model="degree" :min="1" :max="5" step="1" />
                     </div>
                     <div class="control">
                         <input class="checkbox" type="checkbox" v-model="isPolygonNumSelected" />
