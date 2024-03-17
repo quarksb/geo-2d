@@ -80,3 +80,45 @@ export function parseSvgFromUrl(url: string) {
         xhr.send();
     });
 }
+
+/**add media recorder */
+export function addDownloadButton(canvas: HTMLCanvasElement) {
+    const recordButton = document.createElement("button");
+    recordButton.innerText = "录制";
+    recordButton.style.position = "absolute";
+    recordButton.style.top = "10px";
+    recordButton.style.right = "10px";
+    document.body.appendChild(recordButton);
+
+    // canvas 录制
+    let recorder: MediaRecorder;
+    let chunks: Blob[] = [];
+    recordButton.addEventListener("click", () => {
+        if (recorder) {
+            recorder.stop();
+        } else {
+            recorder = new MediaRecorder(canvas.captureStream(20), {
+                mimeType: "video/webm",
+            });
+            recorder.ondataavailable = (e) => {
+                if (e.data && e.data.size) {
+                    chunks.push(e.data);
+                }
+            };
+            recorder.start();
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: "video/webm" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "record.webm";
+                a.click();
+                chunks = [];
+                recordButton.innerText = "录制";
+                recorder = null!;
+            };
+            recordButton.innerText = "结束";
+        }
+    });
+}

@@ -114,6 +114,15 @@ export class Shape {
         }
         return bounds;
     }
+    toPoints(count: number) {
+        let points: vec2[] = [];
+        
+        for(let i = 0; i < this.curves.length; i++) {
+            const curve = this.curves[i];
+            points = points.concat(curve.toPoints(count));
+        }
+        return points;
+    }
 }
 
 export class ShapeGroup {
@@ -202,8 +211,18 @@ export class ShapeGroup {
     toPathString(digits = 0): string {
         let path = "";
         for (const shape of this.shapes) {
-            path += shape.toPathString(digits);
+            path += shape.toPathString(digits) + " ";
         }
+        // 删除最后一空格
+        path = path.slice(0, -1);
         return path;
+    }
+
+    toPoints(count: number) {
+        let points: vec2[] = [];
+        for (const shape of this.shapes) {
+            points = points.concat(shape.toPoints(count));
+        }
+        return points;
     }
 }

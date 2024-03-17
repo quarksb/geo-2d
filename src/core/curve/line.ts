@@ -138,4 +138,7 @@ export class LineCurve extends Curve {
     toDebugPathString(digits?: number | undefined): string {
         return this.toPathString(digits);
     }
+    toPoints(): vec2[] {
+        return [this.startPoint, this.endPoint];
+    }
 }

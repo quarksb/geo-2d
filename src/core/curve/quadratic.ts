@@ -177,8 +177,18 @@ export class QuadraticCurve extends Curve {
         return `Q ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
     }
     toDebugPathString(digits?: number | undefined): string {
-        return `M ${this.startPoint[0].toFixed(digits)} ${this.startPoint[1].toFixed(digits)} L ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} L ${this.endPoint[0].toFixed(
+        return `M ${this.startPoint[0].toFixed(digits)} ${this.startPoint[1].toFixed(digits)} L ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(
             digits
-        )} ${this.endPoint[1].toFixed(digits)}`;
+        )} L ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
+    }
+    /**### 用折线拟合曲线 */
+    toPoints(count = 10): vec2[] {
+        const points: vec2[] = new Array(count);
+        const step = 1 / count;
+        for (let i = 1; i <= count; i++) {
+            const point = this.getPosition(i * step);
+            points[i - 1] = point;
+        }
+        return points.reverse();
     }
 }

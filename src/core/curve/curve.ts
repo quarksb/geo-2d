@@ -26,6 +26,7 @@ export abstract class Curve {
     abstract divideAtArray(tArr: number[]): Curve[];
     // 只考虑一个交点情况
     abstract getSplitT(data: SplitData): number[];
+    abstract toPoints(count?: number): vec2[];
 }
 
 export interface SplitData {
