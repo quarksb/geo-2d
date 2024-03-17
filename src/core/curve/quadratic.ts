@@ -48,8 +48,8 @@ export class QuadraticCurve extends Curve {
 
     applyFn(fn: PointFn): void {
         fn(this.startPoint);
-        fn(this.endPoint);
         fn(this.controlPoint1);
+        fn(this.endPoint);
         this._isDirty = true;
     }
 

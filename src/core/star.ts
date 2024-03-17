@@ -72,7 +72,7 @@ export function getCurvesByPolygon(polygon: vec2[], degree = 3): Curve[] {
     }
 
     for (let i = 0; i < n; i++) {
-        const startPoint: vec2 = midPointArr[i];
+        const startPoint: vec2 = vec2.clone(midPointArr[i]);
         const endPoint: vec2 = midPointArr[(i + 1) % n];
         const controlPoint1 = interpolatePoints[(i + 1) % n];
         curves.push(new QuadraticCurve(startPoint, controlPoint1, endPoint));
