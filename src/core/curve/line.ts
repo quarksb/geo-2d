@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { Curve, PointFn, SplitData } from "./curve";
-import { BBox } from "../BBox";
+import { BBox } from "../base/BBox";
 
 export class LineCurve extends Curve {
     _normal: vec2 | null = null;
@@ -41,7 +41,7 @@ export class LineCurve extends Curve {
         return this.tangent;
     }
 
-    constructor(startPoint: vec2, endPoint: vec2) {
+    constructor (startPoint: vec2, endPoint: vec2) {
         super(startPoint, endPoint);
     }
 

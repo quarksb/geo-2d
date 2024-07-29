@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "./curve/curve";
-import { getRandomGenerate } from "./math";
+import { getRandomGenerate } from "./math/math";
 import { QuadraticCurve } from "./curve";
 import { getBSpline } from "./curve";
-import { BBox } from "./BBox";
+import { BBox } from "./base/BBox";
 
 /**
  * get the vertexes of a polygon
@@ -54,7 +54,7 @@ export function getCurvesByPolygon(polygon: vec2[], degree = 3): Curve[] {
     const curves: Curve[] = [];
     const n = 100;
     const interpolatePoints = new Array<vec2>(n);
-    const bSpline = getBSpline(polygon,  Number(degree));
+    const bSpline = getBSpline(polygon, Number(degree));
     const time = performance.now();
     for (let i = 0; i < n; i++) {
         interpolatePoints[i] = bSpline(i / n);

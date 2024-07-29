@@ -1,22 +1,27 @@
 import { vec2 } from "gl-matrix";
-import { BBox } from "../BBox";
+import { BBox } from "../base/bbox";
 
 export type PointFn = (vec: vec2) => void;
 export abstract class Curve {
     startPoint: vec2;
     endPoint: vec2;
     protected _bbox: BBox | null = null;
+    protected _len = 0;
     protected _isDirty = true;
-    constructor(startPoint: vec2, endPoint: vec2) {
+    constructor (startPoint: vec2, endPoint: vec2) {
         this.startPoint = startPoint;
         this.endPoint = endPoint;
     }
     abstract get bbox(): BBox;
+    abstract get len(): number;
     abstract getPosition(t: number): vec2;
+    /**通过长度百分比位置获取坐标 */
+    abstract getPosDataByPer(per: number): { pos: vec2, tan: vec2 };
     abstract getTangent(t: number | null): vec2;
     abstract getNormal(t: number | null): vec2;
-    abstract getLen(): number;
+
     abstract getBBox(): BBox;
+    abstract getLen(): number;
     abstract applyFn(fn: PointFn): void;
     abstract applyFFDFn(fn: PointFn): void;
     abstract toPathString(digits?: number): string;
@@ -33,4 +38,3 @@ export interface SplitData {
     mode: "x" | "y";
     val: number;
 }
-
