@@ -5,7 +5,7 @@ import { BBox } from "../base/bbox";
 export const LineCurveType = "curve-line";
 
 /**
- * ## LineCurve
+ * ## Line Curve
  * Represents a line segment in a 2D space.
  */
 export class LineCurve extends Curve {
@@ -230,7 +230,7 @@ if (import.meta.vitest) {
 
     // 自定义匹配器
     expect.extend({
-        toBeCloseForVec2(received: vec2, expected: vec2, tolerance = 1e-6) {
+        toEqual(received: vec2, expected: vec2, tolerance = 1e-6) {
             const pass = vec2.distance(received, expected) < tolerance;
             if (pass) {
                 return {
@@ -258,20 +258,18 @@ if (import.meta.vitest) {
         const line = new LineCurve(p[0], p[1]);
         it('get function test', () => {
             expect(line.bbox).toEqual({ x: 0, y: 0, width: 1, height: 1 });
-            expect(line.len).toBeCloseTo(Math.sqrt(2));
+            expect(line.len).toBeCloseTo(Math.SQRT2);
             const normal = line.getNormal();
-            expect(normal).toBeCloseForVec2(vec2.fromValues(-Math.SQRT1_2, Math.SQRT1_2));
+            expect(normal).toEqual(vec2.fromValues(-Math.SQRT1_2, Math.SQRT1_2));
             const tangent = line.getTangent();
-            expect(tangent).toBeCloseForVec2(vec2.fromValues(Math.SQRT1_2, Math.SQRT1_2));
+            expect(tangent).toEqual(vec2.fromValues(Math.SQRT1_2, Math.SQRT1_2));
             const pos = line.getPosition(0.5);
-            expect(pos).toBeCloseForVec2(vec2.fromValues(0.5, 0.5));
+            expect(pos).toEqual(vec2.fromValues(0.5, 0.5));
             const posData = line.getPosDataByPer(0.5);
-            expect(posData.pos).toBeCloseForVec2(vec2.fromValues(0.5, 0.5));
-            expect(posData.tan).toBeCloseForVec2(vec2.fromValues(Math.SQRT1_2, Math.SQRT1_2));
+            expect(posData.pos).toEqual(vec2.fromValues(0.5, 0.5));
+            expect(posData.tan).toEqual(vec2.fromValues(Math.SQRT1_2, Math.SQRT1_2));
             expect(line.getSplitT({ mode: 'x', val: 0.5 })).toEqual([0.5]);
             expect(line.getSplitT({ mode: 'y', val: 0.5 })).toEqual([0.5]);
-
-
         });
 
         it('to function test', () => {

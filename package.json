@@ -1,16 +1,16 @@
 {
-  "name": "organic-shape",
-  "version": "1.0.0-beta.11",
+  "name": "geo-2d",
+  "version": "1.0.0-beta.12",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "dist/organic-shape.umd.js",
-  "module": "dist/organic-shape.es.js",
+  "main": "dist/geometry.umd.js",
+  "module": "dist/geometry.es.js",
   "exports": {
     ".": {
-      "import": "./dist/organic-shape.es.js",
-      "require": "./dist/organic-shape.umd.js"
+      "import": "./dist/geometry.es.js",
+      "require": "./dist/geometry.umd.js"
     },
     "./package.json": "./package.json",
     "./README.md": "./README.md"

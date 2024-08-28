@@ -13,9 +13,9 @@ export default ({ mode }) => {
             build: {
                 lib: {
                     entry: "src/index.ts",
-                    name: "organic-shape",
+                    name: "geometry",
                     formats: ["es", "umd"],
-                    fileName: (format) => `organic-shape.${format}.js`,
+                    fileName: (format) => `geometry.${format}.js`,
                 },
                 outDir: "dist",
                 emptyOutDir: true,
