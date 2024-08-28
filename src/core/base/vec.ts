@@ -4,7 +4,27 @@ export interface PointLike {
     /**point y */
     y: number;
 }
-export class Vec implements PointLike {
+
+export function lineInterSect(p1: PointLike, p2: PointLike, p3: PointLike, p4: PointLike): PointLike {
+    const { x: x1, y: y1 } = p1;
+    const { x: x2, y: y2 } = p2;
+    const { x: x3, y: y3 } = p3;
+    const { x: x4, y: y4 } = p4;
+    const a1 = y2 - y1;
+    const b1 = x1 - x2;
+    const c1 = x2 * y1 - x1 * y2;
+    const a2 = y4 - y3;
+    const b2 = x3 - x4;
+    const c2 = x4 * y3 - x3 * y4;
+    // todo d = 0
+    const d = a1 * b2 - a2 * b1;
+    const x = (b1 * c2 - b2 * c1) / d;
+    const y = (a2 * c1 - a1 * c2) / d;
+    return { x, y };
+}
+
+// 目前没用，使用了 gl-matrix vec2    
+class Vec implements PointLike {
     x: number;
     y: number;
     constructor(x: number, y: number) {
@@ -55,19 +75,3 @@ export class Vec implements PointLike {
     }
 }
 
-export function lineInterSect(p1: PointLike, p2: PointLike, p3: PointLike, p4: PointLike): PointLike {
-    const { x: x1, y: y1 } = p1;
-    const { x: x2, y: y2 } = p2;
-    const { x: x3, y: y3 } = p3;
-    const { x: x4, y: y4 } = p4;
-    const a1 = y2 - y1;
-    const b1 = x1 - x2;
-    const c1 = x2 * y1 - x1 * y2;
-    const a2 = y4 - y3;
-    const b2 = x3 - x4;
-    const c2 = x4 * y3 - x3 * y4;
-    const d = a1 * b2 - a2 * b1;
-    const x = (b1 * c2 - b2 * c1) / d;
-    const y = (a2 * c1 - a1 * c2) / d;
-    return { x, y };
-}

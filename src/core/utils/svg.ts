@@ -1,6 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { getCurvesByPolygon, getPolygon, resizeCurvesByBBox } from "./star";
-import { Curve } from "./curve";
+import { Curve } from "../curve";
 
 export function createSvgByPath(pathStr: string): SVGSVGElement {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -10,17 +9,8 @@ export function createSvgByPath(pathStr: string): SVGSVGElement {
     return svg;
 }
 
-export function getSvgPathBySize(param: { width: number; height: number; polygonNum: number; ramada: number; randomSeed: number; smoothPercent: number; degree?:number, isDebug?: boolean }): string {
-    const { width, height, polygonNum, ramada, randomSeed, degree } = param;
-    const polygon = getPolygon(width, height, polygonNum, ramada, randomSeed);
-    const curves = getCurvesByPolygon(polygon, degree);
-
-    resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
-    return getPathStr(curves);
-}
-
 export function getPathStr(curves: Curve[], digits = 1): string {
-    const startPoint = curves[0].startPoint;
+    const startPoint = curves[0].SPoint;
     let pathStr = `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
     curves.forEach((curve) => {
         pathStr += curve.toPathString(digits) + " ";
@@ -30,7 +20,7 @@ export function getPathStr(curves: Curve[], digits = 1): string {
 }
 
 export function getDebugPathStr(curves: Curve[], digits = 1): string {
-    const startPoint = curves[0].startPoint;
+    const startPoint = curves[0].SPoint;
     let pathStr = `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
     curves.forEach((curve) => {
         pathStr += curve.toDebugPathString(digits) + " ";
@@ -54,7 +44,7 @@ export function pathStringToPathCommands(pathStr: string): { type: string; args:
 
         if (char.match(/[A-Z]/)) {
             // 如果是大写字母，则表示新的命令开始
-            addCommand(currentCommand, currentArgs);
+            currentCommand && addCommand(currentCommand, currentArgs);
             currentCommand = char;
             currentArgs = [];
         } else if (char === " " || char === ",") {

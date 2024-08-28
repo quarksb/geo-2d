@@ -1,88 +1,49 @@
 import { vec2 } from "gl-matrix";
 import { QuadraticCurve } from "./quadratic";
-import { PointFn, SplitData } from "./curve";
+import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
-import { LineCurve } from ".";
+import { LineCurve } from "./line";
 import { BBox } from "../base/bbox";
 
+export const BezierCurveType = "curve-bezier";
+
+/**
+ * ## BezierCurve
+ * Represents a cubic bezier curve in a 2D space.
+ */
 export class BezierCurve extends QuadraticCurve {
-    controlPoint2: vec2;
+    /** The second control point of the curve. */
+    protected _CPoint2: vec2 = vec2.create();
     constructor (startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
         super(startPoint, controlPoint1, endPoint);
-        this.controlPoint2 = controlPoint2;
+        this.type = BezierCurveType;
+        this.CPoint2 = controlPoint2;
     }
 
-    divideAt(t: number): BezierCurve[] {
-        const startPoint = this.startPoint;
-        const endPoint = this.endPoint;
-        const controlPoint1 = this.controlPoint1;
-        const controlPoint2 = this.controlPoint2;
-        const middlePoint1 = vec2.lerp(vec2.create(), startPoint, controlPoint1, t);
-        const middlePoint2 = vec2.lerp(vec2.create(), controlPoint1, controlPoint2, t);
-        const middlePoint3 = vec2.lerp(vec2.create(), controlPoint2, endPoint, t);
-        const middlePoint4 = vec2.lerp(vec2.create(), middlePoint1, middlePoint2, t);
-        const middlePoint5 = vec2.lerp(vec2.create(), middlePoint2, middlePoint3, t);
-        // const middlePoint = vec2.lerp(vec2.create(), middlePoint4, middlePoint5, t);
-        const middlePoint = this.getPosition(t);
-
-        const leftCurve = new BezierCurve(startPoint, middlePoint1, middlePoint4, middlePoint);
-        const rightCurve = new BezierCurve(vec2.clone(middlePoint), middlePoint5, middlePoint3, endPoint);
-        return [leftCurve, rightCurve];
+    /**
+     * Sets the second control point of the curve.
+     */
+    set CPoint2(val: vec2) {
+        this._isDirty ||= !vec2.exactEquals(this._CPoint2, val);
+        this._CPoint2 = val;
     }
-    /**曲线砍n刀生成 n+1 段曲线 */
-    divideAtArray(tArr: number[]): BezierCurve[] {
-        tArr.sort((a, b) => a - b);
-        let currentCurve: BezierCurve = this;
-        const curves: BezierCurve[] = new Array(tArr.length + 1);
-        let lastT = 0
-        for (let i = 0; i < tArr.length; i++) {
-            let t = tArr[i];
-            t = (t - lastT) / (1 - lastT);
-            lastT = tArr[i];
-            const dividedCurves = currentCurve.divideAt(t);
-            curves[i] = dividedCurves[0];
-            currentCurve = dividedCurves[1];
-        }
-        curves[tArr.length] = currentCurve;
-        return curves;
+    /**
+     * Gets the second control point of the curve.
+     * @returns The second control point.
+     */
+    get CPoint2(): vec2 {
+        return this._CPoint2;
     }
 
-    applyFn(fn: PointFn) {
-        fn(this.startPoint);
-        fn(this.endPoint);
-        fn(this.controlPoint1);
-        fn(this.controlPoint2);
-        this._isDirty = true;
-    }
-
-    applyFFDFn(fn: PointFn): void {
-        // todo, consider use solver equations to calculate the control point position
-        const originControlPoint1 = vec2.clone(this.controlPoint1);
-        const originControlPoint2 = vec2.clone(this.controlPoint2);
-        this.applyFn(fn);
-        // todo 理解为何 1/2 更符合直觉
-        // const k = 1 / 2;
-        // const diff1 = vec2.subtract(vec2.create(), this.controlPoint1, originControlPoint1);
-        // vec2.scaleAndAdd(this.controlPoint1, this.controlPoint1, diff1, k);
-        // const diff2 = vec2.subtract(vec2.create(), this.controlPoint2, originControlPoint2);
-        // vec2.scaleAndAdd(this.controlPoint2, this.controlPoint2, diff2, k);
-    }
-
-    get bbox(): BBox {
-        if (!this._bbox || this._isDirty) {
-            this._bbox = this._getBBox();
-        }
-        return this._bbox;
-    }
     /**
      * get BBox by control points, using derivation
      * @returns
      */
-    private _getBBox(): BBox {
-        const [x0, y0] = this.startPoint;
-        const [x1, y1] = this.controlPoint1;
-        const [x2, y2] = this.controlPoint2;
-        const [x3, y3] = this.endPoint;
+    protected _getBBox(): BBox {
+        const [x0, y0] = this.SPoint;
+        const [x1, y1] = this.CPoint1;
+        const [x2, y2] = this.CPoint2;
+        const [x3, y3] = this.EPoint;
 
         const xDerivation = [-3 * x0 + 9 * x1 - 9 * x2 + 3 * x3, 6 * x0 - 12 * x1 + 6 * x2, 3 * x1 - 3 * x0];
         const yDerivation = [-3 * y0 + 9 * y1 - 9 * y2 + 3 * y3, 6 * y0 - 12 * y1 + 6 * y2, 3 * y1 - 3 * y0];
@@ -106,7 +67,7 @@ export class BezierCurve extends QuadraticCurve {
         };
     }
 
-    getSplitT(data: SplitData): number[] {
+    getSplitT(data: CoordData): number[] {
         const { x, y, width, height } = this.bbox;
         const { mode, val } = data;
         const i = mode === "y" ? 1 : 0;
@@ -115,10 +76,10 @@ export class BezierCurve extends QuadraticCurve {
             return [];
         } else {
             const derivation = [
-                -this.startPoint[i] + 3 * this.controlPoint1[i] - 3 * this.controlPoint2[i] + this.endPoint[i],
-                3 * this.startPoint[i] - 6 * this.controlPoint1[i] + 3 * this.controlPoint2[i],
-                -3 * this.startPoint[i] + 3 * this.controlPoint1[i],
-                this.startPoint[i] - val,
+                -this.SPoint[i] + 3 * this.CPoint1[i] - 3 * this.CPoint2[i] + this.EPoint[i],
+                3 * this.SPoint[i] - 6 * this.CPoint1[i] + 3 * this.CPoint2[i],
+                -3 * this.SPoint[i] + 3 * this.CPoint1[i],
+                this.SPoint[i] - val,
             ];
             const roots = getRoots(derivation);
             const delta = 1e-8;
@@ -131,20 +92,13 @@ export class BezierCurve extends QuadraticCurve {
         let b = 3 * t * (1 - t) * (1 - t);
         let c = 3 * t * t * (1 - t);
         let d = t ** 3;
-        let x = a * this.startPoint[0] + b * this.controlPoint1[0] + c * this.controlPoint2[0] + d * this.endPoint[0];
-        let y = a * this.startPoint[1] + b * this.controlPoint1[1] + c * this.controlPoint2[1] + d * this.endPoint[1];
+        let x = a * this.SPoint[0] + b * this.CPoint1[0] + c * this.CPoint2[0] + d * this.EPoint[0];
+        let y = a * this.SPoint[1] + b * this.CPoint1[1] + c * this.CPoint2[1] + d * this.EPoint[1];
         return vec2.fromValues(x, y);
     }
 
     getTangent(t: number): vec2 {
-        let a = -3 * ((1 - t) ** 2);
-        let b = 3 * (1 - 4 * t + 3 * t ** 2);
-        let c = 3 * (2 * t - 3 * t ** 2);
-        let d = 3 * t ** 2;
-        let x = a * this.startPoint[0] + b * this.controlPoint1[0] + c * this.controlPoint2[0] + d * this.endPoint[0];
-        let y = a * this.startPoint[1] + b * this.controlPoint1[1] + c * this.controlPoint2[1] + d * this.endPoint[1];
-
-        const vector = vec2.fromValues(x, y);
+        const vector = this.getDerivative(t);
         return vec2.normalize(vector, vector);
     }
 
@@ -154,49 +108,268 @@ export class BezierCurve extends QuadraticCurve {
         return normal;
     }
 
-    static fromLineCurve(lineCurve: LineCurve): BezierCurve {
-        const startPoint = lineCurve.startPoint;
-        const endPoint = lineCurve.endPoint;
-        const controlPoint1 = vec2.lerp(vec2.create(), startPoint, endPoint, 1 / 3);
-        const controlPoint2 = vec2.lerp(vec2.create(), startPoint, endPoint, 2 / 3);
-        return new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
+    /**
+     * ### Gets the distance from a given point to the bezier curve.
+     * 设定切点 p 则 p-p0 表述为 关于参数 t 的 3 阶方程，p 点切线表述为关于参数 t 的 2 阶方程,
+     * 满足垂直时，即内积为 0，两个方程的内积表述为关于参数t 的 5 阶方程，5 阶方程没有解析解，所以无法直接求解切点
+     * @param pos 
+     * @returns 
+     */
+    getDisToPos(pos: vec2): number {
+        const count = 100;
+        let minDis = Infinity;
+        for (let i = 0; i <= count; i++) {
+            const t = i / count;
+            const point = this.getPosition(t);
+            const dis = vec2.dist(point, pos);
+            minDis = Math.min(minDis, dis);
+        }
+        return minDis;
     }
 
-    split(splitData: SplitData): BezierCurve[] {
+    getDerivative(t: number): vec2 {
+        let a = -3 * (1 - t) ** 2;
+        let b = 3 * (1 - 4 * t + 3 * t ** 2);
+        let c = 3 * (2 * t - 3 * t ** 2);
+        let d = 3 * t ** 2;
+        let x = a * this.SPoint[0] + b * this.CPoint1[0] + c * this.CPoint2[0] + d * this.EPoint[0];
+        let y = a * this.SPoint[1] + b * this.CPoint1[1] + c * this.CPoint2[1] + d * this.EPoint[1];
+        return vec2.fromValues(x, y);
+    }
+
+    getSecondDerivative(t: number): vec2 {
+        let a = 6 * (1 - t);
+        let b = 6 * (3 * t - 2);
+        let c = 6 * (1 - 3 * t);
+        let d = 6 * t;
+        let x = a * this.SPoint[0] + b * this.CPoint1[0] + c * this.CPoint2[0] + d * this.EPoint[0];
+        let y = a * this.SPoint[1] + b * this.CPoint1[1] + c * this.CPoint2[1] + d * this.EPoint[1];
+        return vec2.fromValues(x, y);
+    }
+
+    // getCurvature(t: number): number {
+    //     return super.getCurvature.apply(this, [t]);
+    // }
+
+    // getCusps(): number[] {
+    //     return super.getCusps.apply(this);
+    // }
+
+    applyFn(fn: PointFn) {
+        fn(this.SPoint);
+        fn(this.EPoint);
+        fn(this.CPoint1);
+        fn(this.CPoint2);
+    }
+
+    applyFFDFn(fn: PointFn): void {
+        // todo, consider use solver equations to calculate the control point position
+        const originControlPoint1 = vec2.clone(this.CPoint1);
+        const originControlPoint2 = vec2.clone(this.CPoint2);
+        this.applyFn(fn);
+        // todo 理解为何 1/2 更符合直觉
+        // const k = 1 / 2;
+        // const diff1 = vec2.subtract(vec2.create(), this.controlPoint1, originControlPoint1);
+        // vec2.scaleAndAdd(this.controlPoint1, this.controlPoint1, diff1, k);
+        // const diff2 = vec2.subtract(vec2.create(), this.controlPoint2, originControlPoint2);
+        // vec2.scaleAndAdd(this.controlPoint2, this.controlPoint2, diff2, k);
+    }
+
+    reverse(): void {
+        [this.CPoint1, this.CPoint2] = [this.CPoint2, this.CPoint1];
+        super.reverse();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getLineIntersects(line: LineCurve): vec2[] {
+        const { bbox } = this;
+        if (bbox.x > line.bbox.x + line.bbox.width || bbox.x + bbox.width < line.bbox.x || bbox.y > line.bbox.y + line.bbox.height || bbox.y + bbox.height < line.bbox.y) {
+            return [];
+        }
+        const intersections: vec2[] = [];
+
+        // Calculate the intersection point using line-quadratic bezier intersection formula
+        const [x1, y1] = this.SPoint;
+        const [x2, y2] = this.CPoint1;
+        const [x3, y3] = this.CPoint2;
+        const [x4, y4] = this.EPoint;
+        const [x5, y5] = line.SPoint;
+
+        const ax0 = -x1 + 3 * x2 - 3 * x3 + x4;
+        const ay0 = -y1 + 3 * y2 - 3 * y3 + y4;
+
+        const bx0 = 3 * x1 - 6 * x2 + 3 * x3;
+        const by0 = 3 * y1 - 6 * y2 + 3 * y3;
+
+        const cx0 = -3 * x1 + 3 * x2;
+        const cy0 = -3 * y1 + 3 * y2;
+
+        const dx0 = x1;
+        const dy0 = y1;
+
+        const [lx0, ly0] = vec2.sub(vec2.create(), line.EPoint, line.SPoint);
+
+        const a = lx0 * ay0 - ly0 * ax0;
+        const b = lx0 * by0 - ly0 * bx0;
+        const c = lx0 * cy0 - ly0 * cx0;
+        const d = lx0 * dy0 - ly0 * dx0 - (lx0 * y5 - ly0 * x5);
+
+        const roots = getRoots([a, b, c, d]);
+
+        for (const root of roots) {
+            if (root >= 0 && root <= 1) {
+                const x = ax0 * root ** 3 + bx0 * root ** 2 + cx0 * root + dx0;
+                const y = ay0 * root ** 3 + by0 * root ** 2 + cy0 * root + dy0;
+                intersections.push(vec2.fromValues(x, y));
+            }
+        }
+
+        return intersections;
+    }
+
+    divideAt(t: number): BezierCurve[] {
+        const startPoint = this.SPoint;
+        const endPoint = this.EPoint;
+        const controlPoint1 = this.CPoint1;
+        const controlPoint2 = this.CPoint2;
+        const middlePoint1 = vec2.lerp(vec2.create(), startPoint, controlPoint1, t);
+        const middlePoint2 = vec2.lerp(vec2.create(), controlPoint1, controlPoint2, t);
+        const middlePoint3 = vec2.lerp(vec2.create(), controlPoint2, endPoint, t);
+        const middlePoint4 = vec2.lerp(vec2.create(), middlePoint1, middlePoint2, t);
+        const middlePoint5 = vec2.lerp(vec2.create(), middlePoint2, middlePoint3, t);
+        const middlePoint = this.getPosition(t);
+
+        const leftCurve = new BezierCurve(startPoint, middlePoint1, middlePoint4, middlePoint);
+        const rightCurve = new BezierCurve(vec2.clone(middlePoint), middlePoint5, middlePoint3, endPoint);
+        return [leftCurve, rightCurve];
+    }
+
+    /**曲线砍n刀生成 n+1 段曲线 */
+    divideAtArray(tArr: number[]): BezierCurve[] {
+        return super.divideAtArray.call(this, tArr) as BezierCurve[];
+    }
+
+    splitByCoord(splitData: CoordData): BezierCurve[] {
         const tArr = this.getSplitT(splitData);
         return this.divideAtArray(tArr);
     }
 
     toPathString(digits = 0): string {
-        return `C ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(digits)} ${this.controlPoint2[0].toFixed(digits)} ${this.controlPoint2[1].toFixed(
+        return `C ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(
             digits
-        )} ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
+        )} ${this.EPoint[0].toFixed(digits)} ${this.EPoint[1].toFixed(digits)}`;
     }
 
     toDebugPathString(digits?: number | undefined): string {
-        return `M ${this.startPoint[0].toFixed(digits)} ${this.startPoint[1].toFixed(digits)} L ${this.controlPoint1[0].toFixed(digits)} ${this.controlPoint1[1].toFixed(
+        return ` L ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(
             digits
-        )} L ${this.controlPoint2[0].toFixed(digits)} ${this.controlPoint2[1].toFixed(digits)} L ${this.endPoint[0].toFixed(digits)} ${this.endPoint[1].toFixed(digits)}`;
+        )} L ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} L ${this.EPoint[0].toFixed(digits)} ${this.EPoint[1].toFixed(digits)}`;
+    }
+
+    clone(): BezierCurve {
+        return new BezierCurve(
+            vec2.clone(this.SPoint),
+            vec2.clone(this.CPoint1),
+            vec2.clone(this.CPoint2),
+            vec2.clone(this.EPoint)
+        );
     }
 }
 
-// 源码内的测试套件
-// if (import.meta.vitest) {
-//     const { it, expect } = import.meta.vitest;
-//     const TestDataArr = [
-//         [74.87, 127.58, -74.96, 39.46, 39.85, -38.02, 78.87, 20.89],
-//         [0, 0, 0, 2, 2, 2, 2, 0],
-//     ];
+/**
+ * ### Gets a bezier curve from a curve.
+ * 因为循环依赖问题，不能在 line Quadratic 中使用 Bezier 中导入 BezierCurve, 不能利用
+ * curve.toBezier + 多态实现，故将此方法提取到此处
+ * @param curve 
+ * @returns 
+ */
+export function getBezierFromCurve(curve: Curve): BezierCurve {
+    if (curve instanceof BezierCurve) {
+        return curve;
+    } else if (curve instanceof LineCurve) {
+        return lineToBezier(curve);
+    } else if (curve instanceof QuadraticCurve) {
+        return quadraticToBezier(curve);
+    } else {
+        throw new Error("Unsupported curve type.");
+    }
+}
 
-//     const AnsDataArr = [{}, { x: 0, y: 0, width: 2, height: 4 / 3 }];
-//     it("bbox", () => {
-//         for (const testData of TestDataArr) {
-//             const startPoint = vec2.fromValues(testData[0], testData[1]);
-//             const controlPoint1 = vec2.fromValues(testData[2], testData[3]);
-//             const controlPoint2 = vec2.fromValues(testData[4], testData[5]);
-//             const endPoint = vec2.fromValues(testData[6], testData[7]);
-//             const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-//             expect(bezierCurve.bbox).toEqual({ x: 0, y: 0, width: 2, height: 2 });
-//         }
-//     });
-// }
+export function lineToBezier(lineCurve: LineCurve): BezierCurve {
+    const { SPoint, EPoint } = lineCurve;
+    const controlPoint1 = vec2.lerp(vec2.create(), SPoint, EPoint, 1 / 3);
+    const controlPoint2 = vec2.lerp(vec2.create(), SPoint, EPoint, 2 / 3);
+    return new BezierCurve(SPoint, controlPoint1, controlPoint2, EPoint);
+}
+
+export function quadraticToBezier(quadraticCurve: QuadraticCurve): BezierCurve {
+    const { SPoint, CPoint1: Q1, EPoint } = quadraticCurve;
+    const controlPoint1 = vec2.lerp(vec2.create(), SPoint, Q1, 2 / 3);
+    const controlPoint2 = vec2.lerp(vec2.create(), EPoint, Q1, 2 / 3);
+    return new BezierCurve(SPoint, controlPoint1, controlPoint2, EPoint);
+}
+
+// 源码内的测试套件
+if (import.meta.vitest) {
+    const { it, expect } = import.meta.vitest;
+
+    const TestDataArr = [
+        // {
+        //     input: [100, 0, 200, 0, 300, 0, 400, 0],
+        //     bbox: { x: 100, y: 0, width: 300, height: 0 },
+        //     cusps: [],
+        // },
+        // {
+        //     input: [0, 0, 100, 100, 0, 100, 100, 0],
+        //     bbox: { x: 0, y: 0, width: 100, height: 75 },
+        //     cusps: [0.5],
+        // },
+        {
+            input: [385, 165, 645, 165, 645, 70, 750, 165],
+            bbox: {
+                "height": 42.22222137451172,
+                "width": 365,
+                "x": 385,
+                "y": 122.77777862548828,
+            },
+            cusps: [0.73],
+        },
+        // {
+        //     input: [74.87, 127.58, -74.96, 39.46, 39.85, -38.02, 78.87, 20.89],
+        //     bbox: {
+        //         "height": 127.27870574593544,
+        //         "width": 78.86941333918367,
+        //         "x": 0.000589407398365438,
+        //         "y": 0.30129608511924744,
+        //     },
+        //     cusps: [0.47, 0.7, 0.85],
+        // }
+    ];
+
+
+    it("bbox", () => {
+        for (const testData of TestDataArr) {
+            const { input, bbox } = testData;
+            const startPoint = vec2.fromValues(input[0], input[1]);
+            const controlPoint1 = vec2.fromValues(input[2], input[3]);
+            const controlPoint2 = vec2.fromValues(input[4], input[5]);
+            const endPoint = vec2.fromValues(input[6], input[7]);
+            const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
+            expect(bezierCurve.bbox).toEqual(bbox);
+        }
+    });
+
+    it("cusps", () => {
+        for (const testData of TestDataArr) {
+            const { input, cusps } = testData;
+            const startPoint = vec2.fromValues(input[0], input[1]);
+            const controlPoint1 = vec2.fromValues(input[2], input[3]);
+            const controlPoint2 = vec2.fromValues(input[4], input[5]);
+            const endPoint = vec2.fromValues(input[6], input[7]);
+            const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
+            expect(bezierCurve.getCusps()).toEqual(cusps);
+        }
+    });
+}

@@ -1,9 +1,10 @@
 import { vec2 } from "gl-matrix";
-import { Curve } from "./curve/curve";
-import { getRandomGenerate } from "./math/math";
-import { QuadraticCurve } from "./curve";
-import { getBSpline } from "./curve";
-import { BBox } from "./base/BBox";
+import { Curve } from "../curve/curve";
+import { getRandomGenerate } from "../math";
+import { BBox } from "../base/bbox";
+import { getPathStr } from "./svg";
+import { getBSpline } from "../shape/bSpline";
+import { QuadraticCurve } from "../curve";
 
 /**
  * get the vertexes of a polygon
@@ -30,18 +31,47 @@ export function getPolygon(width: number, height: number, n: number, ramada = 0,
         return vec2.fromValues(x, y);
     };
 
-    // const angleArr = new Array<number>(n);
-    // for (let i = 0; i < n; i++) {
-    //     angleArr[i] = randomGenerate();
-    // }
-    // angleArr.sort((a, b) => a - b);
-
     for (let i = 0; i < n; i++) {
         let point = baseCal(2 * Math.PI * (i / n + angle));
         polygon.push(point);
     }
 
     return polygon;
+}
+
+export function getBezierCurvesBBox(curves: Curve[]): BBox {
+    let xMin = Infinity,
+        yMin = Infinity,
+        xMax = -Infinity,
+        yMax = -Infinity;
+
+    for (const curve of curves) {
+        const { bbox } = curve;
+
+        xMin = Math.min(xMin, bbox.x);
+        yMin = Math.min(yMin, bbox.y);
+        xMax = Math.max(xMax, bbox.x + bbox.width);
+        yMax = Math.max(yMax, bbox.y + bbox.height);
+    }
+    return {
+        x: xMin,
+        y: yMin,
+        width: xMax - xMin,
+        height: yMax - yMin,
+    };
+}
+
+export function resizeCurvesByBBox(curves: Curve[], targetBBox: BBox): void {
+    const bbox = getBezierCurvesBBox(curves);
+
+    const scaleX = targetBBox.width / bbox.width;
+    const scaleY = targetBBox.height / bbox.height;
+    for (const curve of curves) {
+        curve.applyFn((point) => {
+            point[0] = (point[0] - bbox.x) * scaleX + targetBBox.x;
+            point[1] = (point[1] - bbox.y) * scaleY + targetBBox.y;
+        });
+    }
 }
 
 let timeSum = 0;
@@ -80,37 +110,19 @@ export function getCurvesByPolygon(polygon: vec2[], degree = 3): Curve[] {
     return curves;
 }
 
-export function getBezierCurvesBBox(curves: Curve[]): BBox {
-    let xMin = Infinity,
-        yMin = Infinity,
-        xMax = -Infinity,
-        yMax = -Infinity;
+/**
+ *
+ * @param width 目标图像的宽度
+ * @param height
+ * @param polygonNum
+ * @param ramada
+ * @param randomSeed
+ */
+export function getRandomPathStr(width = 100, height = 100, polygonNum = 6, ramada = 0.5, randomSeed = Math.random(), degree = 3) {
+    const polygon = getPolygon(width, height, polygonNum, ramada, randomSeed);
+    const curves = getCurvesByPolygon(polygon, degree);
+    resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
 
-    for (const curve of curves) {
-        const bbox = curve.getBBox();
-
-        xMin = Math.min(xMin, bbox.x);
-        yMin = Math.min(yMin, bbox.y);
-        xMax = Math.max(xMax, bbox.x + bbox.width);
-        yMax = Math.max(yMax, bbox.y + bbox.height);
-    }
-    return {
-        x: xMin,
-        y: yMin,
-        width: xMax - xMin,
-        height: yMax - yMin,
-    };
-}
-
-export function resizeCurvesByBBox(curves: Curve[], targetBBox: BBox): void {
-    const bbox = getBezierCurvesBBox(curves);
-
-    const scaleX = targetBBox.width / bbox.width;
-    const scaleY = targetBBox.height / bbox.height;
-    for (const curve of curves) {
-        curve.applyFn((point) => {
-            point[0] = (point[0] - bbox.x) * scaleX + targetBBox.x;
-            point[1] = (point[1] - bbox.y) * scaleY + targetBBox.y;
-        });
-    }
+    const pathStr = getPathStr(curves);
+    return pathStr;
 }

@@ -5,14 +5,14 @@ export interface BBox {
     height: number;
 }
 
-export interface Bounds {
+export interface BBox2 {
     xMin: number;
     xMax: number;
     yMin: number;
     yMax: number;
 }
 
-export function createBounds(): Bounds {
+export function createBBox2(): BBox2 {
     return {
         xMin: Infinity,
         xMax: -Infinity,

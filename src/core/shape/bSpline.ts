@@ -1,5 +1,7 @@
 import { vec2 } from "gl-matrix";
 
+// todo: b-spline 和其他曲线几乎毫无关系，建议挪动位置
+
 // copy from https://github.com/thibauts/b-spline/blob/master/index.js
 export function interpolate(t: number, degree: number, points: number[][], knots?: number[], weights?: number[]) {
     const pointNum = points.length + degree; // points count
