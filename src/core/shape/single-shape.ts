@@ -112,3 +112,190 @@ export class SingleShape extends Shape {
 
 // todo: 重构
 export type PathCommand = { type: 'Z'; args?: number[] } | { type: string; args?: number[] } | { type: string; args?: number[], x: number, y: number, x1?: number, y1?: number, x2?: number, y2?: number };
+
+if (import.meta.vitest) {
+    const { it, expect, test } = import.meta.vitest
+    test('Shape', () => {
+
+        const commands: PathCommand[] = [
+            {
+                "type": "M",
+                "x": 0,
+                "y": 0
+            },
+            {
+                "type": "L",
+                "x": 0,
+                "y": 100
+            },
+            {
+                "type": "L",
+                "x": 100,
+                "y": 100
+            },
+
+            {
+                "type": "Z" as const
+            }
+        ];
+        const shape = SingleShape.fromCommands(commands);
+        const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
+        const result = shape.getLineIntersects(line);
+
+        expect(result).toEqual([vec2.fromValues(0, 50), vec2.fromValues(50, 50)]);
+    })
+
+    test('Shape', () => {
+        const commands: PathCommand[] = [
+            {
+                "type": "M",
+                "x": 0,
+                "y": 0
+            },
+            {
+                "type": "Q",
+                "x": 100,
+                "y": 100,
+                "x1": 0,
+                "y1": 100
+            },
+            {
+                "type": "Q",
+                "x": 0,
+                "y": 0,
+                "x1": 100,
+                "y1": 0
+            },
+
+        ];
+        const shape = SingleShape.fromCommands(commands);
+        const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
+        const result = shape.getLineIntersects(line);
+
+        expect(result[0][0]).toBeCloseTo(25.94);
+        expect(result[0][1]).toBeCloseTo(50);
+        expect(result[1][0]).toBeCloseTo(74.06);
+        expect(result[1][1]).toBeCloseTo(50);
+    })
+    test('Shape', () => {
+        const commands: PathCommand[] = [
+            {
+                "type": "M",
+                "x": 1146,
+                "y": 0
+            },
+            {
+                "type": "L",
+                "x": 689,
+                "y": 0
+            },
+            {
+                "type": "L",
+                "x": 689,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 771,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 746,
+                "y": 417
+            },
+            {
+                "type": "L",
+                "x": 468,
+                "y": 417
+            },
+            {
+                "type": "L",
+                "x": 443,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 527,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 527,
+                "y": 0
+            },
+            {
+                "type": "L",
+                "x": 70,
+                "y": 0
+            },
+            {
+                "type": "L",
+                "x": 70,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 147,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 403,
+                "y": 1571
+            },
+            {
+                "type": "L",
+                "x": 811,
+                "y": 1571
+            },
+            {
+                "type": "L",
+                "x": 1067,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 1146,
+                "y": 290
+            },
+            {
+                "type": "L",
+                "x": 1146,
+                "y": 0
+            },
+            {
+                "type": "Z"
+            },
+            {
+                "type": "M",
+                "x": 607,
+                "y": 1110
+            },
+            {
+                "type": "L",
+                "x": 527,
+                "y": 707
+            },
+            {
+                "type": "L",
+                "x": 688,
+                "y": 707
+            },
+            {
+                "type": "L",
+                "x": 607,
+                "y": 1110
+            },
+            {
+                "type": "Z" as const
+            }
+        ];
+        const shape = SingleShape.fromCommands(commands);
+        const line = new LineCurve(vec2.fromValues(0, 1), vec2.fromValues(3, 1));
+        const result = shape.getLineIntersects(line);
+
+        expect(result).toEqual([vec2.fromValues(1, 1), vec2.fromValues(2, 1)]);
+    })
+
+}

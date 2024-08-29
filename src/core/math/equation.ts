@@ -1,38 +1,49 @@
 const TOL = 1e-12;
 
-export function getRoots(derivation: number[]) {
-    switch (derivation.length) {
+/**
+ * ### solve the equation
+ * @param coefficients An array of polynomial coefficients, 
+ *  from highest order coefficients to constant terms
+ * @returns An array of all solutions
+ */
+export function getRoots(coefficients: number[]): number[] {
+    switch (coefficients.length) {
         case 0:
             return [];
         case 1:
             return [0];
         case 2:
-            if (Math.abs(derivation[0]) < TOL) {
+            if (Math.abs(coefficients[0]) < TOL) {
                 return [];
             } else {
-                return [-derivation[1] / derivation[0]];
+                return [-coefficients[1] / coefficients[0]];
             }
         case 3:
-            if (Math.abs(derivation[0]) < TOL) {
-                return getRoots(derivation.slice(1));
+            if (Math.abs(coefficients[0]) < TOL) {
+                return getRoots(coefficients.slice(1));
             } else {
-                return getQuadraticRoots(derivation);
+                return getQuadraticRoots(coefficients);
             }
         case 4:
-            if (Math.abs(derivation[0]) < TOL) {
-                return getRoots(derivation.slice(1));
+            if (Math.abs(coefficients[0]) < TOL) {
+                return getRoots(coefficients.slice(1));
             } else {
-                return getCubicRoots(derivation);
+                return getCubicRoots(coefficients);
             }
         default:
             throw new Error("Not implemented");
     }
 }
 
-function getQuadraticRoots(derivation: number[]) {
-    const a = derivation[0];
-    const b = derivation[1];
-    const c = derivation[2];
+/**
+ * ### solve the quadratic equation
+ * @param coefficients 
+ * @returns 
+ */
+function getQuadraticRoots(coefficients: number[]) {
+    const a = coefficients[0];
+    const b = coefficients[1];
+    const c = coefficients[2];
     const delta = b * b - 4 * a * c;
     if (delta < 0) {
         return [];
@@ -42,11 +53,16 @@ function getQuadraticRoots(derivation: number[]) {
     }
 }
 
-function getCubicRoots(derivation: number[]) {
-    const a = derivation[0];
-    const b = derivation[1];
-    const c = derivation[2];
-    const d = derivation[3];
+/**
+ * ### solve the cubic equation
+ * @param coefficients 
+ * @returns 
+ */
+function getCubicRoots(coefficients: number[]) {
+    const a = coefficients[0];
+    const b = coefficients[1];
+    const c = coefficients[2];
+    const d = coefficients[3];
     const A = b / a;
     const B = c / a;
     const C = d / a;
@@ -69,8 +85,14 @@ function getCubicRoots(derivation: number[]) {
     }
 }
 
-// 交换两行
-function swapRows(matrix: number[][], i: number, j: number) {
+/**
+ * ### swap two rows of a matrix
+ * @param matrix  The matrix
+ * @param i     The index of the first row
+ * @param j     The index of the second row
+ * @returns     void
+ */
+function swapRows(matrix: number[][], i: number, j: number): void {
     [matrix[i], matrix[j]] = [matrix[j], matrix[i]];
 }
 

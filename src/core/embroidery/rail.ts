@@ -1,8 +1,8 @@
 import { LineCurve } from "../curve";
-import { calDisData, DisData, Polyline } from "../shape/polyline";
-import { Shape, SingleShape } from "../shape";
+import { calDisData, calPointsArea, DisData, getDistMark, Polyline, Shape, SingleShape } from "../shape";
 import { Stitch } from "./stitch";
 import { createMatrix } from "../math";
+import { vec2 } from "gl-matrix";
 
 
 const isDebug = true || window.location.href.includes('debug');
@@ -23,21 +23,24 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
     for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
             // 计算导轨之间的匹配度
+            // if (i === 2 && j === 10) {
+            //     debugger
+            // }
             const [disArr0, disArr1] = calDisData(polylineArr[i], polylineArr[j]);
             disDataMatrix[i][j] = disArr0;
             disDataMatrix[j][i] = disArr1;
         }
     }
-    console.log("disLimit:", disLimit);
+    // console.log("disLimit:", disLimit);
     // console.log("disDataMatrix:", disDataMatrix);
 
-    const minStdIndexArr = new Array<number>(n);
+    const maxScoreIndexArr = new Array<number>(n);
     // console.log("disDataMatrix:", disDataMatrix);
     for (let i = 0; i < n; i++) {
         // 寻找标准差最小的导轨
         const l0 = polylineArr[i]
-        let minStd = Infinity;
-        let minIndex = -1;
+        let maxScore = -Infinity;
+        let maxIndex = -1;
         for (let j = 0; j < n; j++) {
             if (i === j) {
                 continue;
@@ -45,27 +48,34 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
             const { std, min, mean, max } = disDataMatrix[i][j];
             // console.log(i, j, std.toFixed(5), "min:", min.toFixed(0), "mean:", mean.toFixed(0), "max", max.toFixed(0));
             // debugger
+            // 检查闭合图形是否是逆时针
 
-            if (std / size < minStd && mean < disLimit) {
-                minStd = std / size;
-                minIndex = j;
+            const score = std > 1E10 ? 0 : (0.9 - std / size) * getDistMark(mean, disLimit);
+            // if (i == 0) {
+            //     console.log(i, j, score, (0.9 - std / size), getDistMark(mean, disLimit));
+            // }
+            if (score > maxScore) {
+                maxScore = score;
+                maxIndex = j;
             }
         }
-        minStdIndexArr[i] = minIndex;
+        maxScoreIndexArr[i] = maxIndex;
         // console.log(i, "minIndex:", minIndex, minStd);
     }
 
-    console.log(minStdIndexArr);
+    // maxScoreIndexArr.forEach((index, i) => {
+    //     console.log(i, "---->", index);
+    // })
 
     const successIndex = new Set<number>();
-    for (let i = 0; i < minStdIndexArr.length; i++) {
+    for (let i = 0; i < maxScoreIndexArr.length; i++) {
         if (successIndex.has(i)) {
             continue;
         }
-        if (minStdIndexArr[minStdIndexArr[i]] === i) {
+        if (maxScoreIndexArr[maxScoreIndexArr[i]] === i) {
             // console.log("配对成功", i, minStdIndexArr[i]);
             successIndex.add(i);
-            successIndex.add(minStdIndexArr[i]);
+            successIndex.add(maxScoreIndexArr[i]);
         }
     }
 
@@ -75,13 +85,13 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
 
 
     // 打印配对不成功的导轨
-    for (let i = 0; i < minStdIndexArr.length; i++) {
+    for (let i = 0; i < maxScoreIndexArr.length; i++) {
         if (!successIndex.has(i)) {
             console.log("配对不成功", i);
         }
     }
     console.timeEnd("getRailCouples")
-    return { successIndex, minStdIndexArr };
+    return { successIndex, minStdIndexArr: maxScoreIndexArr };
 }
 
 
@@ -132,6 +142,9 @@ export class Rail {
         // console.log(basicRail, otherRail);
 
         const count = Math.floor(basicL / w);
+        // console.log('count', count, basicL, w);
+        // todo 增加 stitch 最小 length 的限制, 小于次长度的不添加 rung
+
         const rungs: LineCurve[] = new Array(count);
         for (let i = 0; i < count; i += 1) {
             const per = i / count
@@ -151,8 +164,8 @@ export class Rail {
      */
     checkDirection() {
         const { rail0, rail1 } = this;
-        const isClockwise0 = getShapeDirection(rail0);
-        const isClockwise1 = getShapeDirection(rail1);
+        const isClockwise0 = getPointsClockwise(rail0.points);
+        const isClockwise1 = getPointsClockwise(rail1.points);
         // console.log(isClockwise0, isClockwise1);
 
         if (true || isClockwise0 !== isClockwise1) {
@@ -167,14 +180,7 @@ export class Rail {
  * @param shape 
  * @returns true if the shape is clockwise
  */
-function getShapeDirection(shape: Shape) {
-    const { points } = shape;
-    const len = points.length;
-    let sum = 0;
-    for (let i = 0; i < len; i++) {
-        const p0 = points[i];
-        const p1 = points[(i + 1) % len];
-        sum += (p1[0] - p0[0]) * (p1[1] + p0[1]);
-    }
-    return sum > 0;
+export function getPointsClockwise(points: vec2[]) {
+    const area = calPointsArea(points);
+    return area > 0;
 }

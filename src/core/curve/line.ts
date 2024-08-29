@@ -161,7 +161,6 @@ export class LineCurve extends Curve {
     /**
      * Applies a function to the start and end points of the line curve.
      * @param fn The function to apply.
-     * @deprecated Use `applyFn` instead.
      */
     applyFFDFn(fn: PointFn): void {
         this.applyFn(fn);
@@ -220,6 +219,36 @@ export class LineCurve extends Curve {
     clone(): LineCurve {
         return new LineCurve(vec2.clone(this.SPoint), vec2.clone(this.EPoint));
     }
+}
+
+/**
+ * ### Check if two line curves intersect
+ * 倘若相交，则通过线段 line1 的两点必定在线段 line2 的两侧, 反之亦然
+ * @param line1 
+ * @param line2 
+ * @returns 
+ */
+export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boolean {
+    const [x1, y1] = line1.SPoint
+    const [x2, y2] = line1.EPoint;
+    const [x3, y3] = line2.SPoint;
+    const [x4, y4] = line2.EPoint;
+
+    // line1 的两点必定在线段 line2 的两侧
+    const cross0 = (x1 - x3) * (y4 - y3) - (y1 - y3) * (x4 - x3);
+    const cross1 = (x2 - x3) * (y4 - y3) - (y2 - y3) * (x4 - x3);
+    if (cross0 * cross1 > 0) {
+        return false;
+    }
+
+    // line2 的两点必定在线段 line1 的两侧
+    const cross2 = (x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1);
+    const cross3 = (x4 - x1) * (y2 - y1) - (y4 - y1) * (x2 - x1);
+    if (cross2 * cross3 > 0) {
+        return false;
+    }
+
+    return true;
 }
 
 

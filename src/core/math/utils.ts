@@ -58,6 +58,10 @@ export function getDigit(num: number, scale = 4): number {
  */
 
 export function mergeCouple<T>(couples: T[][]): T[][] {
+    // when couples is empty or only one couple, return couples
+    if (couples.length <= 1) {
+        return couples;
+    }
     const toRightMap = new Map<T, T>();
     const toLeftMap = new Map<T, T>();
     for (const couple of couples) {
@@ -110,6 +114,12 @@ if (import.meta.vitest) {
     const { it, expect } = import.meta.vitest;
     it('mergeCouple', () => {
         let couples: Array<[number, number]>;
+        couples = [[2, 4]];
+        expect(mergeCouple(couples)).toEqual([[2, 4]]);
+
+        couples = [[2, 4], [1, 3]];
+        expect(mergeCouple(couples)).toEqual([[2, 4], [1, 3]]);
+
         couples = [[1, 2], [2, 3], [3, 4], [5, 6]];
         expect(mergeCouple(couples)).toEqual([[1, 2, 3, 4], [5, 6]]);
 

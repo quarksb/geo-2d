@@ -20,14 +20,33 @@ export class Polygon {
         }
     }
 
+    /**
+     * ### get the area of the polygon
+     * @returns the area of the polygon
+     */
     getArea() {
-        let area = 0;
+        return Math.abs(this.getSignArea());
+    }
+
+    /**
+     * ### get the signed area of the polygon
+     * @returns signed area
+     */
+    getSignArea() {
+        return calPointsArea(this.points);
+    }
+
+    getCentroid() {
+        let area = this.getSignArea();
+        let cx = 0;
+        let cy = 0;
         for (let i = 0; i < this.points.length; i++) {
             let [xi, yi] = this.points[i];
             let [xj, yj] = this.points[(i + 1) % this.points.length];
-            area += xi * yj - xj * yi;
+            cx += (xi + xj) * (xi * yj - xj * yi);
+            cy += (yi + yj) * (xi * yj - xj * yi);
         }
-        return Math.abs(area) / 2;
+        return [cx / 6 / area, cy / 6 / area];
     }
 
     /**
@@ -38,16 +57,7 @@ export class Polygon {
     includePoint(point: vec2): boolean {
         // bbox check
         if (point[0] < this.bbox.xMin || point[0] > this.bbox.xMax || point[1] < this.bbox.yMin || point[1] > this.bbox.yMax) return false;
-
-        let [x, y] = point;
-        let inside = false;
-        for (let i = 0, j = this.points.length - 1; i < this.points.length; j = i++) {
-            let [xi, yi] = this.points[i];
-            let [xj, yj] = this.points[j];
-            let intersect = ((yi > y) != (yj > y)) && (x - xi < (xj - xi) * (y - yi) / (yj - yi));
-            if (intersect) inside = !inside;
-        }
-        return inside;
+        return isPointInPoints(point, this.points);
     }
 
     /**
@@ -78,16 +88,78 @@ export class Polygon {
 
 }
 
-
-function getSignArea(points: vec2[]) {
+export function calPointsArea(points: vec2[]): number {
     let area = 0;
-    const n = points.length;
-
+    const { length: n } = points;
     for (let i = 0; i < n; i++) {
-        const current = points[i];
-        const next = points[(i + 1) % n];
-        area += current[0] * next[1] - next[0] * current[1];
+        let [xi, yi] = points[i];
+        let [xj, yj] = points[(i + 1) % n];
+        area += xi * yj - xj * yi;
     }
-
     return area / 2;
+}
+
+/**
+ * ### judge if the point is in the left of the line
+ * @param point 
+ * @param line 
+ * @returns 
+ */
+export function isInLeft(point: vec2, line: vec2[]): boolean {
+    let [x, y] = point;
+    let [[x1, y1], [x2, y2]] = line;
+    return (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1) > 0;
+}
+
+export function isPointInPoints(point: vec2, points: vec2[]): boolean {
+    let [x, y] = point;
+    let inside = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+        let [xi, yi] = points[i];
+        let [xj, yj] = points[j];
+        let intersect = ((yi > y) != (yj > y)) && (x - xi < (xj - xi) * (y - yi) / (yj - yi));
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+
+
+if (import.meta.vitest) {
+    const { it, expect } = import.meta.vitest;
+    let points: vec2[];
+    let polygon: Polygon;
+    points = [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+    ].map(([x, y]) => vec2.fromValues(x, y));
+    polygon = new Polygon(points);
+
+    // it("includePoint-0", () => {
+    //     expect(polygon.includePoint([0.5, 0.5])).toBe(true);
+    //     expect(polygon.includePoint([1.5, 0.5])).toBe(false);
+    //     expect(polygon.getArea()).toBe(1);
+    // })
+
+    // it("calPointsArea-0", () => {
+    //     expect(calPointsArea(points)).toBe(1);
+    // })
+
+    points = [
+        [0, 0],
+        [0, 1],
+        [1, 1],
+        [1, 0],
+    ].map(([x, y]) => vec2.fromValues(x, y));
+    polygon = new Polygon(points);
+
+    // it("includePoint-1", () => {
+    //     expect(polygon.includePoint([0.5, 0.5])).toBe(true);
+    //     expect(polygon.includePoint([1.5, 0.5])).toBe(false);
+    // })
+
+    it("calPointsArea-1", () => {
+        expect(calPointsArea(points)).toBe(-1);
+    })
 }

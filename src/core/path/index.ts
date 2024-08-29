@@ -12,9 +12,9 @@ declare type WindingRule = "NONZERO" | "EVENODD";
  * a collection of shapes
  */
 export class Path {
-    constructor (public shapes: Shape[], public windingRule: WindingRule | "NONE" = "NONZERO") {
+    constructor (public shapes: ClosedShape[], public windingRule: WindingRule | "NONE" = "NONZERO") {
     }
-    static fromCommands(commands: PathCommand[], windingRule: WindingRule | "NONE" = "NONZERO"): Path {
+    static fromCommands(commands: PathCommand[]): Path {
         // 先遍历一遍 commands, 拆分 commands，每个 M 命令之间的命令为一个 shape
         const commandsArr: PathCommand[][] = [];
         let currentCommands: PathCommand[] = [];
@@ -37,13 +37,13 @@ export class Path {
             return shape;
         });
 
-        return new Path(shapes, windingRule);
+        return new Path(shapes);
 
     }
 
-    static fromPathString(pathStr: string, windingRule: WindingRule | "NONE" = "NONZERO") {
+    static fromPathString(pathStr: string) {
         const commands = pathStringToPathCommands(pathStr);
-        return Path.fromCommands(commands, windingRule);
+        return Path.fromCommands(commands);
     }
 
     getBBox2(bounds = createBBox2()): BBox2 {
@@ -53,7 +53,28 @@ export class Path {
         return bounds;
     }
 
+    includePoint(point: vec2) {
+        let isInclude = true;
+        for (const shape of this.shapes) {
+            const { isClockwise } = shape;
+            const isShapeInclude = shape.includePoint(point);
+            isInclude &&= !isClockwise ? isShapeInclude : !isShapeInclude;
+            if (!isInclude) {
+                return false;
+            }
+        }
+        return isInclude;
+    }
+
     applyFn(fn: PointFn) {
+        for (const shape of this.shapes) {
+            for (const curve of shape.curves) {
+                curve.applyFn(fn);
+            }
+        }
+    }
+
+    applyFFDFn(fn: PointFn) {
         for (const shape of this.shapes) {
             for (const curve of shape.curves) {
                 curve.applyFFDFn(fn);
@@ -67,6 +88,42 @@ export class Path {
             points = points.concat(shape.getLineIntersects(line));
         }
         return points;
+    }
+
+    /**
+     * ### split path
+     * - if a path is consists by multiple closed shapes, then split the path into multiple paths
+     */
+    split(): Path[] {
+        const { shapes } = this;
+        const shapeArr: ClosedShape[][] = [];
+        for (let index = 0; index < shapes.length; index++) {
+            const shape = shapes[index];
+            const { bounds, isClockwise } = shape;
+            // console.log('bounds', bounds, 'isClockwise', isClockwise);
+            if (!isClockwise) {
+                // 如果是逆时针，则代表一个新的 path
+                shapeArr.push([shape]);
+            } else {
+                // 如果是顺时针，说明是内部结构，需要添加进已有的 path 中
+
+                // 通过 bounds 查找对应的 path
+                const lastShapes = shapeArr.find((shapes) => {
+                    const lastBounds = shapes[0].bounds;
+                    return lastBounds.xMin <= bounds.xMin && lastBounds.xMax >= bounds.xMax && lastBounds.yMin <= bounds.yMin && lastBounds.yMax >= bounds.yMax;
+                });
+
+                if (lastShapes) {
+                    lastShapes.push(shape);
+                } else {
+                    console.error("can't find the path for the shape", shape);
+                }
+            }
+        }
+        const paths = shapeArr.map((shapes) => {
+            return new Path(shapes);
+        });
+        return paths;
     }
 
     splitByCoord(splitData: CoordData) {
@@ -119,4 +176,11 @@ if (import.meta.vitest) {
             yMax: 200,
         });
     });
+
+    test("Path-includePoint", () => {
+        const pathStr = "M 0 0 L 100 0 L 0 100 Z M 20 20 L 20 80 L 80 20 Z";
+        const path = Path.fromPathString(pathStr);
+        expect(path.includePoint(vec2.fromValues(10, 50))).toBeTruthy();
+        expect(path.includePoint(vec2.fromValues(40, 50))).toBeFalsy();
+    })
 }

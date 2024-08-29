@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
-import { LineCurve } from "../curve";
+import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
 import { calRadius, linearRegression } from "../math";
+import { getPointsClockwise } from "../embroidery";
 
 export class Polyline extends SingleShape {
     public curves: LineCurve[];
@@ -191,6 +192,32 @@ export function calDisData(polyline0: Polyline, polyline1: Polyline): DisData[] 
     const { points: ps1 } = polyline1;
     const { length: l0 } = ps0;
     const { length: l1 } = ps1;
+
+    const defaultDisData: DisData = {
+        datas: [],
+        min: Infinity,
+        max: Infinity,
+        mean: Infinity,
+        std: Infinity,
+    };
+
+    // 首尾相交性检测
+    const LineCurve0 = new LineCurve(polyline0.EPoint, polyline1.SPoint);;
+    const LineCurve1 = new LineCurve(polyline1.EPoint, polyline0.SPoint);
+    const isIntersect = checkLineCurveIntersect(LineCurve0, LineCurve1);
+
+    // 导轨两连接线交叉，不合理，直接跳过后续计算
+    if (isIntersect) {
+        return [defaultDisData, defaultDisData];
+    }
+
+    const newPoints = [...ps0, ...ps1];
+    const isClockwise = getPointsClockwise(newPoints);
+    // 正确的多边形应该是顺时针的（逆时针表示有效区为外部）
+    if (!isClockwise) {
+        return [defaultDisData, defaultDisData];
+    }
+
     const datas0 = new Array(l0).fill({ dis: Infinity, index: -1 });
     const datas1 = new Array(l1).fill({ dis: Infinity, index: -1 });
 
@@ -238,18 +265,38 @@ export function calExtendCurve(polyline: Polyline) {
     return { k, b, R2 };
 }
 
+/**
+ * ### get the distance mark
+ * 函数 y = f(x)，满足以下条件：
+ * 
+ * - 当 x < 0 时，y = 0。
+ * - 当 0 ≤ x ≤ k 时，y 从 0 逐渐增大到 1。
+ * - 当 x > k 时，y 从 1 逐渐减小到 0。
+ * 
+ * @param x 
+ * @param k 
+ * @returns 
+ */
+export function getDistMark(x: number, k: number) {
+    return Math.exp(-(x - 1) / k);
+}
 
-export function getConnectMark(polyline0: Polyline, polyline1: Polyline, disLimit = 300, angleLimit = 30) {
+
+export function getConnectMark(polyline0: Polyline, polyline1: Polyline, angleLimit = 30) {
+    // 闭合检查, 如果闭合，则不连接
+    if (polyline0.isClosed || polyline1.isClosed) return 0;
     const { EPoint: EPoint0, outDir: outDir0 } = polyline0;
     const { SPoint: SPoint1, inDir: inDir1 } = polyline1;
 
     const off = vec2.sub(vec2.create(), SPoint1, EPoint0);
     const dis = vec2.len(off);
+    /**距离分数以 泊松分布为基础 */
+    const disMark = getDistMark(dis, 100);
     const angle0 = vec2.angle(off, outDir0) * 180 / Math.PI;
     const angle1 = vec2.angle(off, inDir1) * 180 / Math.PI;
 
-    const getMark = (val: number, limit: number) => Math.max(1 - val / limit, 0);
-    return getMark(dis, disLimit) * getMark(angle0, angleLimit) * getMark(angle1, angleLimit);
+    const getAngleMark = (val: number, limit: number) => Math.max(1 - val / limit, 0);
+    return disMark * getAngleMark(angle0, angleLimit) * getAngleMark(angle1, angleLimit);
 }
 
 export function connectPolyline(polyline0: Polyline, polyline1: Polyline) {

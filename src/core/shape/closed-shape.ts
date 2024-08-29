@@ -1,6 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "../curve";
 import { PathCommand, SingleShape } from "./single-shape";
+import { isPointInPoints } from "./polygon";
 
 
 export class PointNode {
@@ -28,6 +29,16 @@ export class ClosedShape extends SingleShape {
         }
         this.curves = curves;
         this.initPoints();
+    }
+
+    includePoint(point: vec2) {
+        // 1. 先判断 point 是否在 bbox 内部
+        const { xMin, xMax, yMin, yMax } = this.bounds;
+        if (point[0] < xMin || point[0] > xMax || point[1] < yMin || point[1] > yMax) {
+            return false;
+        }
+
+        return isPointInPoints(point, this.points);
     }
 
     /**
