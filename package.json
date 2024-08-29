@@ -34,14 +34,13 @@
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
+    "@vitejs/plugin-vue": "^5.1.2",
     "less": "^4.2.0",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vite-plugin-dts": "^3.6.3",
-    "vitest": "^0.34.6",
+    "vite": "^5.4.2",
+    "vite-plugin-dts": "^4.0.3",
     "vue": "^3.3.4",
-    "vue-tsc": "^1.8.5"
+    "vue-tsc": "^2.1.0"
   },
   "peerDependencies": {
     "gl-matrix": "^3.4.3"
