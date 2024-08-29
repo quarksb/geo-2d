@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { BBox } from "../base/bbox";
+import { BBox } from "../base";
 import { BezierCurve } from "./bezier";
 import { type LineCurve } from "./line";
 

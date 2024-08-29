@@ -3,7 +3,7 @@ import { QuadraticCurve } from "./quadratic";
 import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
 import { LineCurve } from "./line";
-import { BBox } from "../base/bbox";
+import { BBox } from "../base";
 
 export const BezierCurveType = "curve-bezier";
 

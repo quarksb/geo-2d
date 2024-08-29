@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "../curve/curve";
 import { getRandomGenerate } from "../math";
-import { BBox } from "../base/bbox";
+import { BBox } from "../base";
 import { getPathStr } from "./svg";
 import { getBSpline } from "../shape/bSpline";
 import { QuadraticCurve } from "../curve";

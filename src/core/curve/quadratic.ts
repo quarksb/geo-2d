@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { LineCurve } from "./line";
 import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
-import { BBox } from "../base/bbox";
+import { BBox } from "../base";
 
 const SPLIT_COUNT = 100;
 export const QuadraticCurveType = "curve-quadratic";
