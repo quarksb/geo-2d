@@ -28,17 +28,21 @@
     "build": "pnpm run build:demo",
     "build:demo": "vue-tsc && vite build --mode demo",
     "build:lib": "vite build --mode lib",
+    "doc": "typedoc src/index.ts --excludeInternal",
     "preview": "vite preview",
     "publish": "vite build --mode lib && npm publish",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@microsoft/tsdoc": "^0.15.0",
     "@vitejs/plugin-vue": "^5.1.2",
     "less": "^4.2.0",
+    "typedoc": "^0.26.6",
     "typescript": "^5.0.2",
     "vite": "^5.4.2",
     "vite-plugin-dts": "^4.0.3",
+    "vitest": "^2.0.5",
     "vue": "^3.3.4",
     "vue-tsc": "^2.1.0"
   },
