@@ -1,2 +1,2 @@
-export * from "./bbox_temp";
+export * from "./bbox";
 export * from "./vec";
