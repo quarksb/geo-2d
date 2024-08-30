@@ -48,19 +48,23 @@ export class ClosedShape extends SingleShape {
      */
     splitInAngle(angleThreshold = 60): SingleShape[] {
         // console.log('split');
-        // 如果角度大于 60 度，就分割
+        // 如果角度大于 angleThreshold，就分割
         angleThreshold *= Math.PI / 180;
         const { curves, nodes } = this;
 
         const { length: l } = curves;
         const result: Curve[][] = [];
         let curveArr: Curve[] = [];
+        let lastCurve = curves[0];
         for (let i = 0; i < l; i++) {
             const curve = curves[i];
             const { angle } = nodes[i];
             // console.log('angle', angle);
+            // const curvature = curve.getMaxCurvature();
+            // console.log(curve, 'curvature', curvature);
 
-            if (angle > angleThreshold) {
+            // 角度超过阈值 或者 曲线类型改变
+            if (angle > angleThreshold || lastCurve.type !== curve.type) {
                 if (curveArr.length) {
                     result.push(curveArr);
                 }
@@ -68,6 +72,7 @@ export class ClosedShape extends SingleShape {
             } else {
                 curveArr.push(curve);
             }
+            lastCurve = curve;
         }
 
         // if (curveArr.length == 8) {

@@ -63,6 +63,14 @@ export class LineCurve extends Curve {
     }
 
     /**
+     * ### get the max curvature of this curve
+     * @returns 
+     */
+    getMaxCurvature() {
+        return 0;
+    }
+
+    /**
      * Gets the position on the line curve at a given parameter value.
      * @param t The parameter value.
      * @returns The position vector.

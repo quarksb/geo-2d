@@ -116,8 +116,7 @@ export class Rail {
     createRungs(stitch: Stitch) {
         const { rail0, rail1 } = this;
         this.checkDirection();
-        const isRail0Closed = rail0.isClosed;
-        const isRail1Closed = rail1.isClosed;
+
 
         // if (isRail0Closed && isRail1Closed) {
         // console.log(rail1);
@@ -137,7 +136,30 @@ export class Rail {
             disArr = disData1;
         }
 
-        const offsetPer = isRail0Closed && isRail1Closed ? disArr.datas[0].index / otherRail.curves.length : 0;
+        const isRail0Closed = basicRail.isClosed;
+        const isRail1Closed = otherRail.isClosed;
+
+
+        // let indexOffset = 0;
+        // if (isRail0Closed) {
+        //     // 寻找位置最低点, 即 y 值最大
+        //     let yMax = -Infinity;
+        //     let maxIndex = 0;
+        //     console.log(basicRail.points);
+
+        //     for (let i = 0; i < basicRail.points.length; i++) {
+        //         const point = basicRail.points[i];
+        //         if (point[1] > yMax) {
+        //             yMax = point[1];
+        //             maxIndex = i;
+        //         }
+        //     }
+        //     indexOffset = maxIndex;
+        // }
+
+        // console.log('indexOffset', indexOffset);
+        const offsetPer = isRail1Closed ? (disArr.datas[0]?.index || 0) / otherRail.curves.length : 0;
+
         // console.log('offsetPer', offsetPer);
         // console.log(basicRail, otherRail);
 
@@ -147,8 +169,8 @@ export class Rail {
 
         const rungs: LineCurve[] = new Array(count);
         for (let i = 0; i < count; i += 1) {
-            const per = i / count
-            const { pos } = basicRail.getPosDataByPer(per);
+            const per = i / count;
+            const { pos } = basicRail.getPosDataByPer(per, true);
             const { pos: end } = otherRail.getPosDataByPer(per + offsetPer, true);
             const rung = new LineCurve(pos, end);
             rungs[i] = rung;

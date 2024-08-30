@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
-import { calRadius, linearRegression } from "../math";
+import { calRadius, getCurvature, linearRegression } from "../math";
 import { getPointsClockwise } from "../embroidery";
 
 export class Polyline extends SingleShape {
@@ -46,7 +46,7 @@ export class Polyline extends SingleShape {
     split(radiusLimit = 100): Polyline[] {
         const { points } = this;
 
-        const indexArr = getPointsSplitIndexByRadius(points, radiusLimit);
+        const indexArr = getSplitIndexByRadius(points, radiusLimit);
         const arr = splitPointsByIndex(points, indexArr);
         let newArr: vec2[][] = [];
         arr.forEach(points => {
@@ -118,27 +118,26 @@ function getPointsSplitIndexByWave(points: vec2[], sArr = [2, 4, 8, 16, 32]): nu
  * @param radiusLimit 
  * @returns the index array to split points
  */
-function getPointsSplitIndexByRadius(points: vec2[], radiusLimit = 100): number[] {
+function getSplitIndexByRadius(points: vec2[], radiusLimit = 100): number[] {
     const { length: l } = points;
-    const radiusArr = new Array(l - 2);
+    const curvatures = new Array(l - 2);
     for (let i = 1; i < l - 1; i++) {
         const lastPoint = points[i - 1];
         const currentPoint = points[i];
         const nextPoint = points[i + 1];
         // 三点计算半径
-        radiusArr[i - 1] = calRadius(lastPoint, currentPoint, nextPoint);
+        curvatures[i - 1] = getCurvature(lastPoint, currentPoint, nextPoint);
     }
 
-    // console.log("radiusArr:", radiusArr);
+    // console.log("radiusArr:", curvatures);
 
     // 如果 r 小于 minRadius，且 r 是局部最小值，则在此处拆解 polyline
     const indexArr = [];
-    for (let i = 1; i < radiusArr.length - 1; i++) {
-        const lastRadius = radiusArr[i - 1];
-        const r = radiusArr[i];
-        const nextRadius = radiusArr[i + 1];
-        const isMin = r < lastRadius && r < nextRadius;
-        if (isMin && r < radiusLimit) {
+    for (let i = 1; i < curvatures.length - 1; i++) {
+        // slice 速度很慢，所以直接用下标
+        const [lastC, c, nextC] = [curvatures[i - 1], curvatures[i], curvatures[i + 1]];
+        const isMin = Math.abs(c) < Math.abs(lastC) && Math.abs(c) < Math.abs(nextC);
+        if (isMin && (c > 1 / radiusLimit || c < -1 / (2 * radiusLimit))) {
             // radiusArr 比 points 少 2 个，前后各少一个，所以 index 需要加 1
             indexArr.push(i + 1);
         }
@@ -201,14 +200,19 @@ export function calDisData(polyline0: Polyline, polyline1: Polyline): DisData[] 
         std: Infinity,
     };
 
-    // 首尾相交性检测
-    const LineCurve0 = new LineCurve(polyline0.EPoint, polyline1.SPoint);;
-    const LineCurve1 = new LineCurve(polyline1.EPoint, polyline0.SPoint);
-    const isIntersect = checkLineCurveIntersect(LineCurve0, LineCurve1);
+    const isAnyClosed = polyline0.isClosed || polyline1.isClosed;
 
-    // 导轨两连接线交叉，不合理，直接跳过后续计算
-    if (isIntersect) {
-        return [defaultDisData, defaultDisData];
+    // 任何一 shape 闭合时，shape 首尾本身就相交，此时不进行相交性检测
+    if (!isAnyClosed) {
+        // 首尾相交性检测
+        const LineCurve0 = new LineCurve(polyline0.EPoint, polyline1.SPoint);;
+        const LineCurve1 = new LineCurve(polyline1.EPoint, polyline0.SPoint);
+        const isIntersect = checkLineCurveIntersect(LineCurve0, LineCurve1);
+
+        // 导轨两连接线交叉，不合理，直接跳过后续计算
+        if (isIntersect) {
+            return [defaultDisData, defaultDisData];
+        }
     }
 
     const newPoints = [...ps0, ...ps1];
@@ -281,22 +285,36 @@ export function getDistMark(x: number, k: number) {
     return Math.exp(-(x - 1) / k);
 }
 
+export function getAngleMark(val: number, limit: number) {
+    return Math.max(1 - val / limit, 0);
+}
+
 
 export function getConnectMark(polyline0: Polyline, polyline1: Polyline, angleLimit = 30) {
     // 闭合检查, 如果闭合，则不连接
     if (polyline0.isClosed || polyline1.isClosed) return 0;
     const { EPoint: EPoint0, outDir: outDir0 } = polyline0;
     const { SPoint: SPoint1, inDir: inDir1 } = polyline1;
+    // console.log("outDir0:", outDir0, "inDir1:", inDir1);
+
 
     const off = vec2.sub(vec2.create(), SPoint1, EPoint0);
     const dis = vec2.len(off);
     /**距离分数以 泊松分布为基础 */
     const disMark = getDistMark(dis, 100);
-    const angle0 = vec2.angle(off, outDir0) * 180 / Math.PI;
-    const angle1 = vec2.angle(off, inDir1) * 180 / Math.PI;
 
-    const getAngleMark = (val: number, limit: number) => Math.max(1 - val / limit, 0);
-    return disMark * getAngleMark(angle0, angleLimit) * getAngleMark(angle1, angleLimit);
+    let angleMark = 0;
+    const isConnect = dis < 1;
+    if (isConnect) {
+        const angle = vec2.angle(outDir0, inDir1) * 180 / Math.PI;
+        angleMark = getAngleMark(angle, angleLimit);
+    } else {
+        const angle0 = vec2.angle(off, outDir0) * 180 / Math.PI;
+        const angle1 = vec2.angle(off, inDir1) * 180 / Math.PI;
+        angleMark = getAngleMark(angle0, angleLimit) * getAngleMark(angle1, angleLimit)
+    }
+
+    return disMark * angleMark;
 }
 
 export function connectPolyline(polyline0: Polyline, polyline1: Polyline) {
@@ -305,6 +323,7 @@ export function connectPolyline(polyline0: Polyline, polyline1: Polyline) {
     const points = [...polyline0.points, ...polyline1.points.slice(isContinuous ? 1 : 0)];
     return Polyline.fromPoints(points);
 }
+
 
 if (import.meta.vitest) {
     const { it, expect } = import.meta.vitest;
@@ -321,7 +340,7 @@ if (import.meta.vitest) {
             [7, 1],
             [8, 0],
         ].map(([x, y]) => vec2.fromValues(x, y));
-        const indexArr = getPointsSplitIndexByRadius(points, 100);
+        const indexArr = getSplitIndexByRadius(points, 100);
         expect(indexArr).toEqual([4]);
     })
 

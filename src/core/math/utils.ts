@@ -12,20 +12,6 @@ export function getRandomGenerate(x = 0.314) {
     };
 }
 
-/**
- * ### get the area of a triangle
- * 目前使用的是海伦公式，后续可以考虑使用叉积
- * @param points 
- * @returns 
- */
-export function getTriangleArea(points: vec2[]) {
-    const a = vec2.distance(points[0], points[1]);
-    const b = vec2.distance(points[1], points[2]);
-    const c = vec2.distance(points[2], points[0]);
-    const s = (a + b + c) / 2;
-    return Math.sqrt(s * (s - a) * (s - b) * (s - c));
-}
-
 export function getEaseElasticOut(t: number): number {
     const p = 0.2;
     return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1;

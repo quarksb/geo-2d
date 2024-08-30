@@ -98,9 +98,11 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     protected abstract _getLen(): number;
 
     /**
-     * Gets the length of the curve.
-     * @param coordData 
-    abstract get len(): number;
+     * ### get the max curvature of this curve
+     * curvature = 1 / r, curvature > 0 means the curve is turning right, otherwise, turning left
+     * @returns 
+     */
+    abstract getMaxCurvature(): number;
 
     /**
      * Gets the position on the curve at the given parameter value.

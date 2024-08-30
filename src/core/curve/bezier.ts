@@ -109,22 +109,13 @@ export class BezierCurve extends QuadraticCurve {
     }
 
     /**
-     * ### Gets the distance from a given point to the bezier curve.
-     * 设定切点 p 则 p-p0 表述为 关于参数 t 的 3 阶方程，p 点切线表述为关于参数 t 的 2 阶方程,
-     * 满足垂直时，即内积为 0，两个方程的内积表述为关于参数t 的 5 阶方程，5 阶方程没有解析解，所以无法直接求解切点
-     * @param pos 
-     * @returns 
+     * @inheritdoc
+     * 设定垂足点 p0 则 p0 -> pos 表述为 关于参数 t 的 3 阶方程，p0 点切线表述为关于参数 t 的 2 阶方程,
+     * 满足垂直时，即内积为 0，两个方程的内积表述为关于参数t 的 5 阶方程，5 阶方程没有解析解，所以无法用解析法求解垂足
      */
-    getDisToPos(pos: vec2): number {
-        const count = 100;
-        let minDis = Infinity;
-        for (let i = 0; i <= count; i++) {
-            const t = i / count;
-            const point = this.getPosition(t);
-            const dis = vec2.dist(point, pos);
-            minDis = Math.min(minDis, dis);
-        }
-        return minDis;
+    getDisToPos2(pos: vec2): number {
+        console.error("bezier has no analytical solution for getDisToPos2");
+        return this.getDisToPos(pos);
     }
 
     getDerivative(t: number): vec2 {

@@ -143,6 +143,21 @@ export class QuadraticCurve extends LineCurve {
         return normal;
     }
 
+    getMaxCurvature(): number {
+        const cups = this.getCusps();
+        // console.log("cups:", cups);
+
+        let max = 0;
+        for (const cup of cups) {
+            const val = this.getCurvature(cup);
+            if (Math.abs(val) > Math.abs(max)) {
+                max = val;
+            }
+        }
+
+        return max;
+    }
+
     getSplitT(data: CoordData): number[] {
         const { x, y, width, height } = this.bbox;
         const { mode, val } = data;
@@ -199,34 +214,90 @@ export class QuadraticCurve extends LineCurve {
     }
 
     /**
-     * Gets the distance from a given point to the quadratic curve.
+     * ### Gets the distance from a given point to the quadratic curve by numerical method.
      * @param pos 
      * @returns 
      */
     getDisToPos(pos: vec2): number {
+        let count = 100;
+        let minDistance = Infinity;
+        for (let i = 0; i <= count; i++) {
+            const t = i / count;
+            const point = this.getPosition(t);
+            const distance = vec2.distance(pos, point);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+        return minDistance;
+    }
+
+    /**
+     * Gets the distance from a given point to the quadratic curve by Analytical method
+     * @param pos 
+     * @returns 
+     */
+    getDisToPos2(pos: vec2): number {
         const [x1, y1] = this.SPoint;
         const [x2, y2] = this.CPoint1;
         const [x3, y3] = this.EPoint;
         const [x4, y4] = pos;
 
-        const ax0 = x1 - 2 * x2 + x3;
-        const ay0 = y1 - 2 * y2 + y3;
+        // 求出垂足对应的 t, 垂足点满足其切线和直线 pos 之间的夹角为 90 度
+        // 通过求解方程组得到 t
 
-        const bx0 = 2 * (x2 - x1);
-        const by0 = 2 * (y2 - y1);
+        // 曲线参数方程可以表达为
+        // x = (x1-2*x2+x3)*t^2 + 2*(x2-x1)*t + x1
+        // y = (y1-2*y2+y3)*t^2 + 2*(y2-y1)*t + y1
 
-        const cx0 = x1;
-        const cy0 = y1;
+        // 曲线的切线方程可以表达为
+        // x0 = 2 * (x1 - 2 * x2 + x3) * t + 2 * (x2 - x1)
+        // y0 = 2 * (y1 - 2 * y2 + y3) * t + 2 * (y2 - y1)
 
-        const a = ax0 ** 2 + ay0 ** 2;
-        const b = 2 * (ax0 * bx0 + ay0 * by0);
-        const c = bx0 ** 2 + by0 ** 2;
-        const d = 2 * (ax0 * (cx0 - x4) + ay0 * (cy0 - y4));
-        const e = 2 * (bx0 * (cx0 - x4) + by0 * (cy0 - y4));
 
-        const t = (a * e - b * d) / (b ** 2 - 4 * a * c);
-        const pedal = this.getPosition(t);
-        return vec2.distance(pos, pedal);
+
+        // 垂足 p0 到 pos 对应的向量为
+        // x1 = - (x1-2*x2+x3)*t^2 - 2*(x2-x1)*t - x1 + x4
+        // y1 = - (y1-2*y2+y3)*t^2 - 2*(y2-y1)*t - y1 + y4
+        /**向量：垂足 p0 -> pos */
+        const offVecArr = [
+            [- (x1 - 2 * x2 + x3), - 2 * (x2 - x1), x4 - x1],
+            [- (y1 - 2 * y2 + y3), - 2 * (y2 - y1), y4 - y1]
+        ];
+
+        /**切线向量 */
+        const tanArr = [
+            [2 * (x1 - 2 * x2 + x3), 2 * (x2 - x1)],
+            [2 * (y1 - 2 * y2 + y3), 2 * (y2 - y1)]
+        ];
+
+        // 两个向量的点积为 0
+        // x0 * x1 + y0 * y1 = 0
+        // 整理，合并得到 一个一元三次方程
+        /**一元三次方程的参数 */
+        const equation = new Array(2 + 3 - 1).fill(0);
+        for (let i = 0; i < 2; i++) { // x, y
+            for (let j = 0; j < 2; j++) { // tanArr
+                for (let k = 0; k < 3; k++) { // offVecArr
+                    equation[j + k] += tanArr[i][j] * offVecArr[i][k] + tanArr[i][j] * offVecArr[i][k];
+                }
+            }
+        }
+
+        const roots = getRoots(equation);
+        const rootArr = [...roots.filter(t => t * (t - 1) < 0), 0, 1]
+        let minDistance = Infinity;
+        for (let t of rootArr) {
+            const pedal = this.getPosition(t);
+            const distance = vec2.distance(pos, pedal);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+
+        // console.log(minDistance);
+
+        return minDistance;
     }
 
     getDerivative(t: number): vec2 {
@@ -242,13 +313,17 @@ export class QuadraticCurve extends LineCurve {
     }
 
     /**
-     * 计算曲率半径
+     * ### 计算曲率半径
      */
     getCurvature(t: number): number {
-        const [x, y] = this.getDerivative(t);
+        const [x1, y1] = this.getDerivative(t);
         const [x2, y2] = this.getSecondDerivative(t);
-        const dominator = x ** 2 + y ** 2;
-        const k = dominator < 1E-20 ? Infinity : (x * y2 - y * x2) / dominator ** 1.5;
+        const numerator = x1 * y2 - y1 * x2;
+        if (numerator < 1E-20) {
+            return 0
+        }
+        const dominator = x1 ** 2 + y1 ** 2;
+        const k = dominator < 1E-20 ? Infinity : numerator / dominator ** 1.5;
         return k;
     }
 
@@ -257,22 +332,36 @@ export class QuadraticCurve extends LineCurve {
      * @param limit - 曲率半径极值的阈值 @default 1E-2
      * @returns 曲率半径极值点对应的参数 
      */
-    getCusps(limit = 1E-2): number[] {
-        const count = 100;
+    getCusps(limit = 1E-6): number[] {
+        const count = 20;
         // 计算 count 个点的曲率
         /**curvature array */
         const CArr = new Array(count + 1);
+
         for (let i = 0; i <= count; i++) {
             const t = i / count;
-            CArr[i] = this.getCurvature(t);
+            const curvature = this.getCurvature(t);
+            CArr[i] = curvature;
         }
+
+        // console.log(CArr);
+
 
         // 寻找极值点
         const cusps: number[] = [];
         for (let i = 1; i < count; i++) {
-            if ((CArr[i] - CArr[i - 1]) * (CArr[i] - CArr[i + 1]) > 0 && Math.abs(CArr[i]) > limit) {
+            if ((CArr[i] - CArr[i - 1]) * (CArr[i] - CArr[i + 1]) > 0) {
                 cusps.push(i / count);
             }
+        }
+
+        // 分析首尾
+        if (CArr[0] * (CArr[0] - CArr[1]) > 0) {
+            cusps.unshift(0)
+        }
+
+        if (CArr[count] * (CArr[count] - CArr[count - 1]) > 0) {
+            cusps.push(1)
         }
 
         return cusps;
@@ -366,8 +455,7 @@ if (import.meta.vitest) {
     const { it, test, expect, describe } = import.meta.vitest;
 
     describe('test for quadratic curve', () => {
-        /**point arr */
-        const quadraticCurve = new QuadraticCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1), vec2.fromValues(2, 0));
+        let curve = new QuadraticCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1), vec2.fromValues(2, 0));
 
         const points = [
             vec2.fromValues(-1, 0),
@@ -376,8 +464,26 @@ if (import.meta.vitest) {
         ];
 
         it('get distance', () => {
-            expect(quadraticCurve.getDisToPos(vec2.fromValues(1, 1))).toBeCloseTo(0);
-            expect(quadraticCurve.getDisToPos(vec2.fromValues(1, 0))).toBeCloseTo(1);
+            const datas = [
+                { point: vec2.fromValues(-1, 0), distance: 1 },
+                { point: vec2.fromValues(0, 0), distance: 0 },
+                { point: vec2.fromValues(0.5, 1), distance: 0.5798392351022574 },
+                { point: vec2.fromValues(1, 0), distance: 0.5 },
+                { point: vec2.fromValues(2, 0), distance: 0 },
+                { point: vec2.fromValues(3, 0), distance: 1 }
+            ];
+            for (const data of datas) {
+                expect(curve.getDisToPos(data.point)).toBeCloseTo(curve.getDisToPos2(data.point));
+            }
+            // expect(quadraticCurve.getDisToPos(vec2.fromValues(0, 1))).toBeCloseTo(0.5);
+            // expect(quadraticCurve.getDisToPos(vec2.fromValues(1, 1))).toBeCloseTo(0.5);
+            // expect(quadraticCurve.getDisToPos(vec2.fromValues(2, 0))).toBeCloseTo(0);
         })
+
+        // it('get curvature'), () => {
+        //     expect(quadraticCurve.getCurvature(0.5)).toBeCloseTo(0);
+        //     expect(quadraticCurve.getCurvature(0)).toBeCloseTo(Infinity);
+        //     expect(quadraticCurve.getCurvature(1)).toBeCloseTo(Infinity);
+        // }
     })
 }
