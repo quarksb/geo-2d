@@ -1,6 +1,6 @@
 {
   "name": "geo-2d",
-  "version": "1.0.0-beta.15",
+  "version": "1.0.0-beta.17",
   "type": "module",
   "files": [
     "dist"
@@ -9,7 +9,10 @@
   "module": "dist/geometry.es.js",
   "exports": {
     ".": {
-      "import": "./dist/geometry.es.js",
+      "import": {
+        "types": "./src/index.ts",
+        "default": "./dist/geometry.es.js"
+      },
       "require": "./dist/geometry.umd.js"
     },
     "./package.json": "./package.json",
@@ -30,7 +33,7 @@
     "build:lib": "vite build --mode lib",
     "doc": "typedoc src/index.ts --excludeInternal",
     "preview": "vite preview",
-    "publish": "vite build --mode lib && npm publish",
+    "publish:geo": "vite build --mode lib && npm publish",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
@@ -51,7 +54,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/quarksb/geo-2d"
+    "url": "https://github.com/quarksb/geo-2d.git"
   },
   "publishConfig": {
     "access": "public",

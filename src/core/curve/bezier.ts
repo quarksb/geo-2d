@@ -14,7 +14,7 @@ export const BezierCurveType = "curve-bezier";
 export class BezierCurve extends QuadraticCurve {
     /** The second control point of the curve. */
     protected _CPoint2: vec2 = vec2.create();
-    constructor (startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
+    constructor(startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
         super(startPoint, controlPoint1, endPoint);
         this.type = BezierCurveType;
         this.CPoint2 = controlPoint2;
@@ -153,17 +153,54 @@ export class BezierCurve extends QuadraticCurve {
         fn(this.CPoint2);
     }
 
+    /**
+     * ### Apply a free form deformation (FFD) to the curve.
+     * @param fn 
+     */
     applyFFDFn(fn: PointFn): void {
-        // todo, consider use solver equations to calculate the control point position
-        const originControlPoint1 = vec2.clone(this.CPoint1);
-        const originControlPoint2 = vec2.clone(this.CPoint2);
-        this.applyFn(fn);
-        // todo 理解为何 1/2 更符合直觉
-        // const k = 1 / 2;
-        // const diff1 = vec2.subtract(vec2.create(), this.controlPoint1, originControlPoint1);
-        // vec2.scaleAndAdd(this.controlPoint1, this.controlPoint1, diff1, k);
-        // const diff2 = vec2.subtract(vec2.create(), this.controlPoint2, originControlPoint2);
-        // vec2.scaleAndAdd(this.controlPoint2, this.controlPoint2, diff2, k);
+        const { SPoint, EPoint } = this;
+        // 分析问题，经历 FFD 变换后 贝塞尔曲线的位置是确定的，那么还是先两控制点共 4 个参数，需要求解 4 个方程，而每个点可以提供 x, y 两个方程，所以需要 2 个点, 选取 t = 0.4, 0.6 两点
+        /**目标点参数 */ 
+        const tArr = [0.4, 0.6];
+        /**目标点位置 */ 
+        const pArr = tArr.map((t) => {
+            // 求出变换前点位置
+            const p = this.getPosition(t);
+            // 应用 fn 求出变换后 p 的位置
+            fn(p);
+            return p;
+        })
+
+        // 更新收尾两点位置
+        fn(SPoint);
+        fn(EPoint);
+        
+        const getEquation = (t: number, p: vec2) => {
+            // 计算 t 时的方程
+            const a = (1 - t) ** 3;
+            const b = 3 * t * (1 - t) ** 2;
+            const c = 3 * t ** 2 * (1 - t);
+            const d = t ** 3;
+            // 原始等式为 a * SPoint + b * CPoint1 + c * CPoint2 + d * EPoint = p
+            // 现在要求 CPoint1, CPoint2, 故将等式变形为
+            // b * CPoint1 + c * CPoint2 = p - a * SPoint - d * EPoint
+            return [b, c, p[0] - d * EPoint[0] - a * SPoint[0], p[1] - d * EPoint[1] - a * SPoint[1]];
+        };
+        
+        // 共两个二元二次方程组（ x, y 方程组相互独立）
+        const [a, b, m0, n0] = getEquation(tArr[0], pArr[0]);
+        const [c, d, m1, n1] = getEquation(tArr[1], pArr[1]);
+        
+        // bc - ad 只有在 t = 0 或 t = 1 时为 0，所以不用担心分母为 0 的情况
+        const k = 1 / (b * c - a * d);
+
+        const x0 = (b * m1 - d * m0) * k;
+        const y0 = (b * n1 - d * n0) * k;
+        const x1 = (c * m0 - a * m1) * k;
+        const y1 = (c * n0 - a * n1) * k;
+    
+        this.CPoint1 = vec2.fromValues(x0, y0);
+        this.CPoint2 = vec2.fromValues(x1, y1);
     }
 
     reverse(): void {
@@ -248,24 +285,19 @@ export class BezierCurve extends QuadraticCurve {
     }
 
     toPathString(digits = 0): string {
-        return `C ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(
+        return `C ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} ${this.EPoint[0].toFixed(
             digits
-        )} ${this.EPoint[0].toFixed(digits)} ${this.EPoint[1].toFixed(digits)}`;
+        )} ${this.EPoint[1].toFixed(digits)}`;
     }
 
     toDebugPathString(digits?: number | undefined): string {
-        return ` L ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(
+        return ` L ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} L ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} L ${this.EPoint[0].toFixed(
             digits
-        )} L ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} L ${this.EPoint[0].toFixed(digits)} ${this.EPoint[1].toFixed(digits)}`;
+        )} ${this.EPoint[1].toFixed(digits)}`;
     }
 
     clone(): BezierCurve {
-        return new BezierCurve(
-            vec2.clone(this.SPoint),
-            vec2.clone(this.CPoint1),
-            vec2.clone(this.CPoint2),
-            vec2.clone(this.EPoint)
-        );
+        return new BezierCurve(vec2.clone(this.SPoint), vec2.clone(this.CPoint1), vec2.clone(this.CPoint2), vec2.clone(this.EPoint));
     }
 }
 
@@ -273,8 +305,8 @@ export class BezierCurve extends QuadraticCurve {
  * ### Gets a bezier curve from a curve.
  * 因为循环依赖问题，不能在 line Quadratic 中使用 Bezier 中导入 BezierCurve, 不能利用
  * curve.toBezier + 多态实现，故将此方法提取到此处
- * @param curve 
- * @returns 
+ * @param curve
+ * @returns
  */
 export function getBezierFromCurve(curve: Curve): BezierCurve {
     if (curve instanceof BezierCurve) {
@@ -320,10 +352,10 @@ if (import.meta.vitest) {
         {
             input: [385, 165, 645, 165, 645, 70, 750, 165],
             bbox: {
-                "height": 42.22222137451172,
-                "width": 365,
-                "x": 385,
-                "y": 122.77777862548828,
+                height: 42.22222137451172,
+                width: 365,
+                x: 385,
+                y: 122.77777862548828,
             },
             cusps: [0.73],
         },
@@ -338,7 +370,6 @@ if (import.meta.vitest) {
         //     cusps: [0.47, 0.7, 0.85],
         // }
     ];
-
 
     it("bbox", () => {
         for (const testData of TestDataArr) {
