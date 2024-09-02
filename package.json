@@ -10,7 +10,10 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./src/index.ts",
+        "types": [
+          "./src/index.ts",
+          "./dist/index.d.ts"
+        ],
         "default": "./dist/geometry.es.js"
       },
       "require": "./dist/geometry.umd.js"
