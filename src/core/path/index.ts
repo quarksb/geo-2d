@@ -56,9 +56,9 @@ export class Path {
     includePoint(point: vec2) {
         let isInclude = true;
         for (const shape of this.shapes) {
-            const { isClockwise } = shape;
+            const { isRightHand } = shape;
             const isShapeInclude = shape.includePoint(point);
-            isInclude &&= !isClockwise ? isShapeInclude : !isShapeInclude;
+            isInclude &&= isRightHand ? isShapeInclude : !isShapeInclude;
             if (!isInclude) {
                 return false;
             }
@@ -100,9 +100,8 @@ export class Path {
         const shapeArr: ClosedShape[][] = [];
         for (let index = 0; index < shapes.length; index++) {
             const shape = shapes[index];
-            const { bbox2, isClockwise } = shape;
-            // console.log('isClockwise', isClockwise);
-            if (isClockwise) {
+            const { bbox2, isRightHand } = shape;
+            if (isRightHand) {
                 // 如果是顺时针，则代表一个新的 path
                 shapeArr.push([shape]);
             } else {

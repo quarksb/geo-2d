@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve, CoordData, LineCurve, LineCurveType } from "../curve";
 import { BBox2, createBBox2 } from "../base";
-import { getPointsClockwise } from "./polygon";
+import { getPointsRightHandRule } from "./polygon";
 
 
 /**
@@ -12,8 +12,8 @@ import { getPointsClockwise } from "./polygon";
 export abstract class Shape {
     curves: Curve[] = [];
     points: vec2[] = [];
-    /** the clockwise of the shape */
-    _isClockwise?: boolean;
+    /** is the shape complies with the right-hand rule */
+    protected _isRightHand?: boolean;
     protected _len?: number;
     /**记录每段曲线终点到 shape 起点的长度 */
     protected _lenArr: number[] = [];
@@ -34,12 +34,12 @@ export abstract class Shape {
         }
     }
 
-    /** ### the clockwise of the shape */
-    get isClockwise() {
-        if (this._isClockwise === undefined) {
-            this._isClockwise = this.getIsClockwise();
+    /** ### is the shape complies with the right-hand rule  */
+    get isRightHand() {
+        if (this._isRightHand === undefined) {
+            this._isRightHand = this.getIsClockwise();
         }
-        return this._isClockwise;
+        return this._isRightHand;
     }
 
     get isClosed() {
@@ -95,7 +95,7 @@ export abstract class Shape {
      */
     private getIsClockwise() {
         const { points } = this;
-        return getPointsClockwise(points);
+        return getPointsRightHandRule(points);
     }
 
     /**

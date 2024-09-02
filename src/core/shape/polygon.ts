@@ -104,7 +104,7 @@ export function calPointsArea(points: vec2[]): number {
  * @param shape 
  * @returns true if the shape is clockwise
  */
-export function getPointsClockwise(points: vec2[]) {
+export function getPointsRightHandRule(points: vec2[]) {
     const area = calPointsArea(points);
     return area > 0;
 }

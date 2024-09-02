@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
 import { getAngleMark, getCurvature, getDistMark, linearRegression } from "../math";
-import { getPointsClockwise } from "./polygon";
+import { getPointsRightHandRule } from "./polygon";
 
 export class Polyline extends SingleShape {
     public curves: LineCurve[];
@@ -216,9 +216,9 @@ export function calDisData(polyline0: Polyline, polyline1: Polyline): DisData[] 
     }
 
     const newPoints = [...ps0, ...ps1];
-    const isClockwise = getPointsClockwise(newPoints);
+    const isRightHand = getPointsRightHandRule(newPoints);
     // 正确的多边形应该是顺时针的（逆时针表示有效区为外部）
-    if (!isClockwise) {
+    if (!isRightHand) {
         return [defaultDisData, defaultDisData];
     }
 

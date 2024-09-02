@@ -1,5 +1,5 @@
 import { LineCurve } from "../curve";
-import { calDisData, DisData, getPointsClockwise, Polyline, SingleShape } from "../shape";
+import { calDisData, DisData, getPointsRightHandRule, Polyline, SingleShape } from "../shape";
 import { Stitch } from "./stitch";
 import { createMatrix, getDistMark } from "../math";
 
@@ -59,7 +59,7 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
             }
         }
         maxScoreIndexArr[i] = maxIndex;
-        console.log(i, "maxIndex:", maxIndex, maxScore);
+        // console.log(i, "maxIndex:", maxIndex, maxScore);
     }
 
     // maxScoreIndexArr.forEach((index, i) => {
@@ -184,14 +184,8 @@ export class Rail {
      * 检查两条轨道的方向是否一致，如果不一致则调整第二条轨道的方向
      */
     checkDirection() {
-        const { rail0, rail1 } = this;
-        const isClockwise0 = getPointsClockwise(rail0.points);
-        const isClockwise1 = getPointsClockwise(rail1.points);
-        // console.log(isClockwise0, isClockwise1);
-
-        if (true || isClockwise0 !== isClockwise1) {
-            rail1.reverse();
-        }
+        const { rail1 } = this;
+        rail1.reverse();
     }
 
 }
