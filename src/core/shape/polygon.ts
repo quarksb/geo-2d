@@ -100,6 +100,16 @@ export function calPointsArea(points: vec2[]): number {
 }
 
 /**
+ * ### get the direction of a shape
+ * @param shape 
+ * @returns true if the shape is clockwise
+ */
+export function getPointsClockwise(points: vec2[]) {
+    const area = calPointsArea(points);
+    return area > 0;
+}
+
+/**
  * ### judge if the point is in the left of the line
  * @param point 
  * @param line 

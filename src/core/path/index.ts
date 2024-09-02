@@ -46,11 +46,11 @@ export class Path {
         return Path.fromCommands(commands);
     }
 
-    getBBox2(bounds = createBBox2()): BBox2 {
+    getBBox2(bbox2 = createBBox2()): BBox2 {
         for (const shape of this.shapes) {
-            shape.getBBox2(bounds);
+            shape.getBBox2(bbox2);
         }
-        return bounds;
+        return bbox2;
     }
 
     includePoint(point: vec2) {
@@ -99,18 +99,18 @@ export class Path {
         const shapeArr: ClosedShape[][] = [];
         for (let index = 0; index < shapes.length; index++) {
             const shape = shapes[index];
-            const { bounds, isClockwise } = shape;
-            // console.log('bounds', bounds, 'isClockwise', isClockwise);
+            const { bbox2, isClockwise } = shape;
+            // console.log('', , 'isClockwise', isClockwise);
             if (!isClockwise) {
                 // 如果是逆时针，则代表一个新的 path
                 shapeArr.push([shape]);
             } else {
                 // 如果是顺时针，说明是内部结构，需要添加进已有的 path 中
 
-                // 通过 bounds 查找对应的 path
+                // 通过  查找对应的 path
                 const lastShapes = shapeArr.find((shapes) => {
-                    const lastBounds = shapes[0].bounds;
-                    return lastBounds.xMin <= bounds.xMin && lastBounds.xMax >= bounds.xMax && lastBounds.yMin <= bounds.yMin && lastBounds.yMax >= bounds.yMax;
+                    const lastBounds = shapes[0].bbox2;
+                    return lastBounds.xMin <= bbox2.xMin && lastBounds.xMax >= bbox2.xMax && lastBounds.yMin <= bbox2.yMin && lastBounds.yMax >= bbox2.yMax;
                 });
 
                 if (lastShapes) {

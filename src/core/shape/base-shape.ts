@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve, CoordData, LineCurve, LineCurveType } from "../curve";
-import { PathCommand, SingleShape } from "./single-shape";
 import { BBox2, createBBox2 } from "../base";
+import { getPointsClockwise } from "./polygon";
 
 
 /**
@@ -17,7 +17,7 @@ export abstract class Shape {
     protected _len?: number;
     /**记录每段曲线终点到 shape 起点的长度 */
     protected _lenArr: number[] = [];
-    protected _bounds?: BBox2;
+    protected _bbox2?: BBox2;
 
     constructor (curves: Curve[]) {
         this.curves = curves;
@@ -32,10 +32,6 @@ export abstract class Shape {
         for (let i = 0; i < n; i++) {
             this.points[i + 1] = this.curves[i].EPoint
         }
-        // const isClosed = vec2.distance(this.curves[0].SPoint, this.curves[n - 1].EPoint) < 1e-3;
-        // if (!isClosed) {
-        //     this.points[n] = this.curves[n - 1].EPoint;
-        // }
     }
 
     /** ### the clockwise of the shape */
@@ -46,12 +42,12 @@ export abstract class Shape {
         return this._isClockwise;
     }
 
-    /** ### the bounds of the shape */
-    get bounds() {
-        if (!this._bounds) {
-            this._bounds = this.getBBox2();
+    /** ### the bbox2 of the shape */
+    get bbox2() {
+        if (!this._bbox2) {
+            this._bbox2 = this.getBBox2();
         }
-        return this._bounds;
+        return this._bbox2;
     }
     /** ### the length of the shape */
     get len() {
@@ -95,15 +91,7 @@ export abstract class Shape {
      */
     private getIsClockwise() {
         const { points } = this;
-        const { length: len } = points;
-        let sum = 0;
-
-        for (let i = 0; i < len; i++) {
-            const p0 = points[i];
-            const p1 = points[(i + 1) % len];
-            sum += (p1[0] - p0[0]) * (p1[1] + p0[1]);
-        }
-        return sum > 0;
+        return getPointsClockwise(points);
     }
 
     /**
@@ -122,18 +110,18 @@ export abstract class Shape {
 
     /**
      * ### get the BBox2 of the shape
-     * @param bounds 
+     * @param bbox2 
      * @returns 
      */
-    getBBox2(bounds = createBBox2()): BBox2 {
+    getBBox2(bbox2 = createBBox2()): BBox2 {
         for (const { bbox } of this.curves) {
             const { x, y, width, height } = bbox;
-            bounds.xMin = Math.min(bounds.xMin, x);
-            bounds.xMax = Math.max(bounds.xMax, x + width);
-            bounds.yMin = Math.min(bounds.yMin, y);
-            bounds.yMax = Math.max(bounds.yMax, y + height);
+            bbox2.xMin = Math.min(bbox2.xMin, x);
+            bbox2.xMax = Math.max(bbox2.xMax, x + width);
+            bbox2.yMin = Math.min(bbox2.yMin, y);
+            bbox2.yMax = Math.max(bbox2.yMax, y + height);
         }
-        return bounds;
+        return bbox2;
     }
 
     getLineIntersects(line: LineCurve): vec2[] {

@@ -1,8 +1,7 @@
 import { LineCurve } from "../curve";
-import { calDisData, calPointsArea, DisData, getDistMark, Polyline, Shape, SingleShape } from "../shape";
+import { calDisData, DisData, getDistMark, getPointsClockwise, Polyline, SingleShape } from "../shape";
 import { Stitch } from "./stitch";
 import { createMatrix } from "../math";
-import { vec2 } from "gl-matrix";
 
 
 const isDebug = true || window.location.href.includes('debug');
@@ -197,12 +196,3 @@ export class Rail {
 
 }
 
-/**
- * ### get the direction of a shape
- * @param shape 
- * @returns true if the shape is clockwise
- */
-export function getPointsClockwise(points: vec2[]) {
-    const area = calPointsArea(points);
-    return area > 0;
-}

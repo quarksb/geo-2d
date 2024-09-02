@@ -40,7 +40,7 @@ export function interpolate(t: number, degree: number, points: number[][], knots
     const high = knots[pointNum];
     t = t * (high - low) + low;
 
-    if (t < low || t > high) throw new Error("out of bounds");
+    if (t < low || t > high) throw new Error("out of bbox2");
 
     let segmentIndex;
     // find s (the spline segment) for the [t] value provided
@@ -104,7 +104,7 @@ export function getBSpline(points: vec2[], degree: number) {
 
     /**t ∈ [0,1] */
     return (t: number) => {
-        if (t < 0 || t > 1) throw new Error("out of bounds");
+        if (t < 0 || t > 1) throw new Error("out of bbox2");
         t = t * length + degree;
         const x = getNum(xNums, degree, t);
         const y = getNum(yNums, degree, t);

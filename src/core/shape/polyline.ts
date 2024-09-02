@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
 import { calRadius, getCurvature, linearRegression } from "../math";
-import { getPointsClockwise } from "../embroidery";
+import { getPointsClockwise } from "./polygon";
 
 export class Polyline extends SingleShape {
     public curves: LineCurve[];
@@ -254,7 +254,7 @@ export function calDisData(polyline0: Polyline, polyline1: Polyline): DisData[] 
 // 计算 singleRail 的延伸线
 // 
 export function calExtendCurve(polyline: Polyline) {
-    const { points: p, bounds } = polyline;
+    const { points: p, bbox2: bbox2 } = polyline;
     // todo: 应该取曲率最大的点后的部分的 5 个点，现在为了简单取的是 5 个点
     // 取倒数五个点, 如果长度不够则取两个点
     const count = Math.min(p.length, 5);

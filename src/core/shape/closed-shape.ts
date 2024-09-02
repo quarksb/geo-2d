@@ -33,7 +33,7 @@ export class ClosedShape extends SingleShape {
 
     includePoint(point: vec2) {
         // 1. 先判断 point 是否在 bbox 内部
-        const { xMin, xMax, yMin, yMax } = this.bounds;
+        const { xMin, xMax, yMin, yMax } = this.bbox2;
         if (point[0] < xMin || point[0] > xMax || point[1] < yMin || point[1] > yMax) {
             return false;
         }
