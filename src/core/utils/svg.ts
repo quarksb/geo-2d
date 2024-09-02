@@ -28,41 +28,46 @@ export function getDebugPathStr(curves: Curve[], digits = 1): string {
     return pathStr;
 }
 
-// 将单条 pathStr(只含一个M)拆分成一个个子命令
-export function pathStringToPathCommands(pathStr: string): { type: string; args: number[] }[] {
-    const commands: { type: string; args: number[] }[] = [];
-    let currentCommand = "";
-    let currentArgs: number[] = [];
+// todo: 重构
+export type PathCommand = { type: 'Z'; args?: number[] } | { type: string; args?: number[] } | { type: string; args?: number[], x: number, y: number, x1?: number, y1?: number, x2?: number, y2?: number };
 
-    function addCommand(type: string, args: number[]) {
-        commands.push({ type, args });
+/**
+ * ### 将单条 pathStr(只含一个M)拆分成一个个子命令
+ * 支持科学计数法
+ */
+export function pathStringToPathCommands(pathStr: string): PathCommand[] {
+    // 正则表达式匹配路径命令和参数，包括支持科学计数法的数字
+    const pathRegex = /([MmLlHhVvCcSsQqTtAaZz])|([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/g;
+    const matches = pathStr.match(pathRegex);
+
+    if (!matches) {
+        throw new Error("Invalid path string");
     }
 
-    // 遍历路径字符串中的每个字符
-    for (let i = 0; i < pathStr.length; i++) {
-        const char = pathStr[i];
+    const commands: PathCommand[] = [];
+    let currentType: string | null = null;
+    let currentArgs: number[] = [];
 
-        if (char.match(/[A-Z]/)) {
-            // 如果是大写字母，则表示新的命令开始
-            currentCommand && addCommand(currentCommand, currentArgs);
-            currentCommand = char;
-            currentArgs = [];
-        } else if (char === " " || char === ",") {
-            // 忽略空格和逗号
-            continue;
-        } else if (char === "-" || char === "." || !isNaN(parseInt(char, 10))) {
-            // 处理数字、负号和小数点
-            const start = i;
-            while (i < pathStr.length && (pathStr[i] === "-" || pathStr[i] === "." || !isNaN(parseInt(pathStr[i], 10)))) {
-                i++;
+    for (const match of matches) {
+        if (isNaN(parseFloat(match))) {
+            // 如果匹配到的是字母，表示一个新的命令
+            if (currentType) {
+                // 将前一个命令和参数存储
+                commands.push({ type: currentType, args: currentArgs });
+                currentArgs = [];
             }
-            const argStr = pathStr.substring(start, i);
-            currentArgs.push(parseFloat(argStr));
-            i--; // 回退一步，因为在for循环中会自增
+            currentType = match;
+        } else {
+            // 如果匹配到的是数字，表示参数
+            currentArgs.push(parseFloat(match));
         }
     }
 
-    addCommand(currentCommand, currentArgs);
+    // 将最后一个命令存储
+    if (currentType) {
+        commands.push({ type: currentType, args: currentArgs });
+    }
+
     return commands;
 }
 
@@ -76,4 +81,23 @@ export function interpolatePolygon(startPolygon: vec2[], targetPolygon: vec2[], 
         polygon.push(point);
     }
     return polygon;
+}
+
+if (import.meta.vitest) {
+    const { describe, it, expect } = import.meta.vitest;
+    const pathStr = "M55.5437 22.9059 C40.1922 7.60225 20.0901 -0.0301725 0 8.96355e-05 L0.0562527 78.4342 L55.7169 133.921 C86.3252 103.217 86.2476 53.5142 55.5437 22.9059 Z";
+    describe("svg util test", () => {
+        it("pathStringToPathCommands", () => {
+            const commands = pathStringToPathCommands(pathStr);
+            console.log(commands);
+            expect(commands).toEqual([
+                { type: "M", args: [55.5437, 22.9059] },
+                { type: "C", args: [40.1922, 7.60225, 20.0901, -0.0301725, 0, 8.96355e-5] },
+                { type: "L", args: [0.0562527, 78.4342] },
+                { type: "L", args: [55.7169, 133.921] },
+                { type: "C", args: [86.3252, 103.217, 86.2476, 53.5142, 55.5437, 22.9059] },
+                { type: "Z", args: [] },
+            ]);
+        });
+    });
 }

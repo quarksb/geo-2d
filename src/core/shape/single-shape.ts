@@ -1,8 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve, LineCurve, BezierCurve, QuadraticCurve } from "../curve";
-import { pathStringToPathCommands } from "../utils/svg";
+import { PathCommand, pathStringToPathCommands } from "../utils";
 import { Shape } from "./base-shape";
-import { Polyline } from "./polyline";
 
 /**
  * ## Shape of a single path
@@ -105,9 +104,6 @@ export class SingleShape extends Shape {
 
 }
 
-
-// todo: 重构
-export type PathCommand = { type: 'Z'; args?: number[] } | { type: string; args?: number[] } | { type: string; args?: number[], x: number, y: number, x1?: number, y1?: number, x2?: number, y2?: number };
 
 if (import.meta.vitest) {
     const { it, expect, test } = import.meta.vitest
