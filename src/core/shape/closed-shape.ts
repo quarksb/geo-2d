@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "../curve";
-import { PathCommand, SingleShape } from "./single-shape";
+import { SingleShape } from "./single-shape";
 import { isPointInPoints } from "./polygon";
+import { PathCommand } from "../utils";
 
 
 export class PointNode {
