@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
-import { getAngleMark, getCurvature, getDistMark, linearRegression } from "../math";
+import { getCurvature, linearRegression } from "../math";
 import { getPointsRightHandRule } from "./polygon";
 
 export class Polyline extends SingleShape {
@@ -61,7 +61,6 @@ export class Polyline extends SingleShape {
 
         // indexArr.sort((a, b) => a - b);
         // console.log("indexArr:", newArr);
-
         // 如果 r 小于 minRadius，且 r 是局部最小值，则在此处拆解 polyline
 
         return newArr.filter(a => a.length >= 2).map(points => Polyline.fromPoints(points));
@@ -267,36 +266,6 @@ export function calExtendCurve(polyline: Polyline) {
 
     // 此时延长线为直线 
     return { k, b, R2 };
-}
-
-
-
-
-export function getConnectMark(polyline0: Polyline, polyline1: Polyline, angleLimit = 30) {
-    // 闭合检查, 如果闭合，则不连接
-    if (polyline0.isClosed || polyline1.isClosed) return 0;
-    const { EPoint: EPoint0, outDir: outDir0 } = polyline0;
-    const { SPoint: SPoint1, inDir: inDir1 } = polyline1;
-    // console.log("outDir0:", outDir0, "inDir1:", inDir1);
-
-
-    const off = vec2.sub(vec2.create(), SPoint1, EPoint0);
-    const dis = vec2.len(off);
-    /**距离分数以 泊松分布为基础 */
-    const disMark = getDistMark(dis, 100);
-
-    let angleMark = 0;
-    const isConnect = dis < 1;
-    if (isConnect) {
-        const angle = vec2.angle(outDir0, inDir1) * 180 / Math.PI;
-        angleMark = getAngleMark(angle, angleLimit);
-    } else {
-        const angle0 = vec2.angle(off, outDir0) * 180 / Math.PI;
-        const angle1 = vec2.angle(off, inDir1) * 180 / Math.PI;
-        angleMark = getAngleMark(angle0, angleLimit) * getAngleMark(angle1, angleLimit)
-    }
-
-    return disMark * angleMark;
 }
 
 export function connectPolyline(polyline0: Polyline, polyline1: Polyline) {

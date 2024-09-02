@@ -46,7 +46,7 @@ export class ClosedShape extends SingleShape {
      * @param angleThreshold the angle threshold to split
      * @returns 
      */
-    splitInAngle(angleThreshold = 60): SingleShape[] {
+    splitByAngle(angleThreshold = 60): SingleShape[] {
         // console.log('split');
         // 如果角度大于 angleThreshold，就分割
         angleThreshold *= Math.PI / 180;
@@ -64,7 +64,7 @@ export class ClosedShape extends SingleShape {
             // console.log(curve, 'curvature', curvature);
 
             // 角度超过阈值 或者 曲线类型改变
-            if (angle > angleThreshold || lastCurve.type !== curve.type) {
+            if (angle > angleThreshold) {
                 if (curveArr.length) {
                     result.push(curveArr);
                 }
