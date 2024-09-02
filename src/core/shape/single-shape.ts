@@ -15,10 +15,6 @@ export class SingleShape extends Shape {
         super(curves);
     }
 
-    get isClosed() {
-        return this.curves.length > 0 && vec2.dist(this.curves[0].SPoint, this.curves[this.curves.length - 1].EPoint) < 1e-3;
-    }
-
     moveTo(x: number, y: number) {
         this.currentPos = vec2.fromValues(x, y);
     }

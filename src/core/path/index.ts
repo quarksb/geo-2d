@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { ClosedShape, Shape } from "../shape";
 import { pathStringToPathCommands } from "../utils/svg";
-import { BBox2, createBBox2 } from "../base";
+import { BBox2, createBBox2, includeBBox2 } from "../base";
 import { PathCommand } from "../shape/single-shape";
 import { CoordData, LineCurve, PointFn } from "../curve";
 
@@ -93,24 +93,25 @@ export class Path {
     /**
      * ### split path
      * - if a path is consists by multiple closed shapes, then split the path into multiple paths
+     * - such as we could split a "吕" into two "口"
      */
-    split(): Path[] {
+    splitByBBox(): Path[] {
         const { shapes } = this;
         const shapeArr: ClosedShape[][] = [];
         for (let index = 0; index < shapes.length; index++) {
             const shape = shapes[index];
             const { bbox2, isClockwise } = shape;
-            // console.log('', , 'isClockwise', isClockwise);
-            if (!isClockwise) {
-                // 如果是逆时针，则代表一个新的 path
+            // console.log('isClockwise', isClockwise);
+            if (isClockwise) {
+                // 如果是顺时针，则代表一个新的 path
                 shapeArr.push([shape]);
             } else {
-                // 如果是顺时针，说明是内部结构，需要添加进已有的 path 中
+                // 反之，如果是逆时针，说明是内部结构，需要添加进已有的 path 中
 
                 // 通过  查找对应的 path
                 const lastShapes = shapeArr.find((shapes) => {
-                    const lastBounds = shapes[0].bbox2;
-                    return lastBounds.xMin <= bbox2.xMin && lastBounds.xMax >= bbox2.xMax && lastBounds.yMin <= bbox2.yMin && lastBounds.yMax >= bbox2.yMax;
+                    const lastBBox2 = shapes[0].bbox2;
+                    return includeBBox2(lastBBox2, bbox2);
                 });
 
                 if (lastShapes) {

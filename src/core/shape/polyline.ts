@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, LineCurve } from "../curve";
 import { SingleShape } from "./single-shape";
-import { calRadius, getCurvature, linearRegression } from "../math";
+import { getAngleMark, getCurvature, getDistMark, linearRegression } from "../math";
 import { getPointsClockwise } from "./polygon";
 
 export class Polyline extends SingleShape {
@@ -269,25 +269,7 @@ export function calExtendCurve(polyline: Polyline) {
     return { k, b, R2 };
 }
 
-/**
- * ### get the distance mark
- * 函数 y = f(x)，满足以下条件：
- * 
- * - 当 x < 0 时，y = 0。
- * - 当 0 ≤ x ≤ k 时，y 从 0 逐渐增大到 1。
- * - 当 x > k 时，y 从 1 逐渐减小到 0。
- * 
- * @param x 
- * @param k 
- * @returns 
- */
-export function getDistMark(x: number, k: number) {
-    return Math.exp(-(x - 1) / k);
-}
 
-export function getAngleMark(val: number, limit: number) {
-    return Math.max(1 - val / limit, 0);
-}
 
 
 export function getConnectMark(polyline0: Polyline, polyline1: Polyline, angleLimit = 30) {

@@ -42,6 +42,10 @@ export abstract class Shape {
         return this._isClockwise;
     }
 
+    get isClosed() {
+        return this.curves.length > 0 && vec2.dist(this.curves[0].SPoint, this.curves[this.curves.length - 1].EPoint) < 1e-3;
+    }
+
     /** ### the bbox2 of the shape */
     get bbox2() {
         if (!this._bbox2) {
@@ -136,10 +140,10 @@ export abstract class Shape {
         return result.flat();
     }
 
-    getPosDataByPer(percent: number, isReCircle = false) {
+    getPosDataByPer(percent: number) {
         const { len } = this
 
-        if (isReCircle) {
+        if (this.isClosed) {
             percent = (percent + 1) % 1;
         }
 

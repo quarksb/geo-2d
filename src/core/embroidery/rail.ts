@@ -1,7 +1,7 @@
 import { LineCurve } from "../curve";
-import { calDisData, DisData, getDistMark, getPointsClockwise, Polyline, SingleShape } from "../shape";
+import { calDisData, DisData, getPointsClockwise, Polyline, SingleShape } from "../shape";
 import { Stitch } from "./stitch";
-import { createMatrix } from "../math";
+import { createMatrix, getDistMark } from "../math";
 
 
 const isDebug = true || window.location.href.includes('debug');
@@ -36,7 +36,7 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
     const maxScoreIndexArr = new Array<number>(n);
     // console.log("disDataMatrix:", disDataMatrix);
     for (let i = 0; i < n; i++) {
-        // 寻找标准差最小的导轨
+        // 寻找得分最大的导轨
         const l0 = polylineArr[i]
         let maxScore = -Infinity;
         let maxIndex = -1;
@@ -44,7 +44,7 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
             if (i === j) {
                 continue;
             }
-            const { std, min, mean, max } = disDataMatrix[i][j];
+            const { std, mean } = disDataMatrix[i][j];
             // console.log(i, j, std.toFixed(5), "min:", min.toFixed(0), "mean:", mean.toFixed(0), "max", max.toFixed(0));
             // debugger
             // 检查闭合图形是否是逆时针
@@ -59,7 +59,7 @@ export function getRailCouples(polylineArr: Polyline[], disLimit = 100, size: nu
             }
         }
         maxScoreIndexArr[i] = maxIndex;
-        // console.log(i, "minIndex:", minIndex, minStd);
+        console.log(i, "maxIndex:", maxIndex, maxScore);
     }
 
     // maxScoreIndexArr.forEach((index, i) => {
@@ -169,8 +169,8 @@ export class Rail {
         const rungs: LineCurve[] = new Array(count);
         for (let i = 0; i < count; i += 1) {
             const per = i / count;
-            const { pos } = basicRail.getPosDataByPer(per, true);
-            const { pos: end } = otherRail.getPosDataByPer(per + offsetPer, true);
+            const { pos } = basicRail.getPosDataByPer(per);
+            const { pos: end } = otherRail.getPosDataByPer(per + offsetPer);
             const rung = new LineCurve(pos, end);
             rungs[i] = rung;
         }

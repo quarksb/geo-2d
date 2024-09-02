@@ -295,8 +295,6 @@ export class QuadraticCurve extends LineCurve {
             }
         }
 
-        // console.log(minDistance);
-
         return minDistance;
     }
 
@@ -329,10 +327,9 @@ export class QuadraticCurve extends LineCurve {
 
     /**
      *### 数值法计算曲率极值点对应的参数，可以是多个 
-     * @param limit - 曲率半径极值的阈值 @default 1E-2
      * @returns 曲率半径极值点对应的参数 
      */
-    getCusps(limit = 1E-6): number[] {
+    getCusps(): number[] {
         const count = 20;
         // 计算 count 个点的曲率
         /**curvature array */
@@ -346,7 +343,6 @@ export class QuadraticCurve extends LineCurve {
 
         // console.log(CArr);
 
-
         // 寻找极值点
         const cusps: number[] = [];
         for (let i = 1; i < count; i++) {
@@ -355,7 +351,7 @@ export class QuadraticCurve extends LineCurve {
             }
         }
 
-        // 分析首尾
+        // 分析首尾是否是极值点
         if (CArr[0] * (CArr[0] - CArr[1]) > 0) {
             cusps.unshift(0)
         }
@@ -426,7 +422,7 @@ export class QuadraticCurve extends LineCurve {
     /**
      * ### use polyline to represent the curve
      * 
-    */
+     */
     toPoints(count = 10): vec2[] {
         const points: vec2[] = new Array(count);
         const step = 1 / count;
