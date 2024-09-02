@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { checkLineCurveIntersect, LineCurve } from "../curve";
+import { BezierCurve, checkLineCurveIntersect, Curve, LineCurve, lineInterSect, QuadraticCurve } from "../curve";
 import { SingleShape } from "./single-shape";
 import { getCurvature, linearRegression } from "../math";
 import { getPointsRightHandRule } from "./polygon";
@@ -201,7 +201,7 @@ export function calDisData(polyline0: Polyline, polyline1: Polyline): DisData[] 
 
     const isAnyClosed = polyline0.isClosed || polyline1.isClosed;
 
-    // 任何一 shape 闭合时，shape 首尾本身就相交，此时不进行相交性检测
+    // 当 shape 均闭合时，进行相交性检测（ 倘若 shape 闭合，则其首尾已经相交）
     if (!isAnyClosed) {
         // 首尾相交性检测
         const LineCurve0 = new LineCurve(polyline0.EPoint, polyline1.SPoint);;
@@ -269,9 +269,40 @@ export function calExtendCurve(polyline: Polyline) {
 }
 
 export function connectPolyline(polyline0: Polyline, polyline1: Polyline) {
-    const isContinuous = vec2.dist(polyline0.EPoint, polyline1.SPoint) < 1e-3;
+    const dist = vec2.dist(polyline0.EPoint, polyline1.SPoint);
+    let points: vec2[] = [...polyline0.points];
     // 如果连续，则省去 polyline1 的第一个点
-    const points = [...polyline0.points, ...polyline1.points.slice(isContinuous ? 1 : 0)];
+    if (dist < 1E-1) {
+        points = points.concat(polyline1.points.slice(1));
+    } else {
+        const angle = vec2.angle(polyline0.outDir, polyline1.inDir);
+        const baseLen = vec2.dist(polyline0.points[0], polyline0.points[1]);
+        // 当间距较大是，需要插值
+        if (dist > baseLen) {
+            let curve: Curve;
+            if (angle < Math.PI / 36) {
+                // 如果角度较小，则用一阶贝塞尔曲线插值
+                curve = new LineCurve(polyline0.EPoint, polyline1.SPoint);
+            } else {
+                // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
+
+                // debugger
+                const p1 = polyline0.EPoint;
+                const p2 = vec2.add(vec2.create(), polyline0.EPoint, polyline0.outDir);
+                const p3 = vec2.add(vec2.create(), polyline1.SPoint, polyline1.inDir);
+                const p4 = polyline1.SPoint;
+                const interSect = lineInterSect(p1, p2, p3, p4);
+                curve = new QuadraticCurve(polyline0.EPoint, interSect, polyline1.SPoint);
+            }
+            const { len } = curve;
+            for (let t = 1; t * baseLen < len; t++) {
+                const per = t * baseLen / len;
+                points.push(curve.getPosDataByPer(per).pos);
+            }
+        }
+
+        points = points.concat(polyline1.points);
+    }
     return Polyline.fromPoints(points);
 }
 

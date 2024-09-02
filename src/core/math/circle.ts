@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { getTriangleSignArea } from "./triangle";
+import { calPointsArea } from "../shape";
 
 /**
  * ### calculate the radius of a circle
@@ -31,5 +31,5 @@ export function getCurvature(pointA: vec2, pointB: vec2, pointC: vec2) {
     const b = vec2.distance(pointB, pointC);
     const c = vec2.distance(pointC, pointA);
 
-    return getTriangleSignArea(pointA, pointB, pointC) / (a * b * c);
+    return calPointsArea([pointA, pointB, pointC]) / (a * b * c);
 }

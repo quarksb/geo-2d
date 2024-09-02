@@ -229,6 +229,24 @@ export class LineCurve extends Curve {
     }
 }
 
+export function lineInterSect(p1: vec2, p2: vec2, p3: vec2, p4: vec2): vec2 {
+    const [x1, y1] = p1;
+    const [x2, y2] = p2;
+    const [x3, y3] = p3;
+    const [x4, y4] = p4;
+    const a1 = y2 - y1;
+    const b1 = x1 - x2;
+    const c1 = x2 * y1 - x1 * y2;
+    const a2 = y4 - y3;
+    const b2 = x3 - x4;
+    const c2 = x4 * y3 - x3 * y4;
+    // todo d = 0
+    const d = a1 * b2 - a2 * b1;
+    const x = (b1 * c2 - b2 * c1) / d;
+    const y = (a2 * c1 - a1 * c2) / d;
+    return vec2.fromValues(x, y);
+}
+
 /**
  * ### Check if two line curves intersect
  * 倘若相交，则通过线段 line1 的两点必定在线段 line2 的两侧, 反之亦然
@@ -241,6 +259,13 @@ export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boo
     const [x2, y2] = line1.EPoint;
     const [x3, y3] = line2.SPoint;
     const [x4, y4] = line2.EPoint;
+
+    // bbox 检测
+    const { x: x1Min, y: y1Min, width: w1, height: h1 } = line1.bbox;
+    const { x: x2Min, y: y2Min, width: w2, height: h2 } = line2.bbox;
+    if (x1Min + w1 < x2Min || x2Min + w2 < x1Min || y1Min + h1 < y2Min || y2Min + h2 < y1Min) {
+        return false;
+    }
 
     // line1 的两点必定在线段 line2 的两侧
     const cross0 = (x1 - x3) * (y4 - y3) - (y1 - y3) * (x4 - x3);
