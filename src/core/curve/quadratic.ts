@@ -247,14 +247,15 @@ export class QuadraticCurve extends LineCurve {
             [2 * (y1 - 2 * y2 + y3), 2 * (y2 - y1)]
         ];
 
-        // 两个向量的点积为 0
+        // 两个向量的点积为 0 （ 一次方程 点乘 二次方程）
         // x0 * x1 + y0 * y1 = 0
         // 整理，合并得到 一个一元三次方程
-        /**一元三次方程的参数 */
+        /**一元三次方程的参数，共 4 个 */
         const equation = new Array(2 + 3 - 1).fill(0);
         for (let i = 0; i < 2; i++) { // x, y
             for (let j = 0; j < 2; j++) { // tanArr
                 for (let k = 0; k < 3; k++) { // offVecArr
+                    // 合并同次项
                     equation[j + k] += tanArr[i][j] * offVecArr[i][k] + tanArr[i][j] * offVecArr[i][k];
                 }
             }
