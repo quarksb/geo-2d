@@ -1,3 +1,6 @@
+/**
+ * ### Classic Bounding Box
+ */
 export interface BBox {
     x: number;
     y: number;
@@ -5,6 +8,9 @@ export interface BBox {
     height: number;
 }
 
+/**
+ * ### Efficient Bounding Box
+ */
 export interface BBox2 {
     xMin: number;
     xMax: number;

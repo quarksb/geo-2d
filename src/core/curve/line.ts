@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { Curve, PointFn, CoordData } from "./curve";
-import { BBox } from "../base";
+import { BBox2 } from "../base";
 
 export const LineCurveType = "curve-line";
 
@@ -33,13 +33,11 @@ export class LineCurve extends Curve {
         this.ouDir = this.tangent;
     }
 
-    protected _getBBox(): BBox {
+    protected _getBBox2(): BBox2 {
         const { SPoint: SPt, EPoint: EPt } = this;
-        const x = Math.min(SPt[0], EPt[0]);
-        const y = Math.min(SPt[1], EPt[1]);
-        const width = Math.abs(SPt[0] - EPt[0]);
-        const height = Math.abs(SPt[1] - EPt[1]);
-        return { x, y, width, height };
+        const [xMin, xMax] = SPt[0] < EPt[0] ? [SPt[0], EPt[0]] : [EPt[0], SPt[0]];
+        const [yMin, yMax] = SPt[1] < EPt[1] ? [SPt[1], EPt[1]] : [EPt[1], SPt[1]];
+        return { xMin, yMin, xMax, yMax };
     }
 
     protected _getLen(): number {

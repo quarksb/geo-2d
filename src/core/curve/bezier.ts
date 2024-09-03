@@ -3,7 +3,7 @@ import { QuadraticCurve } from "./quadratic";
 import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
 import { LineCurve } from "./line";
-import { BBox } from "../base";
+import { BBox2 } from "../base";
 
 export const BezierCurveType = "curve-bezier";
 
@@ -14,7 +14,7 @@ export const BezierCurveType = "curve-bezier";
 export class BezierCurve extends QuadraticCurve {
     /** The second control point of the curve. */
     protected _CPoint2: vec2 = vec2.create();
-    constructor(startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
+    constructor (startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
         super(startPoint, controlPoint1, endPoint);
         this.type = BezierCurveType;
         this.CPoint2 = controlPoint2;
@@ -39,7 +39,7 @@ export class BezierCurve extends QuadraticCurve {
      * get BBox by control points, using derivation
      * @returns
      */
-    protected _getBBox(): BBox {
+    protected _getBBox2(): BBox2 {
         const [x0, y0] = this.SPoint;
         const [x1, y1] = this.CPoint1;
         const [x2, y2] = this.CPoint2;
@@ -59,12 +59,7 @@ export class BezierCurve extends QuadraticCurve {
         const yMin = Math.min(...yValues);
         const yMax = Math.max(...yValues);
 
-        return {
-            x: xMin,
-            y: yMin,
-            width: xMax - xMin,
-            height: yMax - yMin,
-        };
+        return { xMin, xMax, yMin, yMax };
     }
 
     getSplitT(data: CoordData): number[] {
@@ -160,9 +155,9 @@ export class BezierCurve extends QuadraticCurve {
     applyFFDFn(fn: PointFn): void {
         const { SPoint, EPoint } = this;
         // 分析问题，经历 FFD 变换后 贝塞尔曲线的位置是确定的，那么还是先两控制点共 4 个参数，需要求解 4 个方程，而每个点可以提供 x, y 两个方程，所以需要 2 个点, 选取 t = 0.4, 0.6 两点
-        /**目标点参数 */ 
+        /**目标点参数 */
         const tArr = [0.4, 0.6];
-        /**目标点位置 */ 
+        /**目标点位置 */
         const pArr = tArr.map((t) => {
             // 求出变换前点位置
             const p = this.getPosition(t);
@@ -174,7 +169,7 @@ export class BezierCurve extends QuadraticCurve {
         // 更新收尾两点位置
         fn(SPoint);
         fn(EPoint);
-        
+
         const getEquation = (t: number, p: vec2) => {
             // 计算 t 时的方程
             const a = (1 - t) ** 3;
@@ -186,11 +181,11 @@ export class BezierCurve extends QuadraticCurve {
             // b * CPoint1 + c * CPoint2 = p - a * SPoint - d * EPoint
             return [b, c, p[0] - d * EPoint[0] - a * SPoint[0], p[1] - d * EPoint[1] - a * SPoint[1]];
         };
-        
+
         // 共两个二元二次方程组（ x, y 方程组相互独立）
         const [a, b, m0, n0] = getEquation(tArr[0], pArr[0]);
         const [c, d, m1, n1] = getEquation(tArr[1], pArr[1]);
-        
+
         // bc - ad 只有在 t = 0 或 t = 1 时为 0，所以不用担心分母为 0 的情况
         const k = 1 / (b * c - a * d);
 
@@ -198,7 +193,7 @@ export class BezierCurve extends QuadraticCurve {
         const y0 = (b * n1 - d * n0) * k;
         const x1 = (c * m0 - a * m1) * k;
         const y1 = (c * n0 - a * n1) * k;
-    
+
         this.CPoint1 = vec2.fromValues(x0, y0);
         this.CPoint2 = vec2.fromValues(x1, y1);
     }

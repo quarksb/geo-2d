@@ -1,8 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { LineCurve } from "./line";
-import { PointFn, CoordData, Curve } from "./curve";
+import { PointFn, CoordData } from "./curve";
 import { getRoots } from "../math/equation";
-import { BBox } from "../base";
+import { BBox2 } from "../base";
 
 const SPLIT_COUNT = 100;
 export const QuadraticCurveType = "curve-quadratic";
@@ -41,29 +41,10 @@ export class QuadraticCurve extends LineCurve {
         this.ouDir = this.getTangent(1);
     }
 
-    getRoughBBox(): BBox {
+    protected _getBBox2(): BBox2 {
         const [x0, y0] = this.SPoint;
         const [x1, y1] = this.CPoint1;
-        const [x2, y2] = this.EPoint
-        const xMin = Math.min(x0, x1, x2);
-        const xMax = Math.max(x0, x1, x2);
-        const yMin = Math.min(y0, y1, y2);
-        const yMax = Math.max(y0, y1, y2);
-        return {
-            x: xMin,
-            y: yMin,
-            width: xMax - xMin,
-            height: yMax - yMin,
-        };
-    }
-
-    protected _getBBox(): BBox {
-        const x0 = this.SPoint[0];
-        const y0 = this.SPoint[1];
-        const x1 = this.CPoint1[0];
-        const y1 = this.CPoint1[1];
-        const x2 = this.EPoint[0];
-        const y2 = this.EPoint[1];
+        const [x2, y2] = this.EPoint;
 
         const xDerivation = [2 * (x0 - 2 * x1 + x2), 2 * (x1 - x2)];
         const yDerivation = [2 * (y0 - 2 * y1 + y2), 2 * (y1 - y2)];
@@ -77,12 +58,7 @@ export class QuadraticCurve extends LineCurve {
         const xMax = Math.max(...xValues);
         const yMin = Math.min(...yValues);
         const yMax = Math.max(...yValues);
-        return {
-            x: xMin,
-            y: yMin,
-            width: xMax - xMin,
-            height: yMax - yMin,
-        };
+        return { xMin, xMax, yMin, yMax };
     }
 
     // 通过采样点计算长度

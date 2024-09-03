@@ -1,6 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { BBox } from "../base";
-import { BezierCurve } from "./bezier";
+import { BBox, BBox2 } from "../base";
 import { type LineCurve } from "./line";
 
 export type PointFn = (vec: vec2) => void;
@@ -24,7 +23,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
      * The end point of the curve.
      */
     protected _EPoint: vec2 = vec2.create();
-    protected _bbox?: BBox;
+    protected _bbox2?: BBox2;
     protected _len?: number;
 
     /**
@@ -66,10 +65,15 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     }
 
     get bbox(): BBox {
-        if (this._isDirty || !this._bbox) {
+        const { xMin, yMin, xMax, yMax } = this.bbox2;
+        return { x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin };
+    }
+
+    get bbox2(): BBox2 {
+        if (this._isDirty || !this._bbox2) {
             this.update();
         }
-        return this._bbox!;
+        return this._bbox2!;
     }
 
     get len(): number {
@@ -80,7 +84,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     }
 
     protected update() {
-        this._bbox = this._getBBox();
+        this._bbox2 = this._getBBox2();
         this._len = this._getLen();
         this._isDirty = false;
     }
@@ -89,7 +93,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
      * Gets the bounding box of the curve.
      * @returns The bounding box.
      */
-    protected abstract _getBBox(): BBox;
+    protected abstract _getBBox2(): BBox2;
 
     /**
      * Gets the length of the curve.
@@ -105,7 +109,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     abstract getMaxCurvature(): number;
 
     /**
-     * Gets the position on the curve at the given parameter value.
+     * ### Gets the position on the curve at the given parameter value.
      * @param t - The parameter value.
      * @returns The position on the curve.
      */
