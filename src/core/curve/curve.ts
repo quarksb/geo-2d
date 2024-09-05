@@ -27,11 +27,11 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     protected _len?: number;
 
     /**
-     * The direction of the curve at the start point.
+     * The normal vector to represent direction of the curve at the start point.
      */
     inDir: vec2 = vec2.create();
     /**
-     * The direction of the curve at the end point.
+     * The normal vector to represent direction of the curve at the end point.
      */
     ouDir: vec2 = vec2.create();
 
@@ -81,6 +81,20 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
             this.update();
         }
         return this._len!;
+    }
+
+    /**
+     * Gets the deflection angle of the curve.
+     * @remarks this is the angle between the inDir and ouDir,
+     * it is correct for most of the time, but it not correct for bezier curve sometimes.
+     */
+    get deflection(): number {
+        const { inDir, ouDir } = this;
+        // 计算 outDir 和 inDir 的叉积
+        const sine = inDir[0] * ouDir[1] - inDir[1] * ouDir[0];
+        // 计算 outDir 和 inDir 的点积
+        const cosine = inDir[0] * ouDir[0] + inDir[1] * ouDir[1];
+        return Math.atan2(sine, cosine);
     }
 
     protected update() {

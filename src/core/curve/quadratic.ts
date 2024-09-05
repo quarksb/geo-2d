@@ -22,8 +22,10 @@ export class QuadraticCurve extends LineCurve {
         super(startPoint, endPoint);
         this.type = QuadraticCurveType;
         this.CPoint1 = controlPoint1;
-        this.inDir = vec2.normalize(vec2.create(), vec2.sub(vec2.create(), controlPoint1, startPoint));
-        this.ouDir = vec2.normalize(vec2.create(), vec2.sub(vec2.create(), endPoint, controlPoint1));
+        let vector = vec2.sub(vec2.create(), controlPoint1, startPoint);
+        this.inDir = vec2.normalize(vector, vector);
+        vector = vec2.sub(vec2.create(), endPoint, controlPoint1);
+        this.ouDir = vec2.normalize(vector, vector);
     }
 
     set CPoint1(val: vec2) {
@@ -298,16 +300,16 @@ export class QuadraticCurve extends LineCurve {
             return 0
         }
         const dominator = x1 ** 2 + y1 ** 2;
-        const k = dominator < 1E-20 ? Infinity : numerator / dominator ** 1.5;
-        return k;
+        const curvature = dominator < 1E-20 ? Infinity : numerator / dominator ** 1.5;
+        return curvature;
     }
 
     /**
      *### 数值法计算曲率极值点对应的参数，可以是多个 
+     * @param count 分割点数量(数值越大精度越高)
      * @returns 曲率半径极值点对应的参数 
      */
-    getCusps(): number[] {
-        const count = 20;
+    getCusps(count = 20): number[] {
         // 计算 count 个点的曲率
         /**curvature array */
         const CArr = new Array(count + 1);

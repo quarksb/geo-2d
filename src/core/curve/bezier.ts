@@ -18,6 +18,10 @@ export class BezierCurve extends QuadraticCurve {
         super(startPoint, controlPoint1, endPoint);
         this.type = BezierCurveType;
         this.CPoint2 = controlPoint2;
+        let vector = vec2.sub(vec2.create(), controlPoint1, startPoint);
+        this.inDir = vec2.normalize(vector, vector);
+        vector = vec2.sub(vec2.create(), endPoint, controlPoint2);
+        this.ouDir = vec2.normalize(vector, vector);
     }
 
     /**

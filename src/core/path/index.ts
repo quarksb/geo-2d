@@ -96,29 +96,75 @@ export class Path {
      */
     splitByBBox(): Path[] {
         const { shapes } = this;
+        // console.log("shapes", shapes.map((shape) => shape.isRightHand));
+
+        // 先找到所有的路径，找到 bbox 最大的作为 path 的起始
+        /**biggest shape */
+        let BShape = shapes[0];
+        for (let i = 1; i < shapes.length; i++) {
+            const shape = shapes[i];
+            const { bbox2 } = shape;
+            if (bbox2.xMin < BShape.bbox2.xMin) {
+                BShape = shape;
+            }
+        }
+
+        // check whether the shape is biggest
+        // const isRealBiggest = shapes.every((shape) => {
+        //     const { bbox2 } = shape;
+        //     return bbox2.xMin >= BShape.bbox2.xMin || bbox2.yMin >= BShape.bbox2.yMin || bbox2.xMax <= BShape.bbox2.xMax || bbox2.yMax <= BShape.bbox2.yMax;
+        // })
+
+        // if (!isRealBiggest) {
+        //     console.warn("the biggest shape is not real biggest");
+        // }
+
+        // the BShape should be right hand, if not, then we should reverse the path
+        if (!BShape.isRightHand) {
+            shapes.forEach((shape) => {
+                shape.reverse();
+            })
+        }
+
         const shapeArr: ClosedShape[][] = [];
-        for (let index = 0; index < shapes.length; index++) {
-            const shape = shapes[index];
-            const { bbox2, isRightHand } = shape;
+        // 先找到所有的外圈，即 isRightHand 为 true 的 shape
+        for (let i = 0; i < shapes.length; i++) {
+            const shape = shapes[i];
+            const { isRightHand } = shape;
             if (isRightHand) {
-                // 如果是顺时针，则代表一个新的 path
+                // 顺时针，说明是外部结构，需要添加进 shapeArr
                 shapeArr.push([shape]);
-            } else {
-                // 反之，如果是逆时针，说明是内部结构，需要添加进已有的 path 中
+            }
+        }
+
+        // console.log("shapeArr", shapeArr);
+
+        // 再找到所有的内圈，即 isRightHand 为 false 的 shape
+        for (let i = 0; i < shapes.length; i++) {
+            const shape = shapes[i];
+            const { bbox2, isRightHand } = shape;
+            if (!isRightHand) {
+                // 逆时针，说明是内部结构，需要添加进已有的 path 中
 
                 // 通过  查找对应的 path
                 const lastShapes = shapeArr.find((shapes) => {
+                    if (!shapes[0]) {
+                        return false;
+                    }
                     const lastBBox2 = shapes[0].bbox2;
+                    // console.log("lastBBox2", shapes[0], lastBBox2, bbox2);
+
                     return includeBBox2(lastBBox2, bbox2);
                 });
 
                 if (lastShapes) {
                     lastShapes.push(shape);
                 } else {
-                    console.error("can't find the path for the shape", shape);
+                    console.warn("can't find the path for shape:", shape);
                 }
             }
         }
+
         const paths = shapeArr.map((shapes) => {
             return new Path(shapes);
         });

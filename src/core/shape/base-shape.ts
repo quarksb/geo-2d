@@ -25,12 +25,15 @@ export abstract class Shape {
     }
 
     initPoints() {
-        const { length: n } = this.curves;
+        const { curves } = this;
+        const { length: n } = curves;
         if (n === 0) return;
-        this.points = new Array<vec2>(n);
-        this.points[0] = this.curves[0].SPoint;
+        // console.log("curves", curves);
+
+        this.points = new Array<vec2>(n + 1);
+        this.points[0] = curves[0].SPoint;
         for (let i = 0; i < n; i++) {
-            this.points[i + 1] = this.curves[i].EPoint
+            this.points[i + 1] = curves[i].EPoint
         }
     }
 
@@ -87,6 +90,14 @@ export abstract class Shape {
      */
     get outDir() {
         return this.curves[this.curves.length - 1].ouDir;
+    }
+
+    getMaxCurvature() {
+        let maxCurvature = 0;
+        for (const curve of this.curves) {
+            maxCurvature = Math.max(maxCurvature, curve.getMaxCurvature());
+        }
+        return maxCurvature;
     }
 
     /**
@@ -211,8 +222,9 @@ export abstract class Shape {
             curve.reverse();
         }
         this.points.reverse();
-        // lenArr 需要重新计算
-        this._getLen();
+        this._isRightHand = !this._isRightHand;
+        // _lenArr 需要更新
+        this._len = this._getLen();
     }
 
 
@@ -329,6 +341,7 @@ export function simplyCurves(curves: Curve[]): Curve[] {
             result.push(currentCurve);
         }
     }
+
     for (let i = 1; i < curves.length - 1; i++) {
         const lastCurve = result[result.length - 1];
         const currentCurve = curves[i];

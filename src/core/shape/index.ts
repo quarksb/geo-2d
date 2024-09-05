@@ -4,3 +4,4 @@ export * from './single-shape';
 export * from './closed-shape';
 export * from './polyline';
 export * from './polygon';
+export * from './utils';

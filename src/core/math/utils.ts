@@ -1,4 +1,10 @@
 import { vec2 } from "gl-matrix";
+
+
+export function cross(v0: vec2, v1: vec2): number {
+    return v0[0] * v1[1] - v0[1] * v1[0];
+}
+
 const a = 1103515245;
 const b = 12345;
 const m = 2147483647;
@@ -93,6 +99,18 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
     // console.log("result:", result);
 
     return result;
+}
+
+/**
+ * get the angle change between two vectors
+ * @param v1 - the first vector
+ * @param v2 - the second vector
+ * @returns - the angle change from v1 to v2
+ */
+export function getAngleChange(v1: vec2, v2: vec2) {
+    const sine = v1[0] * v2[1] - v1[1] * v2[0];
+    const cosine = v1[0] * v2[0] + v1[1] * v2[1];
+    return Math.atan2(sine, cosine);
 }
 
 
