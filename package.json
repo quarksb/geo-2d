@@ -1,6 +1,6 @@
 {
   "name": "geo-2d",
-  "version": "1.0.0-beta.17",
+  "version": "1.0.0-beta.20",
   "type": "module",
   "files": [
     "dist"
@@ -14,7 +14,7 @@
           "./src/index.ts",
           "./dist/index.d.ts"
         ],
-        "default": "./dist/geometry.es.js"
+        "default": "./src/index.ts"
       },
       "require": "./dist/geometry.umd.js"
     },
@@ -36,7 +36,7 @@
     "build:lib": "vite build --mode lib",
     "doc": "typedoc src/index.ts --excludeInternal",
     "preview": "vite preview",
-    "publish:geo": "vite build --mode lib && npm publish",
+    "publish:lib": "vite build --mode lib && npm publish",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },

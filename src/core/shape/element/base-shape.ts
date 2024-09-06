@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { Curve, CoordData, LineCurve, LineCurveType } from "../curve";
-import { BBox2, createBBox2 } from "../base";
+import { Curve, CoordData, LineCurve, LineCurveType } from "../../curve";
+import { BBox2, createBBox2, getBBox2Size, mergeBBox2 } from "../../base";
 import { getPointsRightHandRule } from "./polygon";
 
 
@@ -128,15 +128,11 @@ export abstract class Shape {
      * @param bbox2 
      * @returns 
      */
-    getBBox2(bbox2 = createBBox2()): BBox2 {
-        for (const { bbox } of this.curves) {
-            const { x, y, width, height } = bbox;
-            bbox2.xMin = Math.min(bbox2.xMin, x);
-            bbox2.xMax = Math.max(bbox2.xMax, x + width);
-            bbox2.yMin = Math.min(bbox2.yMin, y);
-            bbox2.yMax = Math.max(bbox2.yMax, y + height);
+    getBBox2(outBBox2 = createBBox2()): BBox2 {
+        for (const { bbox2 } of this.curves) {
+            mergeBBox2(outBBox2, bbox2);
         }
-        return bbox2;
+        return outBBox2;
     }
 
     getLineIntersects(line: LineCurve): vec2[] {
@@ -267,97 +263,8 @@ export abstract class Shape {
     }
 }
 
-/**
- * ### simply curves
- * 尝试合并相邻的线段，合并规则如下，优先级逐渐减低
- * - 方向相同的直线直接合并
- * 
- * - 长度差异过大，长线合并短线
- * @param curves 
- * @returns 
- */
-export function simplyCurves(curves: Curve[]): Curve[] {
-    const isClosed = vec2.distance(curves[0].SPoint, curves[curves.length - 1].EPoint) < 1;
 
-    let offsetIndex = 0;
-    if (isClosed) {
-        // 寻找长度最长的线段
-        let maxLength = 0;
-        for (let i = 0; i < curves.length; i++) {
-            const curve = curves[i];
-            const len = curve.len;
-            if (len > maxLength) {
-                maxLength = len;
-                offsetIndex = i;
-            }
-        }
-    }
+if (import.meta.vitest) {
+    const point = vec2.fromValues(655, -208);
 
-    let result: Curve[] = [curves[offsetIndex]];
-
-    for (let i = 1; i < curves.length; i++) {
-        const j = (i + offsetIndex) % curves.length;
-        const currentCurve = curves[j];
-        const lastCurve = result[result.length - 1];
-        // 两者都是直线
-        const isBothLine = currentCurve.type === LineCurveType && lastCurve.type === LineCurveType;
-        if (isBothLine) {
-            const isSameDirection = vec2.dot(currentCurve.inDir, lastCurve.ouDir) > 0.99;
-            if (isSameDirection) {
-                lastCurve.EPoint = currentCurve.EPoint;
-            } else {
-                result.push(currentCurve);
-            }
-        } else {
-            result.push(currentCurve);
-        }
-    }
-
-    curves = result;
-    result = [curves[0]];
-    const check = (lastCurve: Curve, currentCurve: Curve, nextCurve: Curve) => {
-        const { len: l0 } = lastCurve;
-        const { len: l1 } = currentCurve;
-        const { len: l2 } = nextCurve;
-
-        const threshold = 20;
-        const isLengthDiff = l0 > threshold * l1 && l2 > threshold * l1;
-
-        if (isLengthDiff) {
-            // 长度差异过大，长线合并短线
-            const angle0 = vec2.angle(lastCurve.ouDir, currentCurve.inDir);
-            const angle1 = vec2.angle(currentCurve.ouDir, nextCurve.inDir);
-
-            if (angle0 < angle1) {
-                // 合并当前线段 和 lastCurve
-                lastCurve.EPoint = currentCurve.EPoint;
-            } else {
-                // 合并 currentCurve 和 nextCurve
-                nextCurve.SPoint = currentCurve.SPoint;
-                // console.log('合并 currentCurve 和 nextCurve');
-                return true
-            }
-        } else {
-            result.push(currentCurve);
-        }
-    }
-
-    for (let i = 1; i < curves.length - 1; i++) {
-        const lastCurve = result[result.length - 1];
-        const currentCurve = curves[i];
-        const nextCurve = curves[i + 1];
-        const sign = check(lastCurve, currentCurve, nextCurve);
-        if (sign) {
-            result.push(nextCurve);
-            i++;
-        }
-    }
-
-    // 最后一个 curve
-    if (isClosed) {
-        check(result[result.length - 1], curves[curves.length - 1], curves[0]);
-    } else {
-        result.push(curves[curves.length - 1]);
-    }
-    return result;
 }

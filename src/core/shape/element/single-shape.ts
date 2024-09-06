@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { Curve, LineCurve, BezierCurve, QuadraticCurve } from "../curve";
-import { PathCommand, pathStringToPathCommands } from "../utils";
+import { Curve, LineCurve, BezierCurve, QuadraticCurve } from "../../curve";
+import { PathCommand, pathStringToPathCommands } from "../../utils";
 import { Shape } from "./base-shape";
 
 /**

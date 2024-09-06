@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
-import { checkLineCurveIntersect, LineCurve, lineInterSect } from "../curve";
+import { checkLineCurveIntersect, LineCurve, lineInterSect } from "../../curve";
 import { SingleShape } from "./single-shape";
-import { linearRegression } from "../math";
+import { linearRegression } from "../../math";
 import { getPointsRightHandRule } from "./polygon";
-import { connectShape } from "./utils";
+import { connectShape } from "../method/connect";
 
 export class Polyline extends SingleShape {
     public curves: LineCurve[];

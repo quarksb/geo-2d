@@ -3,7 +3,7 @@ import { Curve } from "../curve/curve";
 import { getRandomGenerate } from "../math";
 import { BBox } from "../base";
 import { getPathStr } from "./svg";
-import { getBSpline } from "../shape/bSpline";
+import { getBSpline } from "../shape/element/bSpline";
 import { QuadraticCurve } from "../curve";
 
 /**

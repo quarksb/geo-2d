@@ -93,13 +93,11 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
         result.push(values);
     }
 
-
-
-    // console.log("count:", couples.length ** 2 - maxCount);
-    // console.log("result:", result);
-
     return result;
 }
+
+
+
 
 /**
  * get the angle change between two vectors

@@ -1,4 +1,4 @@
-import { BezierCurve, getBezierFromCurve } from "../curve";
+import { BezierCurve, getBezierFromCurve } from "../../curve";
 import { SingleShape } from "./single-shape";
 
 /**

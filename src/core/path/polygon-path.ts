@@ -1,4 +1,4 @@
-import { Polygon } from "../shape/polygon";
+import { Polygon } from "../shape";
 
 declare type WindingRule = "NONZERO" | "EVENODD";
 

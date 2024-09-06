@@ -27,12 +27,22 @@ export function createBBox2(): BBox2 {
     };
 }
 
+/**
+ * merge bbox2B to bbox2A
+ * @param bbox2A
+ * @param bbox2B
+ * @returns 
+ */
 export function mergeBBox2(bbox2A: BBox2, bbox2B: BBox2): BBox2 {
     bbox2A.xMin = Math.min(bbox2A.xMin, bbox2B.xMin);
     bbox2A.xMax = Math.max(bbox2A.xMax, bbox2B.xMax);
     bbox2A.yMin = Math.min(bbox2A.yMin, bbox2B.yMin);
     bbox2A.yMax = Math.max(bbox2A.yMax, bbox2B.yMax);
     return bbox2A;
+}
+
+export function getBBox2Size(bbox2: BBox2): { width: number, height: number } {
+    return { width: bbox2.xMax - bbox2.xMin, height: bbox2.yMax - bbox2.yMin };
 }
 
 /**

@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { BBox2 } from "../base";
+import { BBox2 } from "../../base";
 
 export class Polygon {
     points: vec2[];
