@@ -20,6 +20,39 @@ import { Curve, LineCurveType } from "../../curve";
  * @returns 
  */
 export function simplyCurves(curves: Curve[]): Curve[] {
+    curves = mergeLine(curves);
+    curves = mergeShortCurve(curves);
+    return curves;
+}
+
+/**合并连续的直线 */
+function mergeLine(curves: Curve[]) {
+    const { length: n } = curves;
+    const newCurves: Curve[] = [curves[0]];
+    for (let i = 1; i < n; i++) {
+        const currentCurve = curves[i];
+        const lastCurve = newCurves[newCurves.length - 1];
+        // 两者都是直线
+        const isBothLine = currentCurve.type === LineCurveType && lastCurve.type === LineCurveType;
+        // 且方向非常接近
+        const needMerge = isBothLine && vec2.dot(currentCurve.ouDir, lastCurve.ouDir) > 0.982;
+        if (needMerge) {
+            // 合并直线, 修改 lastCurve 的终点, 舍弃 currentCurve
+            lastCurve.EPoint = currentCurve.EPoint;
+        } else {
+            newCurves.push(currentCurve);
+        }
+    }
+
+    return newCurves;
+}
+
+/**
+ * merge short curve
+ * @param curves 
+ * @returns 
+ */
+function mergeShortCurve(curves: Curve[]) {
     const bbox2 = createBBox2();
     for (const curve of curves) {
         mergeBBox2(bbox2, curve.bbox2);
@@ -28,46 +61,9 @@ export function simplyCurves(curves: Curve[]): Curve[] {
     /**基准长度设定为 bbox 对角线的 1% */
     const lenLimit = Math.hypot(size.width, size.width) / 100;
 
-    let { length: n } = curves;
+    const newCurves = [curves[0]];
 
-    const isClosed = vec2.distance(curves[0].SPoint, curves[n - 1].EPoint) < 1;
-
-    let offsetIndex = 0;
-    if (isClosed) {
-        // 寻找长度最长的线段
-        let maxLength = 0;
-        for (let i = 0; i < n; i++) {
-            const curve = curves[i];
-            const len = curve.len;
-            if (len > maxLength) {
-                maxLength = len;
-                offsetIndex = i;
-            }
-        }
-    }
-
-    // 合并直线
-    let newCurves: Curve[] = [curves[offsetIndex]];
-    for (let i = 1; i < n; i++) {
-        const j = (i + offsetIndex) % n;
-        const currentCurve = curves[j];
-        const lastCurve = newCurves[newCurves.length - 1];
-        // 两者都是直线
-        const isBothLine = currentCurve.type === LineCurveType && lastCurve.type === LineCurveType;
-        // 且方向相同
-        const needMerge = isBothLine && vec2.dot(currentCurve.inDir, lastCurve.ouDir) > 0.982;
-        if (needMerge) {
-            // 合并直线, 直接修改 lastCurve 的终点
-            lastCurve.EPoint = currentCurve.EPoint;
-        } else {
-            newCurves.push(currentCurve);
-        }
-    }
-
-    curves = newCurves;
-    newCurves = [curves[0]];
-
-    n = curves.length;
+    const { length: n } = curves;
 
     /**标记可以合并的曲线，可以合并并不意味着一定合并 */
     const mergeSign = new Array(n).fill(false);
@@ -79,30 +75,38 @@ export function simplyCurves(curves: Curve[]): Curve[] {
         }
     }
 
-    console.table(mergeSign);
-    // 合并小线段
-    for (let i = 1; i < n - 1; i++) {
-        const curCurve = curves[i];
+    return curves;
+
+    // 先尝试把连续多段小曲线合并成一段
+    let i = 0, j = 0;
+    while (i < n) {
+        // 找到第一个可以合并的曲线
         if (mergeSign[i]) {
-            const lastCurve = newCurves[newCurves.length - 1];
-            const nextCurve = curves[i + 1];
-            shouldMerge(lastCurve, curCurve, nextCurve);
-        } else {
-            newCurves.push(curCurve);
+            j = i + 1;
+            while (j < n && mergeSign[j]) {
+                j++;
+            }
+            if (j - i > 1) {
+                // 合并 i 到 j-1 的曲线
+                let SPoint = curves[i].SPoint;
+                let EPoint = curves[j - 1].EPoint;
+                for (let k = i + 1; k < j; k++) {
+                    curves[k].SPoint = SPoint;
+                    curves[k].EPoint = EPoint;
+                }
+                i = j;
+            } else {
+                i++;
+            }
         }
     }
 
-    // 最后一个 curve
-    if (isClosed) {
-        shouldMerge(newCurves[newCurves.length - 1], curves[n - 1], curves[0]);
-    } else {
-        newCurves.push(curves[n - 1]);
-    }
     return newCurves;
 }
 
 /**
  * 检查是否可以合并
+ * @todo 未完成, 目前合并逻辑不完善
  * @param lastCurve 
  * @param currentCurve 
  * @param nextCurve 
@@ -130,7 +134,5 @@ export function shouldMerge(lastCurve: Curve, currentCurve: Curve, nextCurve: Cu
             // console.log('合并 currentCurve 和 nextCurve');
             return true
         }
-    } else {
-        // result.push(currentCurve);
     }
 }

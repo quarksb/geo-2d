@@ -227,6 +227,11 @@ export class LineCurve extends Curve {
     }
 }
 
+export function isLineDirClose(line1: LineCurve, line2: LineCurve): boolean {
+    // 0.982 为标准正态分布 -3, 3 之间的概率, 随便写的，0.95 亦可
+    return vec2.dot(line1.tangent, line2.tangent) > 0.982;
+}
+
 export function lineInterSect(p1: vec2, p2: vec2, p3: vec2, p4: vec2): vec2 {
     const [x1, y1] = p1;
     const [x2, y2] = p2;
