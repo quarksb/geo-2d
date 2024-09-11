@@ -1,6 +1,6 @@
 {
   "name": "geo-2d",
-  "version": "1.0.0-beta.20",
+  "version": "1.0.0-beta.21",
   "type": "module",
   "files": [
     "dist"
@@ -11,10 +11,9 @@
     ".": {
       "import": {
         "types": [
-          "./src/index.ts",
           "./dist/index.d.ts"
         ],
-        "default": "./src/index.ts"
+        "default": "./dist/geometry.es.js"
       },
       "require": "./dist/geometry.umd.js"
     },

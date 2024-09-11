@@ -8,13 +8,27 @@ import { includeBBox2 } from "../../base";
 export class ClosedShape extends SingleShape {
     constructor (public curves: Curve[]) {
         super(curves);
+        // check whether it's closed
+        const { EPoint, SPoint } = this;
+        if (vec2.distance(EPoint, SPoint) > 1E-1) {
+            console.error("ClosedShape must be closed");
+        }
         this.initPoints();
     }
 
+    /**
+     * ## includePoint
+     * - check whether the point is in the shape
+     * @param point
+     * @returns
+     * - true: the point is in the shape
+     * - false: the point is not in the shape
+     * - if the point is on the edge of the shape, then return false
+     */
     includePoint(point: vec2) {
         // 1. 先判断 point 是否在 bbox 内部
         const { xMin, xMax, yMin, yMax } = this.bbox2;
-        if (point[0] < xMin || point[0] > xMax || point[1] < yMin || point[1] > yMax) {
+        if (point[0] <= xMin || point[0] >= xMax || point[1] <= yMin || point[1] >= yMax) {
             return false;
         }
 

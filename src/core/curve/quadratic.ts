@@ -3,6 +3,7 @@ import { LineCurve } from "./line";
 import { PointFn, CoordData } from "./curve";
 import { getRoots } from "../math/equation";
 import { BBox2 } from "../base";
+import { cross } from "../math";
 
 const SPLIT_COUNT = 100;
 export const QuadraticCurveType = "curve-quadratic";
@@ -25,7 +26,7 @@ export class QuadraticCurve extends LineCurve {
         let vector = vec2.sub(vec2.create(), controlPoint1, startPoint);
         this.inDir = vec2.normalize(vector, vector);
         vector = vec2.sub(vec2.create(), endPoint, controlPoint1);
-        this.ouDir = vec2.normalize(vector, vector);
+        this.outDir = vec2.normalize(vector, vector);
     }
 
     set CPoint1(val: vec2) {
@@ -37,10 +38,10 @@ export class QuadraticCurve extends LineCurve {
         return this._CPoint1;
     }
 
-    protected update(): void {
+    protected override update(): void {
         super.update();
         this.inDir = this.getTangent(0);
-        this.ouDir = this.getTangent(1);
+        this.outDir = this.getTangent(1);
     }
 
     protected _getBBox2(): BBox2 {
@@ -156,6 +157,27 @@ export class QuadraticCurve extends LineCurve {
     }
 
     getLineIntersects(line: LineCurve): vec2[] {
+        // bbox 碰撞检查
+        const { xMin, xMax, yMin, yMax } = this.bbox2;
+        const { SPoint, EPoint } = line;
+
+        const points = [
+            vec2.fromValues(xMin, yMin),
+            vec2.fromValues(xMax, yMin),
+            vec2.fromValues(xMax, yMax),
+            vec2.fromValues(xMin, yMax)
+        ];
+
+        // 如果 bbox四点 都在 line 一侧，则不可能相交
+        let count = 0;
+        for (const point of points) {
+            // 叉乘判断点在直线的哪一侧
+            count += cross(vec2.sub(vec2.create(), EPoint, SPoint), vec2.sub(vec2.create(), point, SPoint)) > 0 ? 1 : 0;
+        }
+        if (count === 0 || count === 4) {
+            return [];
+        }
+
         const intersections: vec2[] = [];
 
         const [x1, y1] = this.SPoint;
@@ -355,7 +377,7 @@ export class QuadraticCurve extends LineCurve {
         vec2.add(this.CPoint1, this.CPoint1, diff);
     }
 
-    override divideAt(t: number): QuadraticCurve[] {
+    override splitAt(t: number): QuadraticCurve[] {
         const startPoint = this.SPoint;
         const endPoint = this.EPoint;
         const controlPoint1 = this.CPoint1;
@@ -367,8 +389,8 @@ export class QuadraticCurve extends LineCurve {
         return [leftCurve, rightCurve];
     }
 
-    divideAtArray(tArr: number[]): QuadraticCurve[] {
-        return super.divideAtArray.call(this, tArr) as QuadraticCurve[];
+    splitAtArray(tArr: number[]): QuadraticCurve[] {
+        return super.splitAtArray.call(this, tArr) as QuadraticCurve[];
     }
 
     pathOffset(distance: number): QuadraticCurve {
@@ -385,7 +407,7 @@ export class QuadraticCurve extends LineCurve {
 
     splitByCoord(splitData: CoordData): QuadraticCurve[] {
         const tArr = this.getSplitT(splitData);
-        return this.divideAtArray(tArr);
+        return this.splitAtArray(tArr);
     }
 
     toPathString(digits = 0): string {

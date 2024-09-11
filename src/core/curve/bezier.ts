@@ -4,6 +4,7 @@ import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
 import { LineCurve } from "./line";
 import { BBox2 } from "../base";
+import { cross } from "../math";
 
 export const BezierCurveType = "curve-bezier";
 
@@ -21,7 +22,7 @@ export class BezierCurve extends QuadraticCurve {
         let vector = vec2.sub(vec2.create(), controlPoint1, startPoint);
         this.inDir = vec2.normalize(vector, vector);
         vector = vec2.sub(vec2.create(), endPoint, controlPoint2);
-        this.ouDir = vec2.normalize(vector, vector);
+        this.outDir = vec2.normalize(vector, vector);
     }
 
     /**
@@ -211,10 +212,27 @@ export class BezierCurve extends QuadraticCurve {
      * @inheritdoc
      */
     getLineIntersects(line: LineCurve): vec2[] {
-        const { bbox } = this;
-        if (bbox.x > line.bbox.x + line.bbox.width || bbox.x + bbox.width < line.bbox.x || bbox.y > line.bbox.y + line.bbox.height || bbox.y + bbox.height < line.bbox.y) {
+        // bbox 碰撞检查
+        const { xMin, xMax, yMin, yMax } = this.bbox2;
+        const { SPoint, EPoint } = line;
+
+        const points = [
+            vec2.fromValues(xMin, yMin),
+            vec2.fromValues(xMax, yMin),
+            vec2.fromValues(xMax, yMax),
+            vec2.fromValues(xMin, yMax)
+        ];
+
+        // 如果 bbox四点 都在 line 一侧，则不可能相交
+        let count = 0;
+        for (const point of points) {
+            // 叉乘判断点在直线的哪一侧
+            count += cross(vec2.sub(vec2.create(), EPoint, SPoint), vec2.sub(vec2.create(), point, SPoint)) > 0 ? 1 : 0;
+        }
+        if (count === 0 || count === 4) {
             return [];
         }
+
         const intersections: vec2[] = [];
 
         // Calculate the intersection point using line-quadratic bezier intersection formula
@@ -256,7 +274,7 @@ export class BezierCurve extends QuadraticCurve {
         return intersections;
     }
 
-    divideAt(t: number): BezierCurve[] {
+    splitAt(t: number): BezierCurve[] {
         const startPoint = this.SPoint;
         const endPoint = this.EPoint;
         const controlPoint1 = this.CPoint1;
@@ -274,13 +292,13 @@ export class BezierCurve extends QuadraticCurve {
     }
 
     /**曲线砍n刀生成 n+1 段曲线 */
-    divideAtArray(tArr: number[]): BezierCurve[] {
-        return super.divideAtArray.call(this, tArr) as BezierCurve[];
+    splitAtArray(tArr: number[]): BezierCurve[] {
+        return super.splitAtArray.call(this, tArr) as BezierCurve[];
     }
 
     splitByCoord(splitData: CoordData): BezierCurve[] {
         const tArr = this.getSplitT(splitData);
-        return this.divideAtArray(tArr);
+        return this.splitAtArray(tArr);
     }
 
     toPathString(digits = 0): string {

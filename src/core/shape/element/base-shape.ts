@@ -46,7 +46,7 @@ export abstract class Shape {
     }
 
     get isClosed() {
-        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1e-3;
+        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1E-1;
     }
 
     /** ### the bbox2 of the shape */
@@ -89,7 +89,7 @@ export abstract class Shape {
      * ### the out direction of this curve
      */
     get outDir() {
-        return this.curves[this.curves.length - 1].ouDir;
+        return this.curves[this.curves.length - 1].outDir;
     }
 
     getMaxCurvature() {
@@ -206,7 +206,7 @@ export abstract class Shape {
         const newCurves = new Array(length * count);
         for (let i = 0; i < length; i++) {
             const curve = this.curves[i];
-            const curves = curve.divideAtArray(arr);
+            const curves = curve.splitAtArray(arr);
             newCurves.splice(i * count, count, ...curves);
         }
         this.curves = newCurves;

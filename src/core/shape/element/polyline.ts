@@ -24,7 +24,7 @@ export class Polyline extends SingleShape {
             for (let i = 0; i < n; i++) {
                 arr[i] = curves[i].inDir;
             }
-            arr[n] = curves[n - 1].ouDir;
+            arr[n] = curves[n - 1].outDir;
             this.tanArr = arr;
         }
     }

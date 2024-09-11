@@ -1,5 +1,18 @@
 import { vec2 } from "gl-matrix";
+import { ConnectEnd, ConnectStart } from "../curve";
+import { toAngle } from "./circle";
 
+export function arrEquals<T>(v0: Array<T>, v1: Array<T>): boolean {
+    if (v0.length !== v1.length) {
+        return false;
+    }
+    for (let i = 0; i < v0.length; i++) {
+        if (v0[i] !== v1[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 export function cross(v0: vec2, v1: vec2): number {
     return v0[0] * v1[1] - v0[1] * v1[0];
@@ -96,6 +109,16 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
     return result;
 }
 
+/**
+ * get the angle of the curve
+ * @param lastCurve 
+ * @param curve 
+ * @returns 
+ */
+export function getCurveAngle(lastCurve: ConnectStart, curve: ConnectEnd) {
+    return toAngle(getRadianChange(lastCurve.outDir, curve.inDir));
+}
+
 
 
 
@@ -105,7 +128,7 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
  * @param v2 - the second vector
  * @returns - the angle change from v1 to v2
  */
-export function getAngleChange(v1: vec2, v2: vec2) {
+export function getRadianChange(v1: vec2, v2: vec2) {
     const sine = v1[0] * v2[1] - v1[1] * v2[0];
     const cosine = v1[0] * v2[0] + v1[1] * v2[1];
     return Math.atan2(sine, cosine);

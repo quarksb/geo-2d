@@ -6,7 +6,7 @@ export type PointFn = (vec: vec2) => void;
 /**
  * Represents an abstract curve.
  */
-export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
+export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, ConnectAble {
     /**
      * The type of the curve.
      */
@@ -33,7 +33,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
     /**
      * The normal vector to represent direction of the curve at the end point.
      */
-    ouDir: vec2 = vec2.create();
+    outDir: vec2 = vec2.create();
 
     /**
      * Creates a new instance of the Curve class.
@@ -89,11 +89,11 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
      * it is correct for most of the time, but it not correct for bezier curve sometimes.
      */
     get deflection(): number {
-        const { inDir, ouDir } = this;
+        const { inDir, outDir } = this;
         // 计算 outDir 和 inDir 的叉积
-        const sine = inDir[0] * ouDir[1] - inDir[1] * ouDir[0];
+        const sine = inDir[0] * outDir[1] - inDir[1] * outDir[0];
         // 计算 outDir 和 inDir 的点积
-        const cosine = inDir[0] * ouDir[0] + inDir[1] * ouDir[1];
+        const cosine = inDir[0] * outDir[0] + inDir[1] * outDir[1];
         return Math.atan2(sine, cosine);
     }
 
@@ -159,7 +159,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
 
     /**
      * Finds the intersection points between the curve and a line.
-     * @param line - The line curve.
+     * @param line - The line to intersect with（代指直线，而不是线段）
      * @returns An array of intersection points.
      */
     abstract getLineIntersects(line: LineCurve): vec2[];
@@ -170,14 +170,14 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
      */
     abstract getDisToPos(pos: vec2): number;
 
-    abstract divideAt(t: number): Curve[];
+    abstract splitAt(t: number): Curve[];
 
     /**
      * ### Divides the curve at multiple parameter values.
      * @param tArr An array of parameter values to divide the curve at.
      * @returns An array of divided curves.
      */
-    divideAtArray(tArr: number[]): Curve[] {
+    splitAtArray(tArr: number[]): Curve[] {
         tArr.sort((a, b) => a - b);
         let currentCurve: Curve = this;
         const curves: Curve[] = new Array(tArr.length + 1);
@@ -186,7 +186,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
             let t = tArr[i];
             t = (t - lastT) / (1 - lastT);
             lastT = tArr[i];
-            const dividedCurves = currentCurve.divideAt(t);
+            const dividedCurves = currentCurve.splitAt(t);
             curves[i] = dividedCurves[0];
             currentCurve = dividedCurves[1];
         }
@@ -201,7 +201,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve> {
      */
     splitByCoord(splitData: CoordData): Curve[] {
         const tArr = this.getSplitT(splitData);
-        return this.divideAtArray(tArr);
+        return this.splitAtArray(tArr);
     }
 
     /**
@@ -254,7 +254,7 @@ export interface SplitAble<T> {
      * @param t - The parameter value to divide the curve at.
      * @returns An array of divided curves.
      */
-    divideAt(t: number): T[];
+    splitAt(t: number): T[];
 
     /**
      * Splits the curve at the given coordinate data.
@@ -268,8 +268,20 @@ export interface SplitAble<T> {
      * @param paramArr - The array of parameter values to divide the curve at.
      * @returns An array of divided curves.
      */
-    divideAtArray(paramArr: number[]): T[];
+    splitAtArray(paramArr: number[]): T[];
 }
+
+export interface ConnectStart {
+    EPoint: vec2,
+    outDir: vec2
+}
+
+export interface ConnectEnd {
+    SPoint: vec2,
+    inDir: vec2
+}
+
+export interface ConnectAble extends ConnectStart, ConnectEnd { };
 
 export interface CoordData {
     mode: "x" | "y";

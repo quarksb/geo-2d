@@ -22,7 +22,7 @@ export class LineCurve extends Curve {
         this.tangent = vec2.normalize(vec2.create(), vec2.sub(vec2.create(), endPoint, startPoint));
         this.normal = vec2.fromValues(-this.tangent[1], this.tangent[0]);
         this.inDir = this.tangent;
-        this.ouDir = this.tangent;
+        this.outDir = this.tangent;
     }
 
     protected update() {
@@ -30,7 +30,7 @@ export class LineCurve extends Curve {
         this.tangent = vec2.normalize(vec2.create(), vec2.sub(vec2.create(), this.EPoint, this.SPoint));
         this.normal = vec2.fromValues(-this.tangent[1], this.tangent[0]);
         this.inDir = this.tangent;
-        this.ouDir = this.tangent;
+        this.outDir = this.tangent;
     }
 
     protected _getBBox2(): BBox2 {
@@ -107,9 +107,7 @@ export class LineCurve extends Curve {
     }
 
     /**
-    * Calculates the intersection points between two line curves.
-    * @param line The line curve to intersect with.
-    * @returns An array of intersection points.
+    * @inheritdoc
     */
     getLineIntersects(line: LineCurve): vec2[] {
         const [x1, y1] = this.SPoint
@@ -126,8 +124,8 @@ export class LineCurve extends Curve {
             const x = (a * (x3 - x4) - b * (x1 - x2)) / d;
             const y = (a * (y3 - y4) - b * (y1 - y2)) / d;
 
-            const { x: xMin, y: yMin, width, height } = this.bbox;
-            if (x >= xMin && x <= x + width && y >= yMin && y <= yMin + height) {
+            const { xMin, yMin, xMax, yMax } = this.bbox2;
+            if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
                 intersect.push(vec2.fromValues(x, y));
             }
         }
@@ -182,7 +180,7 @@ export class LineCurve extends Curve {
      * @param t The parameter value to divide the line curve at.
      * @returns An array of divided line curves.
      */
-    divideAt(t: number): LineCurve[] {
+    splitAt(t: number): LineCurve[] {
         const { SPoint: SPt, EPoint: EPt } = this;
         const point = this.getPosition(t);
         return [new LineCurve(SPt, point), new LineCurve(vec2.clone(point), EPt)];

@@ -35,7 +35,7 @@ function mergeLine(curves: Curve[]) {
         // 两者都是直线
         const isBothLine = currentCurve.type === LineCurveType && lastCurve.type === LineCurveType;
         // 且方向非常接近
-        const needMerge = isBothLine && vec2.dot(currentCurve.ouDir, lastCurve.ouDir) > 0.982;
+        const needMerge = isBothLine && vec2.dot(currentCurve.outDir, lastCurve.outDir) > 0.982;
         if (needMerge) {
             // 合并直线, 修改 lastCurve 的终点, 舍弃 currentCurve
             lastCurve.EPoint = currentCurve.EPoint;
@@ -49,6 +49,8 @@ function mergeLine(curves: Curve[]) {
 
 /**
  * merge short curve
+ * @description 实际文字存在存在一些小曲线，这些小曲线能会因为方向对后续计算产生严重误导，因此需要合并
+ * 比如 OPPOSans 字体中的 纹字，其右边的 “文” 结构的内线下方夹角处用了一个小曲线，会误导后续角度判断。
  * @param curves 
  * @returns 
  */
@@ -70,69 +72,56 @@ function mergeShortCurve(curves: Curve[]) {
 
     for (let i = 0; i < n; i++) {
         const curve = curves[i];
+        // @todo 判定条件需要优化，需要考虑角度
         if (curve.len < lenLimit) {
             mergeSign[i] = true;
         }
     }
 
-    return curves;
+    // @todo 优化合并算法,假如存在连续的短曲线，应该如何合并
 
-    // 先尝试把连续多段小曲线合并成一段
-    let i = 0, j = 0;
-    while (i < n) {
-        // 找到第一个可以合并的曲线
-        if (mergeSign[i]) {
-            j = i + 1;
-            while (j < n && mergeSign[j]) {
-                j++;
-            }
-            if (j - i > 1) {
-                // 合并 i 到 j-1 的曲线
-                let SPoint = curves[i].SPoint;
-                let EPoint = curves[j - 1].EPoint;
-                for (let k = i + 1; k < j; k++) {
-                    curves[k].SPoint = SPoint;
-                    curves[k].EPoint = EPoint;
-                }
-                i = j;
-            } else {
-                i++;
-            }
-        }
+    for (let i = 1; i < n - 1; i++) {
+        const lastCurve = newCurves[newCurves.length - 1];
+        const currentCurve = curves[i];
+        const nextCurve = curves[i + 1];
+
+        newCurves[i] = mergeSign[i] ? mergeCurve(lastCurve, currentCurve, nextCurve) : currentCurve;
     }
 
-    return newCurves;
+    const isClosed = vec2.sqrDist(curves[0].SPoint, curves[n - 1].EPoint) < 1
+    if (isClosed) {
+        [n - 1, 0].forEach(i => {
+            const lastCurve = curves[i - 1];
+            const currentCurve = curves[i % n];
+            const nextCurve = curves[(i + 1) % n];
+            newCurves[i] = mergeSign[i] ? mergeCurve(lastCurve, currentCurve, nextCurve) : currentCurve;
+        })
+    }
+
+    // 曲线去重
+    return Array.from(new Set(newCurves))
 }
 
 /**
- * 检查是否可以合并
- * @todo 未完成, 目前合并逻辑不完善
- * @param lastCurve 
- * @param currentCurve 
- * @param nextCurve 
- * @returns 
+ * 合并曲线
+ * @param lastCurve - 上一根曲线
+ * @param currentCurve - 待合并的曲线
+ * @param nextCurve - 下一根曲线
+ * @returns - 合并后的曲线
  */
-export function shouldMerge(lastCurve: Curve, currentCurve: Curve, nextCurve: Curve) {
-    const { len: l0 } = lastCurve;
-    const { len: l1 } = currentCurve;
-    const { len: l2 } = nextCurve;
+export function mergeCurve(lastCurve: Curve, currentCurve: Curve, nextCurve: Curve) {
+    const angle0 = vec2.angle(lastCurve.outDir, currentCurve.inDir);
+    const angle1 = vec2.angle(currentCurve.outDir, nextCurve.inDir);
 
-    const threshold = 20;
-    const isLengthDiff = l0 > threshold * l1 && l2 > threshold * l1;
-
-    if (isLengthDiff) {
-        // 长度差异过大，长线合并短线
-        const angle0 = vec2.angle(lastCurve.ouDir, currentCurve.inDir);
-        const angle1 = vec2.angle(currentCurve.ouDir, nextCurve.inDir);
-
-        if (angle0 < angle1) {
-            // 合并当前线段 和 lastCurve
-            lastCurve.EPoint = currentCurve.EPoint;
-        } else {
-            // 合并 currentCurve 和 nextCurve
-            nextCurve.SPoint = currentCurve.SPoint;
-            // console.log('合并 currentCurve 和 nextCurve');
-            return true
-        }
+    // 判定哪个方向的角度更小
+    if (angle0 < angle1) {
+        // 合并当前线段 和 lastCurve
+        lastCurve.EPoint = currentCurve.EPoint;
+        return lastCurve;
+    } else {
+        // 合并 currentCurve 和 nextCurve
+        nextCurve.SPoint = currentCurve.SPoint;
+        return nextCurve;
     }
+
 }
