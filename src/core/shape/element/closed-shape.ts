@@ -5,7 +5,7 @@ import { isPointInPoints } from "./polygon";
 import { PathCommand } from "../../utils";
 import { includeBBox2 } from "../../base";
 
-export class ClosedShape extends SingleShape {
+export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
     constructor (public curves: Curve[]) {
         super(curves);
         // check whether it's closed
@@ -25,7 +25,7 @@ export class ClosedShape extends SingleShape {
      * - false: the point is not in the shape
      * - if the point is on the edge of the shape, then return false
      */
-    includePoint(point: vec2) {
+    include(point: vec2) {
         // 1. 先判断 point 是否在 bbox 内部
         const { xMin, xMax, yMin, yMax } = this.bbox2;
         if (point[0] <= xMin || point[0] >= xMax || point[1] <= yMin || point[1] >= yMax) {
@@ -46,6 +46,10 @@ export class ClosedShape extends SingleShape {
     }
 }
 
+
+export interface IncludeAble<T> {
+    include(point: T): boolean;
+}
 
 /**
  * ### split path

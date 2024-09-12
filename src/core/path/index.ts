@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { ClosedShape, splitByBBox } from "../shape";
+import { ClosedShape, IncludeAble, splitByBBox } from "../shape";
 import { PathCommand, pathStringToPathCommands } from "../utils/svg";
 import { BBox2, createBBox2 } from "../base";
 import { CoordData, LineCurve, PointFn } from "../curve";
@@ -10,7 +10,7 @@ declare type WindingRule = "NONZERO" | "EVENODD";
  * ## Path
  * a collection of shapes
  */
-export class Path {
+export class Path implements IncludeAble<vec2> {
     constructor (public shapes: ClosedShape[], public windingRule: WindingRule | "NONE" = "NONZERO") {
     }
     static fromCommands(commands: PathCommand[]): Path {
@@ -52,11 +52,11 @@ export class Path {
         return bbox2;
     }
 
-    includePoint(point: vec2) {
+    include(point: vec2) {
         let isInclude = true;
         for (const shape of this.shapes) {
             const { isRightHand } = shape;
-            const isShapeInclude = shape.includePoint(point);
+            const isShapeInclude = shape.include(point);
             isInclude &&= isRightHand ? isShapeInclude : !isShapeInclude;
             if (!isInclude) {
                 return false;
@@ -157,7 +157,7 @@ if (import.meta.vitest) {
     test("Path-includePoint", () => {
         const pathStr = "M 0 0 L 100 0 L 0 100 Z M 20 20 L 20 80 L 80 20 Z";
         const path = Path.fromPathString(pathStr);
-        expect(path.includePoint(vec2.fromValues(10, 50))).toBeTruthy();
-        expect(path.includePoint(vec2.fromValues(40, 50))).toBeFalsy();
+        expect(path.include(vec2.fromValues(10, 50))).toBeTruthy();
+        expect(path.include(vec2.fromValues(40, 50))).toBeFalsy();
     })
 }

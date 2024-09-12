@@ -46,7 +46,7 @@ export abstract class Shape {
     }
 
     get isClosed() {
-        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1E-1;
+        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1E-2;
     }
 
     /** ### the bbox2 of the shape */
