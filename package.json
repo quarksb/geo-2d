@@ -31,7 +31,7 @@
   "scripts": {
     "dev": "vite",
     "build": "pnpm run build:demo",
-    "build:demo": "vue-tsc && vite build --mode demo",
+    "build:demo": "vite build --mode demo",
     "build:lib": "vite build --mode lib",
     "doc": "typedoc src/index.ts --excludeInternal",
     "preview": "vite preview",

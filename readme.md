@@ -14,10 +14,8 @@
 
 ## Features
 
-- **Point Operations**: Create and manipulate points in 2D space.
-- **Line Operations**: Handle lines and line segments, including intersection detection.
-- **Shape Operations**: Work with basic shapes like circles, rectangles, and polygons.
-- **Geometric Calculations**: Calculate distances, areas, angles, and other geometric properties.
+- **Curve Object**: include line-curve, quadratic-curve adn bezier-curve.
+- **Shape Operations**: Work with basic shapes like singleShape, and polygons.
 - **Transformations**: Apply transformations like translation, rotation, and scaling to geometric objects.
 
 ## Installation
