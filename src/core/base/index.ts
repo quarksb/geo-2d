@@ -1,3 +1,3 @@
 export * from "./bbox";
 
-export type tuple2 = [number, number];
+export type Tuple2<T> = [T, T];

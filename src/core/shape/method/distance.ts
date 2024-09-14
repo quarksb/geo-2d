@@ -25,9 +25,8 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
         const { len } = shape;
         const count = Math.ceil(len / baseLen);
         if (!count) {
-            debugger
+            console.error("the count of points is 0");
         }
-
         return shape.toPoints(count);
     });
 
