@@ -1,6 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { BBox, BBox2 } from "../base";
 import { type LineCurve } from "./line";
+import { getRadianChange } from "../math";
 
 export type PointFn = (vec: vec2) => void;
 /**
@@ -90,11 +91,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
      */
     get deflection(): number {
         const { inDir, outDir } = this;
-        // 计算 outDir 和 inDir 的叉积
-        const sine = inDir[0] * outDir[1] - inDir[1] * outDir[0];
-        // 计算 outDir 和 inDir 的点积
-        const cosine = inDir[0] * outDir[0] + inDir[1] * outDir[1];
-        return Math.atan2(sine, cosine);
+        return getRadianChange(inDir, outDir);
     }
 
     protected update() {
