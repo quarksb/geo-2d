@@ -107,7 +107,7 @@ export class SingleShape extends Shape {
 
 if (import.meta.vitest) {
     const { it, expect, test } = import.meta.vitest
-    test('Shape', () => {
+    test('SingleShape', () => {
 
         const commands: PathCommand[] = [
             {
@@ -137,7 +137,7 @@ if (import.meta.vitest) {
         expect(result).toEqual([vec2.fromValues(0, 50), vec2.fromValues(50, 50)]);
     })
 
-    test('Shape', () => {
+    test('SingleShape', () => {
         const commands: PathCommand[] = [
             {
                 "type": "M",
@@ -169,7 +169,8 @@ if (import.meta.vitest) {
         expect(result[1][0]).toBeCloseTo(74.06);
         expect(result[1][1]).toBeCloseTo(50);
     })
-    test('Shape', () => {
+
+    test('SingleShape', () => {
         const commands: PathCommand[] = [
             {
                 "type": "M",

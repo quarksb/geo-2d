@@ -154,4 +154,10 @@ if (import.meta.vitest) {
         couples = [[1, 4], [3, 6], [5, 0], [7, 2]];
         expect(mergeCouple(couples)).toEqual([[1, 4], [3, 6], [5, 0], [7, 2]]);
     });
+    it('getRadianChange', () => {
+        expect(getRadianChange([1, 0], [0, 1])).toBeCloseTo(Math.PI / 2);
+        expect(getRadianChange([1, 0], [1, 0])).toBeCloseTo(0);
+        expect(getRadianChange([1, 0], [-1, 0])).toBeCloseTo(Math.PI);
+        expect(getRadianChange([-1, -1], [0, -1])).toBeCloseTo(Math.PI / 4);
+    })
 }

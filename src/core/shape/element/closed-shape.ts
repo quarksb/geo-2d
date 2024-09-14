@@ -1,9 +1,9 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "../../curve";
 import { SingleShape } from "./single-shape";
-import { isPointInPoints } from "./polygon";
+import { calPointsArea, isPointInPoints } from "../../math";
 import { PathCommand } from "../../utils";
-import { includeBBox2 } from "../../base";
+import { BBox2, includeBBox2 } from "../../base";
 
 export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
     constructor (public curves: Curve[]) {
@@ -17,21 +17,13 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
     }
 
     /**
-     * ## includePoint
-     * - check whether the point is in the shape
-     * @param point
-     * @returns
-     * - true: the point is in the shape
-     * - false: the point is not in the shape
-     * - if the point is on the edge of the shape, then return false
+     * judge if the point is in the polygon
+     * @param point 
+     * @returns 
      */
-    include(point: vec2) {
-        // 1. 先判断 point 是否在 bbox 内部
-        const { xMin, xMax, yMin, yMax } = this.bbox2;
-        if (point[0] <= xMin || point[0] >= xMax || point[1] <= yMin || point[1] >= yMax) {
-            return false;
-        }
-
+    include(point: vec2): boolean {
+        // bbox check
+        if (!isInBBox2(point, this.bbox2)) return false;
         return isPointInPoints(point, this.points);
     }
 
@@ -44,6 +36,28 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
         const sb = super.fromCommands(commands);
         return new ClosedShape(sb.curves);
     }
+
+    /**
+     * ### get the area of the polygon
+     * @returns the area of the polygon
+     */
+    getArea() {
+        return Math.abs(this.getSignArea());
+    }
+
+    /**
+     * ### get the signed area of the polygon
+     * @returns signed area
+     */
+    getSignArea() {
+        return calPointsArea(this.points);
+    }
+
+}
+
+export function isInBBox2(point: vec2, bbox2: BBox2): boolean {
+    const { xMin, xMax, yMin, yMax } = bbox2;
+    return point[0] >= xMin && point[0] <= xMax && point[1] >= yMin && point[1] <= yMax;
 }
 
 

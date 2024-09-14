@@ -1,8 +1,7 @@
 import { vec2 } from "gl-matrix";
-import { checkLineCurveIntersect, LineCurve, lineInterSect } from "../../curve";
+import { LineCurve, lineInterSect } from "../../curve";
 import { SingleShape } from "./single-shape";
 import { linearRegression } from "../../math";
-import { getPointsRightHandRule } from "./polygon";
 import { connectShape } from "../method/connect";
 
 export class Polyline extends SingleShape {
@@ -73,7 +72,7 @@ export class Polyline extends SingleShape {
     //  *### 数值法计算曲率极值点对应的参数，可以是多个 
     //  * @returns 曲率半径极值点对应的参数 
     //  */
-    //  getCusps(): number[] {
+    // getCusps(): number[] {
     //     // 计算 count 个点的曲率
     //     /**curvature array */
     //     const CArr = new Array(count + 1);
@@ -146,90 +145,6 @@ export class Polyline extends SingleShape {
     }
 }
 
-
-
-export interface DisData {
-    datas: {
-        dis: number;
-        index: number;
-    }[],
-    min: number;
-    max: number;
-    mean: number;
-    std: number;
-}
-
-/**
- * ### calculate distance data between two polyline
- * @param shape0 
- * @param shape1 
- * @returns 
- */
-export function calDisData(shape0: SingleShape, shape1: SingleShape): DisData[] {
-    const count = 20
-    const ps0 = shape0.toPoints(count);
-    const ps1 = shape1.toPoints(count);
-    const { length: l0 } = ps0;
-    const { length: l1 } = ps1;
-
-    const defaultDisData: DisData = {
-        datas: [],
-        min: Infinity,
-        max: Infinity,
-        mean: Infinity,
-        std: Infinity,
-    };
-
-    const isAnyClosed = shape0.isClosed || shape1.isClosed;
-
-    // 当 shape 均闭合时，进行相交性检测（ 倘若 shape 闭合，则其首尾已经相交）
-    if (!isAnyClosed) {
-        // 首尾相交性检测
-        const LineCurve0 = new LineCurve(shape0.EPoint, shape1.SPoint);;
-        const LineCurve1 = new LineCurve(shape1.EPoint, shape0.SPoint);
-        const isIntersect = checkLineCurveIntersect(LineCurve0, LineCurve1);
-
-        // 导轨两连接线交叉，不合理，直接跳过后续计算
-        if (isIntersect) {
-            return [defaultDisData, defaultDisData];
-        }
-    }
-
-    const newPoints = [...ps0, ...ps1];
-    const isRightHand = getPointsRightHandRule(newPoints);
-    // 正确的多边形应该是顺时针的（逆时针表示有效区为外部）
-    if (!isRightHand) {
-        return [defaultDisData, defaultDisData];
-    }
-
-    const datas0 = new Array(l0).fill({ dis: Infinity, index: -1 });
-    const datas1 = new Array(l1).fill({ dis: Infinity, index: -1 });
-
-    for (let i0 = 0; i0 < l0; i0++) {
-        for (let i1 = 0; i1 < l1; i1++) {
-            const dis = vec2.dist(ps0[i0], ps1[i1]);
-
-            if (dis < datas0[i0].dis) {
-                datas0[i0] = { dis, index: i1 };
-            }
-
-            if (dis < datas1[i1].dis) {
-                datas1[i1] = { dis, index: i0 };
-            }
-        }
-    }
-
-    const disDatas = [datas0, datas1].map(datas => {
-        const disArr = datas.map(({ dis }) => dis);
-        const min = Math.min(...disArr);
-        const max = Math.max(...disArr);
-        const mean = disArr.reduce((a, b) => a + b, 0) / disArr.length;
-        const std = Math.sqrt(disArr.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / disArr.length);
-        return { datas, min, max, mean, std };
-    });
-
-    return disDatas;
-}
 
 /**
  * 多段线自交检测

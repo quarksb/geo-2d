@@ -121,11 +121,6 @@ function getNum(points: number[], degree: number, t: number) {
         data[i] = points[i % length];
     }
 
-    // console.log(
-    //     "data",
-    //     data.map((v) => v.toFixed(1))
-    // );
-
     for (let i = 0; i < degree; i++) {
         // build level l of the pyramid
         for (let k = baseIndex; k > baseIndex - degree + i; k--) {
@@ -133,13 +128,7 @@ function getNum(points: number[], degree: number, t: number) {
             // console.log(k, lamoda.toFixed(2), data[k - 1].toFixed(1), data[k].toFixed(1));
             data[k] = lamoda * data[k] + (1 - lamoda) * data[k - 1];
         }
-        // console.log(
-        //     "data",
-        //     data.map((v) => v.toFixed(1))
-        // );
     }
-
-    // console.log("baseIndex", baseIndex, data[baseIndex].toFixed(1));
 
     return data[baseIndex];
 }

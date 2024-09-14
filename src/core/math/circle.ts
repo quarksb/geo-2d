@@ -1,5 +1,4 @@
 import { vec2 } from "gl-matrix";
-import { calPointsArea } from "../shape";
 
 /**
  * convert angle to radian
@@ -47,26 +46,4 @@ export function calRadius(pointA: vec2, pointB: vec2, pointC: vec2) {
         return Infinity;
     }
     return a * b * c / 4 / Math.sqrt(s * (s - a) * (s - b) * (s - c));
-}
-
-
-/**
- * ### calculate the curvature of a circle(with sign)
- * curvature = sign * 1 / r
- * @param pointA 
- * @param pointB 
- * @param pointC 
- * @returns 
- */
-export function getCurvature(pointA: vec2, pointB: vec2, pointC: vec2) {
-    const a = vec2.distance(pointA, pointB);
-    const b = vec2.distance(pointB, pointC);
-    const c = vec2.distance(pointC, pointA);
-
-    // 分母
-    const denominator = a * b * c;
-    if (Math.abs(denominator) < 1E-20) {
-        return 0;
-    }
-    return calPointsArea([pointA, pointB, pointC]) / (a * b * c);
 }

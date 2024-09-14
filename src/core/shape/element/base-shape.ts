@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
-import { Curve, CoordData, LineCurve, LineCurveType } from "../../curve";
-import { BBox2, createBBox2, getBBox2Size, mergeBBox2 } from "../../base";
-import { getPointsRightHandRule } from "./polygon";
+import { Curve, CoordData, LineCurve } from "../../curve";
+import { BBox2, createBBox2, mergeBBox2 } from "../../base";
+import { calPointsArea } from "../../math";
 
 
 /**
@@ -40,7 +40,7 @@ export abstract class Shape {
     /** ### is the shape complies with the right-hand rule  */
     get isRightHand() {
         if (this._isRightHand === undefined) {
-            this._isRightHand = this.getIsClockwise();
+            this._isRightHand = this.getIsRightHand();
         }
         return this._isRightHand;
     }
@@ -104,9 +104,9 @@ export abstract class Shape {
      * ### get the direction of a shape
      * @returns 
      */
-    private getIsClockwise() {
+    private getIsRightHand() {
         const { points } = this;
-        return getPointsRightHandRule(points);
+        return calPointsArea(points) > 0;
     }
 
     /**
