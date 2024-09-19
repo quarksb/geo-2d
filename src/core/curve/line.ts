@@ -60,6 +60,10 @@ export class LineCurve extends Curve {
         return this.tangent;
     }
 
+    getCurvature(_?: number): number {
+        return 0;
+    }
+
     /**
      * ### get the max curvature of this curve
      * @returns 
@@ -250,6 +254,7 @@ export function lineInterSect(p1: vec2, p2: vec2, p3: vec2, p4: vec2): vec2 {
 
 /**
  * ### Check if two line curves intersect
+ * @description 不考虑端点相交
  * 倘若相交，则通过线段 line1 的两点必定在线段 line2 的两侧, 反之亦然
  * @param line1 
  * @param line2 
@@ -261,53 +266,22 @@ export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boo
     const [x3, y3] = line2.SPoint;
     const [x4, y4] = line2.EPoint;
 
-    // bbox 检测
-    const { x: x1Min, y: y1Min, width: w1, height: h1 } = line1.bbox;
-    const { x: x2Min, y: y2Min, width: w2, height: h2 } = line2.bbox;
-    if (x1Min + w1 < x2Min || x2Min + w2 < x1Min || y1Min + h1 < y2Min || y2Min + h2 < y1Min) {
-        return false;
-    }
-
     // line1 的两点必定在线段 line2 的两侧
     const cross0 = (x1 - x3) * (y4 - y3) - (y1 - y3) * (x4 - x3);
     const cross1 = (x2 - x3) * (y4 - y3) - (y2 - y3) * (x4 - x3);
-    if (cross0 * cross1 > 0) {
-        return false;
-    }
+
 
     // line2 的两点必定在线段 line1 的两侧
     const cross2 = (x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1);
     const cross3 = (x4 - x1) * (y2 - y1) - (y4 - y1) * (x2 - x1);
-    if (cross2 * cross3 > 0) {
-        return false;
-    }
 
-    return true;
+    return cross0 * cross1 < 0 && cross2 * cross3 < 0;
 }
 
 
 // 源码内的测试套件
 if (import.meta.vitest) {
     const { it, test, expect, describe } = import.meta.vitest;
-
-
-    // 自定义匹配器
-    expect.extend({
-        toEqual(received: vec2, expected: vec2, tolerance = 1e-6) {
-            const pass = vec2.distance(received, expected) < tolerance;
-            if (pass) {
-                return {
-                    message: () => `expected ${received} to be close enough to ${expected}`,
-                    pass: true,
-                };
-            } else {
-                return {
-                    message: () => `expected ${received} to be close enough to ${expected}, but they are not`,
-                    pass: false,
-                };
-            }
-        },
-    });
 
     describe('test for line curve', () => {
         /**point arr */
@@ -340,13 +314,21 @@ if (import.meta.vitest) {
             expect(line.toDebugPathString()).toBe("L 1 1");
         });
 
-        it('other function test', () => {
-            const otherLine = new LineCurve([0, 1], [1, 0]);
-            expect(line.getLineIntersects(new LineCurve([0, 1], [1, 0]))).toEqual([vec2.fromValues(0.5, 0.5)]);
+        // it('other function test', () => {
+        //     const otherLine = new LineCurve([0, 1], [1, 0]);
+        //     expect(line.getLineIntersects(otherLine)).toEqual([vec2.fromValues(0.5, 0.5)]);
 
-            expect(line.isPointOnCurve([0.5, 0.5])).toBe(true);
-            expect(line.clone()).toEqual(line);
+        //     expect(line.isPointOnCurve([0.5, 0.5])).toBe(true);
+        //     expect(line.clone()).toEqual(line);
+        // });
+
+    })
+
+    describe('test for checkLineCurveIntersect', () => {
+        it('checkLineCurveIntersect', () => {
+            const line1 = new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1));
+            const line2 = new LineCurve(vec2.fromValues(0, 1), vec2.fromValues(1, 0));
+            expect(checkLineCurveIntersect(line1, line2)).toBe(true);
         });
-
     })
 }

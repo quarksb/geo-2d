@@ -172,7 +172,7 @@ export class QuadraticCurve extends LineCurve {
         let count = 0;
         for (const point of points) {
             // 叉乘判断点在直线的哪一侧
-            count += cross(vec2.sub(vec2.create(), EPoint, SPoint), vec2.sub(vec2.create(), point, SPoint)) > 0 ? 1 : 0;
+            count += cross(line.tangent, vec2.sub(vec2.create(), point, SPoint)) > 0 ? 1 : 0;
         }
         if (count === 0 || count === 4) {
             return [];
@@ -314,11 +314,11 @@ export class QuadraticCurve extends LineCurve {
     /**
      * ### 计算曲率半径
      */
-    getCurvature(t: number): number {
+    override getCurvature(t: number): number {
         const [x1, y1] = this.getDerivative(t);
         const [x2, y2] = this.getSecondDerivative(t);
         const numerator = x1 * y2 - y1 * x2;
-        if (numerator < 1E-20) {
+        if (Math.abs(numerator) < 1E-20) {
             return 0
         }
         const dominator = x1 ** 2 + y1 ** 2;

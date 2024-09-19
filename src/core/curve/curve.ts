@@ -112,6 +112,8 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
      */
     protected abstract _getLen(): number;
 
+    abstract getCurvature(t: number): number;
+
     /**
      * ### get the max curvature of this curve
      * curvature = 1 / r, curvature > 0 means the curve is turning right, otherwise, turning left

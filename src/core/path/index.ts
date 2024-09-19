@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { ClosedShape, IncludeAble, splitByBBox } from "../shape";
+import { ClosedShape, IncludeAble, InterSectAble, splitByBBox } from "../shape";
 import { PathCommand, pathStringToPathCommands } from "../utils/svg";
 import { BBox2, createBBox2 } from "../base";
 import { CoordData, LineCurve, PointFn } from "../curve";
@@ -10,7 +10,7 @@ declare type WindingRule = "NONZERO" | "EVENODD";
  * ## Path
  * a collection of shapes
  */
-export class Path implements IncludeAble<vec2> {
+export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
     constructor (public shapes: ClosedShape[], public windingRule: WindingRule | "NONE" = "NONZERO") {
     }
     static fromCommands(commands: PathCommand[]): Path {
@@ -60,6 +60,18 @@ export class Path implements IncludeAble<vec2> {
             isInclude &&= isRightHand ? isShapeInclude : !isShapeInclude;
             if (!isInclude) {
                 return false;
+            }
+        }
+        return isInclude;
+    }
+
+    intersect(lineCurve: LineCurve) {
+        // 检车是否和任意一条边相交
+        let isInclude = true;
+        for (const shape of this.shapes) {
+            if (!shape.intersect(lineCurve)) {
+                isInclude = false;
+                break;
             }
         }
         return isInclude;

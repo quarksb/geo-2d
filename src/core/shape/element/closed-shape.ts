@@ -1,11 +1,11 @@
 import { vec2 } from "gl-matrix";
-import { Curve } from "../../curve";
+import { checkLineCurveIntersect, Curve, LineCurve } from "../../curve";
 import { SingleShape } from "./single-shape";
 import { calPointsArea, isPointInPoints } from "../../math";
 import { PathCommand } from "../../utils";
 import { BBox2, includeBBox2 } from "../../base";
 
-export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
+export class ClosedShape extends SingleShape implements IncludeAble<vec2>, InterSectAble<LineCurve> {
     constructor (public curves: Curve[]) {
         super(curves);
         // check whether it's closed
@@ -25,6 +25,19 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2> {
         // bbox check
         if (!isInBBox2(point, this.bbox2)) return false;
         return isPointInPoints(point, this.points);
+    }
+
+    intersect(lineCurve: LineCurve) {
+        // 检车是否和任意一条边相交
+        let isInclude = false;
+        for (const curve of this.curves) {
+            const line = new LineCurve(curve.SPoint, curve.EPoint);
+            if (checkLineCurveIntersect(line, lineCurve)) {
+                isInclude = true;
+                break;
+            }
+        }
+        return isInclude;
     }
 
     static fromCommands(commands: PathCommand[]) {
@@ -63,6 +76,10 @@ export function isInBBox2(point: vec2, bbox2: BBox2): boolean {
 
 export interface IncludeAble<T> {
     include(point: T): boolean;
+}
+
+export interface InterSectAble<T> {
+    intersect(obj: T): boolean;
 }
 
 /**
