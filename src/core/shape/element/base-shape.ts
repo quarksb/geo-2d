@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { Curve, CoordData, LineCurve } from "../../curve";
+import { Curve, CoordData, LineCurve, PointFn } from "../../curve";
 import { BBox2, createBBox2, mergeBBox2 } from "../../base";
 import { calPointsArea } from "../../math";
 
@@ -184,6 +184,12 @@ export abstract class Shape {
         const previousLen = left === 0 ? 0 : this._lenArr[left - 1];
         const per = (currentLen - previousLen) / curve.len;
         return curve.getPosDataByPer(per);
+    }
+
+    applyFn(fn: PointFn) {
+        for (const curve of this.curves) {
+            curve.applyFn(fn);
+        }
     }
 
     splitByCoord(coordData: CoordData) {

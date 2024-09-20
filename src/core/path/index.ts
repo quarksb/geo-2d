@@ -79,9 +79,7 @@ export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
 
     applyFn(fn: PointFn) {
         for (const shape of this.shapes) {
-            for (const curve of shape.curves) {
-                curve.applyFn(fn);
-            }
+            shape.applyFn(fn);
         }
     }
 
