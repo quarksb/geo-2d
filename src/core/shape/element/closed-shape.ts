@@ -2,7 +2,7 @@ import { vec2 } from "gl-matrix";
 import { checkLineCurveIntersect, Curve, LineCurve } from "../../curve";
 import { SingleShape } from "./single-shape";
 import { calPointsArea, isPointInPoints } from "../../math";
-import { PathCommand } from "../../utils";
+import { PathCommand, pathStringToPathCommands } from "../../utils";
 import { BBox2, includeBBox2 } from "../../base";
 
 export class ClosedShape extends SingleShape implements IncludeAble<vec2>, InterSectAble<LineCurve> {
@@ -30,7 +30,8 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
     intersect(lineCurve: LineCurve) {
         // 检车是否和任意一条边相交
         let isInclude = false;
-        for (const curve of this.curves) {
+        for (let i = 0; i < this.curves.length; i++) {
+            const curve = this.curves[i];
             const line = new LineCurve(curve.SPoint, curve.EPoint);
             if (checkLineCurveIntersect(line, lineCurve)) {
                 isInclude = true;
@@ -48,6 +49,11 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
         }
         const sb = super.fromCommands(commands);
         return new ClosedShape(sb.curves);
+    }
+
+    static override fromPathString(pathStr: string) {
+        const commands = pathStringToPathCommands(pathStr);
+        return ClosedShape.fromCommands(commands);
     }
 
     /**
@@ -88,7 +94,7 @@ export interface InterSectAble<T> {
  * - such as we could split a "吕" into two "口"
  */
 export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
-    // console.log("shapes", shapes.map((shape) => shape.isRightHand));
+    // console.log("shapes", shapes.map((shape) => shape.isClockwise));
 
     // 先找到所有的路径，找到 bbox 最大的作为 path 的起始
     /**biggest shape */
@@ -112,18 +118,18 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
     // }
 
     // the BShape should be right hand, if not, then we should reverse the path
-    if (!BShape.isRightHand) {
+    if (!BShape.isClockwise) {
         shapes.forEach((shape) => {
             shape.reverse();
         })
     }
 
     const shapeArr: ClosedShape[][] = [];
-    // 先找到所有的外圈，即 isRightHand 为 true 的 shape
+    // 先找到所有的外圈，即 isClockwise 为 true 的 shape
     for (let i = 0; i < shapes.length; i++) {
         const shape = shapes[i];
-        const { isRightHand } = shape;
-        if (isRightHand) {
+        const { isClockwise } = shape;
+        if (isClockwise) {
             // 顺时针，说明是外部结构，需要添加进 shapeArr
             shapeArr.push([shape]);
         }
@@ -131,11 +137,11 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
 
     // console.log("shapeArr", shapeArr);
 
-    // 再找到所有的内圈，即 isRightHand 为 false 的 shape
+    // 再找到所有的内圈，即 isClockwise 为 false 的 shape
     for (let i = 0; i < shapes.length; i++) {
         const shape = shapes[i];
-        const { bbox2, isRightHand } = shape;
-        if (!isRightHand) {
+        const { bbox2, isClockwise } = shape;
+        if (!isClockwise) {
             // 逆时针，说明是内部结构，需要添加进已有的 path 中
 
             // 通过  查找对应的 path

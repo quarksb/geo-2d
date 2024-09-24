@@ -2,6 +2,7 @@ import { vec2 } from "gl-matrix";
 import { Curve, CoordData, LineCurve, PointFn } from "../../curve";
 import { BBox2, createBBox2, mergeBBox2 } from "../../base";
 import { calPointsArea } from "../../math";
+import { vec2ToStr } from "../../utils";
 
 
 /**
@@ -13,7 +14,7 @@ export abstract class Shape {
     curves: Curve[] = [];
     points: vec2[] = [];
     /** is the shape complies with the right-hand rule */
-    protected _isRightHand?: boolean;
+    protected _isClockwise?: boolean;
     protected _len?: number;
     /**记录每段曲线终点到 shape 起点的长度 */
     protected _lenArr: number[] = [];
@@ -38,11 +39,11 @@ export abstract class Shape {
     }
 
     /** ### is the shape complies with the right-hand rule  */
-    get isRightHand() {
-        if (this._isRightHand === undefined) {
-            this._isRightHand = this.getIsRightHand();
+    get isClockwise() {
+        if (this._isClockwise === undefined) {
+            this._isClockwise = this.getIsClockwise();
         }
-        return this._isRightHand;
+        return this._isClockwise;
     }
 
     get isClosed() {
@@ -95,7 +96,8 @@ export abstract class Shape {
     getMaxCurvature() {
         let maxCurvature = 0;
         for (const curve of this.curves) {
-            maxCurvature = Math.max(maxCurvature, curve.getMaxCurvature());
+            const curCurvature = curve.getMaxCurvature();
+            maxCurvature = Math.sign(curCurvature) * Math.max(maxCurvature, Math.abs(curCurvature));
         }
         return maxCurvature;
     }
@@ -104,7 +106,7 @@ export abstract class Shape {
      * ### get the direction of a shape
      * @returns 
      */
-    private getIsRightHand() {
+    private getIsClockwise() {
         const { points } = this;
         return calPointsArea(points) > 0;
     }
@@ -224,7 +226,7 @@ export abstract class Shape {
             curve.reverse();
         }
         this.points.reverse();
-        this._isRightHand = !this._isRightHand;
+        this._isClockwise = !this._isClockwise;
         // _lenArr 需要更新
         this._len = this._getLen();
     }
@@ -240,7 +242,7 @@ export abstract class Shape {
             const isContinuous = vec2.distance(curPos, curve.SPoint) < 1;
             if (!isContinuous) {
                 const { SPoint: startPoint } = curve;
-                pathStr += `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
+                pathStr += `M ${vec2ToStr(startPoint)} `;
                 originPoint = startPoint;
             }
             pathStr += curve.toPathString(digits) + " ";

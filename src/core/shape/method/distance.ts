@@ -58,9 +58,9 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
         }
 
         const newPoints = [...ps0, ...ps1];
-        const isRightHand = calPointsArea(newPoints) > 0;
+        const isClockwise = calPointsArea(newPoints) > 0;
         // 正确的多边形应该是顺时针的（逆时针表示有效区为外部）
-        if (!isRightHand) {
+        if (!isClockwise) {
             return [defaultDisData, defaultDisData];
         }
     }

@@ -64,3 +64,31 @@ export function calPointsArea(points: vec2[]): number {
     }
     return area / 2;
 }
+
+if (import.meta.vitest) {
+    const { describe, it, expect } = import.meta.vitest;
+
+    describe("math/triangle", () => {
+        it("isPointInPoints unClockwise", () => {
+            const points = [
+                vec2.fromValues(0, 0),
+                vec2.fromValues(1, 0),
+                vec2.fromValues(1, 1),
+                vec2.fromValues(0, 1),
+            ];
+            expect(isPointInPoints(vec2.fromValues(0.5, 0.5), points)).toBe(true);
+            expect(isPointInPoints(vec2.fromValues(0.5, 1.5), points)).toBe(false);
+        })
+
+        it("isPointInPoints clockwise", () => {
+            const points = [
+                vec2.fromValues(0, 0),
+                vec2.fromValues(0, 1),
+                vec2.fromValues(1, 1),
+                vec2.fromValues(1, 0),
+            ];
+            expect(isPointInPoints(vec2.fromValues(0.5, 0.5), points)).toBe(true);
+            expect(isPointInPoints(vec2.fromValues(0.5, 1.5), points)).toBe(false);
+        })
+    })
+}
