@@ -55,26 +55,21 @@ export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
     include(point: vec2) {
         let isInclude = true;
         for (const shape of this.shapes) {
-            const { isRightHand } = shape;
+            const { isClockwise } = shape;
             const isShapeInclude = shape.include(point);
-            isInclude &&= isRightHand ? isShapeInclude : !isShapeInclude;
+            isInclude &&= isClockwise ? isShapeInclude : !isShapeInclude;
             if (!isInclude) {
                 return false;
             }
         }
-        return isInclude;
+        return true;
     }
 
     intersect(lineCurve: LineCurve) {
         // 检车是否和任意一条边相交
-        let isInclude = true;
-        for (const shape of this.shapes) {
-            if (!shape.intersect(lineCurve)) {
-                isInclude = false;
-                break;
-            }
-        }
-        return isInclude;
+        return this.shapes.some((shape) => {
+            return shape.intersect(lineCurve);
+        });
     }
 
     applyFn(fn: PointFn) {
