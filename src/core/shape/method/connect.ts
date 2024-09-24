@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { Shape } from "../element/base-shape";
-import { cross } from "../../math";
+import { cross, toAngle } from "../../math";
 import { BezierCurve, ConnectEnd, ConnectStart, Curve, LineCurve, lineInterSect, QuadraticCurve } from "../../curve";
 import { SingleShape } from "../element/single-shape";
 
@@ -15,17 +15,13 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
     let curve: Curve;
     /**l0.outDir -> vec 和 vec -> l1.inDir 同向*/
     const isSameDirection = cross(shape0.outDir, vec) * cross(vec, shape1.inDir) > 0;
-    const angle = vec2.angle(shape0.outDir, shape1.inDir);
+    const angle = toAngle(vec2.angle(shape0.outDir, shape1.inDir));
+
     /**@todo isSameDirection 考虑三阶贝塞尔 */
-    if (angle >= Math.PI / 360 && angle <= Math.PI / 3) {
+    if (angle >= 10 && angle <= 60) {
         if (isSameDirection) {
             // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
-            const p1 = shape0.EPoint;
-            const p2 = vec2.add(vec2.create(), shape0.EPoint, shape0.outDir);
-            const p3 = vec2.add(vec2.create(), shape1.SPoint, shape1.inDir);
-            const p4 = shape1.SPoint;
-            const interSect = lineInterSect(p1, p2, p3, p4);
-            curve = new QuadraticCurve(shape0.EPoint, interSect, shape1.SPoint);
+            curve = getQuadraticCurve(shape0, shape1);
         } else {
             // 三阶贝塞尔曲线
             const p1 = shape0.EPoint;
@@ -39,6 +35,16 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
         curve = new LineCurve(shape0.EPoint, shape1.SPoint);
     }
 
+    return curve;
+}
+
+export function getQuadraticCurve(shape0: ConnectStart, shape1: ConnectEnd) {
+    const p1 = shape0.EPoint;
+    const p2 = vec2.add(vec2.create(), shape0.EPoint, shape0.outDir);
+    const p3 = vec2.add(vec2.create(), shape1.SPoint, shape1.inDir);
+    const p4 = shape1.SPoint;
+    const interSect = lineInterSect(p1, p2, p3, p4);
+    const curve = new QuadraticCurve(shape0.EPoint, interSect, shape1.SPoint);
     return curve;
 }
 
