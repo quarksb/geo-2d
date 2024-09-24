@@ -1,6 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve, PointFn, CoordData } from "./curve";
 import { BBox2 } from "../base";
+import { vec2ToStr } from "../utils";
 
 export const LineCurveType = "curve-line";
 
@@ -211,8 +212,7 @@ export class LineCurve extends Curve {
      * @returns The path string representation of the line curve.
      */
     toPathString(digits = 0): string {
-        const [x2, y2] = this.EPoint;
-        return `L ${x2.toFixed(digits)} ${y2.toFixed(digits)}`;
+        return `L ${vec2ToStr(this.EPoint, digits)}`;
     }
 
     /**

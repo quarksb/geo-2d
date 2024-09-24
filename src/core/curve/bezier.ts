@@ -5,6 +5,7 @@ import { getRoots } from "../math/equation";
 import { LineCurve } from "./line";
 import { BBox2 } from "../base";
 import { cross } from "../math";
+import { vec2ToStr } from "../utils";
 
 export const BezierCurveType = "curve-bezier";
 
@@ -302,15 +303,11 @@ export class BezierCurve extends QuadraticCurve {
     }
 
     toPathString(digits = 0): string {
-        return `C ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} ${this.EPoint[0].toFixed(
-            digits
-        )} ${this.EPoint[1].toFixed(digits)}`;
+        return `C ${vec2ToStr(this.CPoint1, digits)} ${vec2ToStr(this.CPoint2, digits)} ${vec2ToStr(this.EPoint, digits)}`;
     }
 
     toDebugPathString(digits?: number | undefined): string {
-        return ` L ${this.CPoint1[0].toFixed(digits)} ${this.CPoint1[1].toFixed(digits)} L ${this.CPoint2[0].toFixed(digits)} ${this.CPoint2[1].toFixed(digits)} L ${this.EPoint[0].toFixed(
-            digits
-        )} ${this.EPoint[1].toFixed(digits)}`;
+        return ` L ${vec2ToStr(this.CPoint1, digits)} L ${vec2ToStr(this.CPoint2, digits)} L ${vec2ToStr(this.EPoint, digits)}`;
     }
 
     clone(): BezierCurve {
