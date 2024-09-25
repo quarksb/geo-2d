@@ -202,6 +202,7 @@ export class BezierCurve extends QuadraticCurve {
 
         this.CPoint1 = vec2.fromValues(x0, y0);
         this.CPoint2 = vec2.fromValues(x1, y1);
+        this._isDirty = true;
     }
 
     reverse(): void {

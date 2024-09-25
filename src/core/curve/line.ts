@@ -165,6 +165,7 @@ export class LineCurve extends Curve {
     applyFn(fn: PointFn): void {
         fn(this.SPoint);
         fn(this.EPoint);
+        this._isDirty = true;
     }
 
     /**

@@ -188,10 +188,19 @@ export abstract class Shape {
         return curve.getPosDataByPer(per);
     }
 
+    clearCache() {
+        this._len = undefined;
+        this._lenArr = [];
+        this._bbox2 = undefined;
+        this._isClockwise = undefined;
+    }
+
     applyFn(fn: PointFn) {
         for (const curve of this.curves) {
             curve.applyFn(fn);
         }
+        // 清理缓存
+        this.clearCache();
     }
 
     splitByCoord(coordData: CoordData) {

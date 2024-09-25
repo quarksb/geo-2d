@@ -368,6 +368,7 @@ export class QuadraticCurve extends LineCurve {
         fn(this.SPoint);
         fn(this.EPoint);
         fn(this.CPoint1);
+        this._isDirty = true;
     }
 
     applyFFDFn(fn: PointFn): void {
