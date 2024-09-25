@@ -24,27 +24,28 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
             curve = getQuadraticCurve(shape0, shape1);
         } else {
             // 三阶贝塞尔曲线
-            const p1 = shape0.EPoint;
+            const p1 = vec2.clone(shape0.EPoint);
             const p2 = vec2.scaleAndAdd(vec2.create(), shape0.EPoint, shape0.outDir, 1);
             const p3 = vec2.scaleAndAdd(vec2.create(), shape1.SPoint, shape1.inDir, -1);
-            const p4 = shape1.SPoint;
+            const p4 = vec2.clone(shape1.SPoint);
             curve = new BezierCurve(p1, p2, p3, p4);
         }
     } else {
         // 如果角度太小或者太大，则用直线插值
-        curve = new LineCurve(shape0.EPoint, shape1.SPoint);
+        curve = new LineCurve(vec2.clone(shape0.EPoint), vec2.clone(shape1.SPoint));
     }
 
     return curve;
 }
 
 export function getQuadraticCurve(shape0: ConnectStart, shape1: ConnectEnd) {
-    const p1 = shape0.EPoint;
-    const p2 = vec2.add(vec2.create(), shape0.EPoint, shape0.outDir);
-    const p3 = vec2.add(vec2.create(), shape1.SPoint, shape1.inDir);
-    const p4 = shape1.SPoint;
+    const p1 = vec2.clone(shape0.EPoint);
+    const p4 = vec2.clone(shape1.SPoint);
+    const p2 = vec2.add(vec2.create(), p1, shape0.outDir);
+    const p3 = vec2.add(vec2.create(), p4, shape1.inDir);
+
     const interSect = lineInterSect(p1, p2, p3, p4);
-    const curve = new QuadraticCurve(shape0.EPoint, interSect, shape1.SPoint);
+    const curve = new QuadraticCurve(p1, interSect, p4);
     return curve;
 }
 
