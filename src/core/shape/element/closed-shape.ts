@@ -137,7 +137,7 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         return index
     }
 
-    const indexMatrix: number[][] = new Array(outSideShapeArr.length).fill([]);
+    const indexMatrix: number[][] = new Array(outSideShapeArr.length).fill(0).map(() => []);
     // 便利所有的内圈，即 isClockwise 为 false 的 shape
     for (let i = 0; i < inSideShapeArr.length; i++) {
         const shape = shapes[i];
@@ -149,7 +149,11 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         }
     }
 
-    const result: ClosedShape[][] = new Array(outSideShapeArr.length).fill([]);
+    // console.log("indexMatrix:", indexMatrix);
+
+
+    // 不能直接 fill([]) 会导致所有的 indexMatrix[i] 都是同一个数组
+    const result: ClosedShape[][] = new Array(outSideShapeArr.length).fill(0).map(() => []);
     for (let i = 0; i < indexMatrix.length; i++) {
         result[i].push(outSideShapeArr[i]);
         const indexArr = indexMatrix[i];
@@ -157,6 +161,7 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
             result[i].push(inSideShapeArr[index]);
         })
     }
+    // console.log("result:", result);
 
     return result;
 }
