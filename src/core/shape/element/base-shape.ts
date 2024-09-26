@@ -12,6 +12,7 @@ import { vec2ToStr } from "../../utils";
  */
 export abstract class Shape {
     curves: Curve[] = [];
+    /**@deprecated 准备移除 */
     points: vec2[] = [];
     /** is the shape complies with the right-hand rule */
     protected _isClockwise?: boolean;
@@ -235,7 +236,10 @@ export abstract class Shape {
             curve.reverse();
         }
         this.points.reverse();
-        this._isClockwise = !this._isClockwise;
+        // this.isClockwise 可能为 undefined, 所以不能直接取反
+        if (this._isClockwise !== undefined) {
+            this._isClockwise = !this._isClockwise;
+        }
         // _lenArr 需要更新
         this._len = this._getLen();
     }

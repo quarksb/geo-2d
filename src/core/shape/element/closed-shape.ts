@@ -107,61 +107,56 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         }
     }
 
-    // check whether the shape is biggest
-    // const isRealBiggest = shapes.every((shape) => {
-    //     const { bbox2 } = shape;
-    //     return bbox2.xMin >= BShape.bbox2.xMin || bbox2.yMin >= BShape.bbox2.yMin || bbox2.xMax <= BShape.bbox2.xMax || bbox2.yMax <= BShape.bbox2.yMax;
-    // })
-
-    // if (!isRealBiggest) {
-    //     console.warn("the biggest shape is not real biggest");
-    // }
 
     // the BShape should be right hand, if not, then we should reverse the path
     if (!BShape.isClockwise) {
+        console.warn("outShape should be right hand, and now I will reverse it");
         shapes.forEach((shape) => {
             shape.reverse();
         })
     }
 
-    const shapeArr: ClosedShape[][] = [];
+    const outSideShapeArr: ClosedShape[] = [];
+    const inSideShapeArr: ClosedShape[] = [];
     // 先找到所有的外圈，即 isClockwise 为 true 的 shape
     for (let i = 0; i < shapes.length; i++) {
         const shape = shapes[i];
         const { isClockwise } = shape;
         if (isClockwise) {
-            // 顺时针，说明是外部结构，需要添加进 shapeArr
-            shapeArr.push([shape]);
+            outSideShapeArr.push(shape);
+        } else {
+            inSideShapeArr.push(shape);
         }
     }
 
-    // console.log("shapeArr", shapeArr);
+    // 通过比较 bbox 查找对应的 path
+    const getIndex = (inSideShape: ClosedShape) => {
+        const index = outSideShapeArr.findIndex((outSideShape) => {
+            return includeBBox2(outSideShape.bbox2, inSideShape.bbox2);
+        });
+        return index
+    }
 
-    // 再找到所有的内圈，即 isClockwise 为 false 的 shape
-    for (let i = 0; i < shapes.length; i++) {
+    const indexMatrix: number[][] = new Array(outSideShapeArr.length).fill([]);
+    // 便利所有的内圈，即 isClockwise 为 false 的 shape
+    for (let i = 0; i < inSideShapeArr.length; i++) {
         const shape = shapes[i];
-        const { bbox2, isClockwise } = shape;
-        if (!isClockwise) {
-            // 逆时针，说明是内部结构，需要添加进已有的 path 中
-
-            // 通过  查找对应的 path
-            const lastShapes = shapeArr.find((shapes) => {
-                if (!shapes[0]) {
-                    return false;
-                }
-                const lastBBox2 = shapes[0].bbox2;
-                // console.log("lastBBox2", shapes[0], lastBBox2, bbox2);
-
-                return includeBBox2(lastBBox2, bbox2);
-            });
-
-            if (lastShapes) {
-                lastShapes.push(shape);
-            } else {
-                console.warn("can't find the path for shape:", shape);
-            }
+        const index = getIndex(shape);
+        if (index !== -1) {
+            indexMatrix[index].push(i);
+        } else {
+            console.warn("can't find the path for shape:", shape);
         }
     }
 
-    return shapeArr;
+    const result: ClosedShape[][] = new Array(outSideShapeArr.length).fill([]);
+    for (let i = 0; i < indexMatrix.length; i++) {
+        result[i].push(outSideShapeArr[i]);
+        const indexArr = indexMatrix[i];
+        indexArr.forEach((index) => {
+            result[i].push(inSideShapeArr[index]);
+        })
+    }
+
+    return result;
 }
