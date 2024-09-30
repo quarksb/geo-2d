@@ -42,7 +42,7 @@ export class SingleShape extends Shape {
         if (vec2.equals(this.currentPos, startPoint)) {
             return;
         }
-        const line = new LineCurve(this.currentPos, this.curves[0].SPoint);
+        const line = new LineCurve(this.currentPos, vec2.clone(this.curves[0].SPoint));
         this.curves.push(line);
     }
 
