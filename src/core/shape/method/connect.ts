@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Shape } from "../element/base-shape";
 import { cross, toAngle } from "../../math";
-import { BezierCurve, ConnectEnd, ConnectStart, Curve, LineCurve, lineInterSect, QuadraticCurve } from "../../curve";
+import { ConnectEnd, ConnectStart, Curve, LineCurve, lineInterSect, QuadraticCurve } from "../../curve";
 import { SingleShape } from "../element/single-shape";
 
 /**
@@ -18,18 +18,9 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
     const angle = toAngle(vec2.angle(shape0.outDir, shape1.inDir));
 
     /**@todo isSameDirection 考虑三阶贝塞尔 */
-    if (angle >= 10 && angle <= 60) {
-        if (isSameDirection) {
-            // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
-            curve = getQuadraticCurve(shape0, shape1);
-        } else {
-            // 三阶贝塞尔曲线
-            const p1 = vec2.clone(shape0.EPoint);
-            const p2 = vec2.scaleAndAdd(vec2.create(), shape0.EPoint, shape0.outDir, 1);
-            const p3 = vec2.scaleAndAdd(vec2.create(), shape1.SPoint, shape1.inDir, -1);
-            const p4 = vec2.clone(shape1.SPoint);
-            curve = new BezierCurve(p1, p2, p3, p4);
-        }
+    if (isSameDirection && angle > 1 && angle < 60) {
+        // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
+        curve = getQuadraticCurve(shape0, shape1);
     } else {
         // 如果角度太小或者太大，则用直线插值
         curve = new LineCurve(vec2.clone(shape0.EPoint), vec2.clone(shape1.SPoint));
@@ -77,5 +68,58 @@ export function connectShape(shape0: Shape, shape1: Shape): SingleShape {
     return new SingleShape(curves);
 }
 
+
+if (import.meta.vitest) {
+    const { describe, it, expect } = import.meta.vitest;
+    describe('test connect', () => {
+        it('getConnectCurve: QuadraticCurve0', () => {
+            const shape0 = new SingleShape([
+                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
+            ]);
+            const shape1 = new SingleShape([
+                new LineCurve(vec2.fromValues(2, 0.5), vec2.fromValues(2.5, 1))
+            ]);
+            const curve = getConnectCurve(shape0, shape1);
+            const output = new QuadraticCurve(vec2.fromValues(1, 0), vec2.fromValues(1.5, 0), vec2.fromValues(2, 0.5));
+            expect(curve).toEqual(output);
+        });
+
+        // it('getConnectCurve: QuadraticCurve1', () => {
+        //     const shape0 = new SingleShape([
+        //         new QuadraticCurve(vec2.fromValues(1, 0), vec2.fromValues(0, 0), vec2.fromValues(0, 1))
+        //     ]);
+        //     const shape1 = new SingleShape([
+        //         new QuadraticCurve(vec2.fromValues(0.5, -0.5),vec2.fromValues(1, -0.2), vec2.fromValues(1.5, -0.5))
+        //     ]);
+        //     const curve = getConnectCurve(shape0, shape1);
+        //     const output = new QuadraticCurve(vec2.fromValues(1, 0), vec2.fromValues(1.5, 0), vec2.fromValues(2, 0.5));
+        //     expect(curve).toEqual(output);
+        // });
+
+        it('getConnectCurve: LineCurve0', () => {
+            const shape0 = new SingleShape([
+                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
+            ]);
+            const shape1 = new SingleShape([
+                new LineCurve(vec2.fromValues(2, 0), vec2.fromValues(2.5, 1))
+            ]);
+            const curve = getConnectCurve(shape0, shape1);
+            const output = new LineCurve(vec2.fromValues(1, 0), vec2.fromValues(2, 0));
+            expect(curve).toEqual(output);
+        });
+
+        it('getConnectCurve: LineCurve1', () => {
+            const shape0 = new SingleShape([
+                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
+            ]);
+            const shape1 = new SingleShape([
+                new LineCurve(vec2.fromValues(1, -1), vec2.fromValues(2, 0))
+            ]);
+            const curve = getConnectCurve(shape0, shape1);
+            const output = new LineCurve(vec2.fromValues(1, 0), vec2.fromValues(1, -1));
+            expect(curve).toEqual(output);
+        });
+    });
+}
 
 

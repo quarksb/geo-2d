@@ -117,7 +117,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
     /**
      * ### get the max curvature of this curve
      * curvature = 1 / r, curvature > 0 means the curve is turning right, otherwise, turning left
-     * @returns 
+     * @returns range from (-Infinity, Infinity)
      */
     abstract getMaxCurvature(): number;
 

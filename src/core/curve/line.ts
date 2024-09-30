@@ -166,6 +166,7 @@ export class LineCurve extends Curve {
         fn(this.SPoint);
         fn(this.EPoint);
         this._isDirty = true;
+        this.update();
     }
 
     /**

@@ -152,6 +152,8 @@ export class BezierCurve extends QuadraticCurve {
         fn(this.EPoint);
         fn(this.CPoint1);
         fn(this.CPoint2);
+        this._isDirty = true;
+        this.update();
     }
 
     /**
