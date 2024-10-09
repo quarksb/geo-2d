@@ -8,9 +8,10 @@ import { SingleShape } from "../element/single-shape";
  * get connect curve for two shapes
  * @param shape0 
  * @param shape1 
+ * @param angleLimit 用曲线连接还是折线连接的判定角度
  * @returns 
  */
-export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
+export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd, angleLimit = 30) {
     const vec = vec2.sub(vec2.create(), shape1.SPoint, shape0.EPoint);
     let curve: Curve;
     /**l0.outDir -> vec 和 vec -> l1.inDir 同向*/
@@ -18,7 +19,7 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd) {
     const angle = toAngle(vec2.angle(shape0.outDir, shape1.inDir));
 
     /**@todo isSameDirection 考虑三阶贝塞尔 */
-    if (isSameDirection && angle > 1 && angle < 60) {
+    if (isSameDirection && angle > 1 && angle < angleLimit) {
         // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
         curve = getQuadraticCurve(shape0, shape1);
     } else {

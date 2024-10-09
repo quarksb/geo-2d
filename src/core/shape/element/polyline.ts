@@ -68,43 +68,6 @@ export class Polyline extends SingleShape {
         return maxDeflection;
     }
 
-    // /**
-    //  *### 数值法计算曲率极值点对应的参数，可以是多个 
-    //  * @returns 曲率半径极值点对应的参数 
-    //  */
-    // getCusps(): number[] {
-    //     // 计算 count 个点的曲率
-    //     /**curvature array */
-    //     const CArr = new Array(count + 1);
-
-    //     for (let i = 0; i <= count; i++) {
-    //         const t = i / count;
-    //         const curvature = this.getCurvature(t);
-    //         CArr[i] = curvature;
-    //     }
-
-    //     // console.log(CArr);
-
-    //     // 寻找极值点
-    //     const cusps: number[] = [];
-    //     for (let i = 1; i < count; i++) {
-    //         if ((CArr[i] - CArr[i - 1]) * (CArr[i] - CArr[i + 1]) > 0) {
-    //             cusps.push(i / count);
-    //         }
-    //     }
-
-    //     // 分析首尾是否是极值点
-    //     if (CArr[0] * (CArr[0] - CArr[1]) > 0) {
-    //         cusps.unshift(0)
-    //     }
-
-    //     if (CArr[count] * (CArr[count] - CArr[count - 1]) > 0) {
-    //         cusps.push(1)
-    //     }
-
-    //     return cusps;
-    // }
-
     getPosDataByPer(percent: number) {
         const { isClosed, len, curves } = this
 
@@ -169,7 +132,7 @@ export function isSelfIntersect(polyline: Polyline) {
 // 计算 singleRail 的延伸线
 // 
 export function calExtendCurve(polyline: Polyline) {
-    const { points: p, bbox2: bbox2 } = polyline;
+    const { points: p, bbox2 } = polyline;
     // todo: 应该取曲率最大的点后的部分的 5 个点，现在为了简单取的是 5 个点
     // 取倒数五个点, 如果长度不够则取两个点
     const count = Math.min(p.length, 5);

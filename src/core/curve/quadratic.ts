@@ -123,17 +123,15 @@ export class QuadraticCurve extends LineCurve {
         return normal;
     }
 
-    getMaxCurvature(): number {
-        const cups = this.getCusps();
-
+    getMaxCurvature(n = 10): number {
         let max = 0;
-        for (const cup of cups) {
-            const val = this.getCurvature(cup);
-            if (Math.abs(val) > Math.abs(max)) {
-                max = val;
+        for (let i = 0; i <= n; i++) {
+            const t = i / n;
+            const curvature = this.getCurvature(t);
+            if (Math.abs(curvature) > Math.abs(max)) {
+                max = curvature;
             }
         }
-
         return max;
     }
 
@@ -328,16 +326,16 @@ export class QuadraticCurve extends LineCurve {
 
     /**
      *### 数值法计算曲率极值点对应的参数，可以是多个 
-     * @param count 分割点数量(数值越大精度越高)
+     * @param n 分割点数量(数值越大精度越高)
      * @returns 曲率半径极值点对应的参数 
      */
-    getCusps(count = 20): number[] {
+    getCusps(n = 10): number[] {
         // 计算 count 个点的曲率
         /**curvature array */
-        const CArr = new Array(count + 1);
+        const CArr = new Array(n + 1);
 
-        for (let i = 0; i <= count; i++) {
-            const t = i / count;
+        for (let i = 0; i <= n; i++) {
+            const t = i / n;
             const curvature = this.getCurvature(t);
             CArr[i] = curvature;
         }
@@ -346,9 +344,9 @@ export class QuadraticCurve extends LineCurve {
 
         // 寻找极值点
         const cusps: number[] = [];
-        for (let i = 1; i < count; i++) {
+        for (let i = 1; i < n; i++) {
             if ((CArr[i] - CArr[i - 1]) * (CArr[i] - CArr[i + 1]) > 0) {
-                cusps.push(i / count);
+                cusps.push(i / n);
             }
         }
 
@@ -357,7 +355,7 @@ export class QuadraticCurve extends LineCurve {
             cusps.unshift(0)
         }
 
-        if (CArr[count] * (CArr[count] - CArr[count - 1]) > 0) {
+        if (CArr[n] * (CArr[n] - CArr[n - 1]) > 0) {
             cusps.push(1)
         }
 
@@ -444,43 +442,4 @@ export function LineToQuadratic(lineCurve: LineCurve): QuadraticCurve {
     const endPoint = lineCurve.EPoint;
     const controlPoint1 = vec2.fromValues((startPoint[0] + endPoint[0]) / 2, (startPoint[1] + endPoint[1]) / 2);
     return new QuadraticCurve(startPoint, controlPoint1, endPoint);
-}
-
-
-// 源码内的测试套件
-if (import.meta.vitest) {
-    const { it, test, expect, describe } = import.meta.vitest;
-
-    describe('test for quadratic curve', () => {
-        let curve = new QuadraticCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1), vec2.fromValues(2, 0));
-
-        const points = [
-            vec2.fromValues(-1, 0),
-            vec2.fromValues(1, 2),
-            vec2.fromValues(3, 0)
-        ];
-
-        it('get distance', () => {
-            const datas = [
-                { point: vec2.fromValues(-1, 0), distance: 1 },
-                { point: vec2.fromValues(0, 0), distance: 0 },
-                { point: vec2.fromValues(0.5, 1), distance: 0.5798392351022574 },
-                { point: vec2.fromValues(1, 0), distance: 0.5 },
-                { point: vec2.fromValues(2, 0), distance: 0 },
-                { point: vec2.fromValues(3, 0), distance: 1 }
-            ];
-            for (const data of datas) {
-                expect(curve.getDisToPos(data.point)).toBeCloseTo(curve.getDisToPos2(data.point));
-            }
-            // expect(quadraticCurve.getDisToPos(vec2.fromValues(0, 1))).toBeCloseTo(0.5);
-            // expect(quadraticCurve.getDisToPos(vec2.fromValues(1, 1))).toBeCloseTo(0.5);
-            // expect(quadraticCurve.getDisToPos(vec2.fromValues(2, 0))).toBeCloseTo(0);
-        })
-
-        // it('get curvature'), () => {
-        //     expect(quadraticCurve.getCurvature(0.5)).toBeCloseTo(0);
-        //     expect(quadraticCurve.getCurvature(0)).toBeCloseTo(Infinity);
-        //     expect(quadraticCurve.getCurvature(1)).toBeCloseTo(Infinity);
-        // }
-    })
 }

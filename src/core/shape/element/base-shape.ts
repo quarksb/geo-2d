@@ -94,10 +94,10 @@ export abstract class Shape {
         return this.curves[this.curves.length - 1].outDir;
     }
 
-    getMaxCurvature() {
+    getMaxCurvature(n = 10) {
         let maxCurvature = 0;
         for (const curve of this.curves) {
-            const curCurvature = curve.getMaxCurvature();
+            const curCurvature = curve.getMaxCurvature(n);
             maxCurvature = Math.sign(curCurvature) * Math.max(maxCurvature, Math.abs(curCurvature));
         }
         return maxCurvature;

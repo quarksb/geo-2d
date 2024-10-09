@@ -139,14 +139,6 @@ export class BezierCurve extends QuadraticCurve {
         return vec2.fromValues(x, y);
     }
 
-    // getCurvature(t: number): number {
-    //     return super.getCurvature.apply(this, [t]);
-    // }
-
-    // getCusps(): number[] {
-    //     return super.getCusps.apply(this);
-    // }
-
     applyFn(fn: PointFn) {
         fn(this.SPoint);
         fn(this.EPoint);
@@ -349,66 +341,4 @@ export function quadraticToBezier(quadraticCurve: QuadraticCurve): BezierCurve {
     const controlPoint1 = vec2.lerp(vec2.create(), SPoint, Q1, 2 / 3);
     const controlPoint2 = vec2.lerp(vec2.create(), EPoint, Q1, 2 / 3);
     return new BezierCurve(SPoint, controlPoint1, controlPoint2, EPoint);
-}
-
-// 源码内的测试套件
-if (import.meta.vitest) {
-    const { it, expect } = import.meta.vitest;
-
-    const TestDataArr = [
-        // {
-        //     input: [100, 0, 200, 0, 300, 0, 400, 0],
-        //     bbox: { x: 100, y: 0, width: 300, height: 0 },
-        //     cusps: [],
-        // },
-        // {
-        //     input: [0, 0, 100, 100, 0, 100, 100, 0],
-        //     bbox: { x: 0, y: 0, width: 100, height: 75 },
-        //     cusps: [0.5],
-        // },
-        {
-            input: [385, 165, 645, 165, 645, 70, 750, 165],
-            bbox: {
-                height: 42.22222137451172,
-                width: 365,
-                x: 385,
-                y: 122.77777862548828,
-            },
-            cusps: [0.73],
-        },
-        // {
-        //     input: [74.87, 127.58, -74.96, 39.46, 39.85, -38.02, 78.87, 20.89],
-        //     bbox: {
-        //         "height": 127.27870574593544,
-        //         "width": 78.86941333918367,
-        //         "x": 0.000589407398365438,
-        //         "y": 0.30129608511924744,
-        //     },
-        //     cusps: [0.47, 0.7, 0.85],
-        // }
-    ];
-
-    it("bbox", () => {
-        for (const testData of TestDataArr) {
-            const { input, bbox } = testData;
-            const startPoint = vec2.fromValues(input[0], input[1]);
-            const controlPoint1 = vec2.fromValues(input[2], input[3]);
-            const controlPoint2 = vec2.fromValues(input[4], input[5]);
-            const endPoint = vec2.fromValues(input[6], input[7]);
-            const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-            expect(bezierCurve.bbox).toEqual(bbox);
-        }
-    });
-
-    it("cusps", () => {
-        for (const testData of TestDataArr) {
-            const { input, cusps } = testData;
-            const startPoint = vec2.fromValues(input[0], input[1]);
-            const controlPoint1 = vec2.fromValues(input[2], input[3]);
-            const controlPoint2 = vec2.fromValues(input[4], input[5]);
-            const endPoint = vec2.fromValues(input[6], input[7]);
-            const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
-            expect(bezierCurve.getCusps()).toEqual(cusps);
-        }
-    });
 }

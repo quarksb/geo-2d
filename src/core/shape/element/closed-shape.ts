@@ -121,7 +121,11 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
     // 先找到所有的外圈，即 isClockwise 为 true 的 shape
     for (let i = 0; i < shapes.length; i++) {
         const shape = shapes[i];
-        const { isClockwise } = shape;
+        const { isClockwise, bbox2 } = shape;
+        // 过滤杂点，比如 wedding 字体的 8 字就有杂点
+        // console.log("bbox2:", bbox2);
+
+        if ((bbox2.xMax - bbox2.xMin) * (bbox2.yMax - bbox2.yMin) < 1) continue;
         if (isClockwise) {
             outSideShapeArr.push(shape);
         } else {
@@ -140,7 +144,7 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
     const indexMatrix: number[][] = new Array(outSideShapeArr.length).fill(0).map(() => []);
     // 便利所有的内圈，即 isClockwise 为 false 的 shape
     for (let i = 0; i < inSideShapeArr.length; i++) {
-        const shape = shapes[i];
+        const shape = inSideShapeArr[i];
         const index = getIndex(shape);
         if (index !== -1) {
             indexMatrix[index].push(i);
