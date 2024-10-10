@@ -6,14 +6,14 @@
     "dist"
   ],
   "main": "dist/geometry.umd.js",
-  "module": "dist/geometry.es.js",
+  "module": "./src/index.ts",
   "exports": {
     ".": {
       "import": {
         "types": [
-          "./dist/index.d.ts"
+          "./src/index.ts"
         ],
-        "default": "./dist/geometry.es.js"
+        "default": "./src/index.ts"
       },
       "require": "./dist/geometry.umd.js"
     },

@@ -108,7 +108,10 @@ export class SingleShape extends Shape {
 export const getShapesArea = (shapes: SingleShape[]) => {
     const points = [];
     for (const shape of shapes) {
-        points.push(...shape.curves.map(curve => curve.SPoint));
+        shape.curves.forEach(curve => {
+            points.push(curve.SPoint);
+        })
+        points.push(shape.EPoint);
     }
     const area = calPointsArea(points);
     return area;
