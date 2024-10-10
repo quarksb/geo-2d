@@ -123,18 +123,6 @@ export class QuadraticCurve extends LineCurve {
         return normal;
     }
 
-    getMaxCurvature(n = 10): number {
-        let max = 0;
-        for (let i = 0; i <= n; i++) {
-            const t = i / n;
-            const curvature = this.getCurvature(t);
-            if (Math.abs(curvature) > Math.abs(max)) {
-                max = curvature;
-            }
-        }
-        return max;
-    }
-
     getSplitT(data: CoordData): number[] {
         const { x, y, width, height } = this.bbox;
         const { mode, val } = data;
@@ -322,6 +310,28 @@ export class QuadraticCurve extends LineCurve {
         const dominator = x1 ** 2 + y1 ** 2;
         const curvature = dominator < 1E-20 ? Infinity : numerator / dominator ** 1.5;
         return curvature;
+    }
+
+    getMaxCurvature(n = 10): number {
+        let max = 0;
+        for (let i = 0; i <= n; i++) {
+            const t = i / n;
+            const curvature = this.getCurvature(t);
+            if (Math.abs(curvature) > Math.abs(max)) {
+                max = curvature;
+            }
+        }
+        return max;
+    }
+
+    getMeanCurvature(n = 10): number {
+        let sum = 0;
+        for (let i = 0; i <= n; i++) {
+            const t = i / n;
+            const curvature = this.getCurvature(t);
+            sum += curvature;
+        }
+        return sum / (n + 1);
     }
 
     /**

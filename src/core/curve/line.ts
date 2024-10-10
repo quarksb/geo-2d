@@ -73,6 +73,10 @@ export class LineCurve extends Curve {
         return 0;
     }
 
+    getMeanCurvature(): number {
+        return 0;
+    }
+
     /**
      * Gets the position on the line curve at a given parameter value.
      * @param t The parameter value.

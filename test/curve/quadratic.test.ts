@@ -40,15 +40,15 @@ describe('test for quadratic curve', () => {
 
     it("getMaxCurvature 0", () => {
         const input = [232, 195, 234, 191, 283, 89]
-        const maxCurvature = 0.45;
+        const maxCurvature = -0.045;
         const startPoint = vec2.fromValues(input[0], input[1]);
         const controlPoint1 = vec2.fromValues(input[2], input[3]);
         const endPoint = vec2.fromValues(input[4], input[5]);
         const bezierCurve = new QuadraticCurve(startPoint, controlPoint1, endPoint);
 
         const realMaxCurvature = bezierCurve.getMaxCurvature(100);
-        const k = maxCurvature / realMaxCurvature
-        expect(k + 1 / k).toBeCloseTo(2, 0.01);
+
+        expect(realMaxCurvature).toBeCloseTo(maxCurvature);
 
     });
 })
