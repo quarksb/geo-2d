@@ -1,19 +1,19 @@
 {
   "name": "geo-2d",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "type": "module",
   "files": [
     "dist"
   ],
   "main": "dist/geometry.umd.js",
-  "module": "./src/index.ts",
+  "module": "dist/geometry.es.js",
   "exports": {
     ".": {
       "import": {
         "types": [
-          "./src/index.ts"
+          "./dist/index.d.ts"
         ],
-        "default": "./src/index.ts"
+        "default": "./dist/geometry.es.js"
       },
       "require": "./dist/geometry.umd.js"
     },
