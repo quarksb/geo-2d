@@ -16,7 +16,7 @@ export class Polygon extends ClosedShape {
     }
 
     getCentroid() {
-        let area = this.getSignArea();
+        let area = this.getArea();
         let cx = 0;
         let cy = 0;
         for (let i = 0; i < this.points.length; i++) {

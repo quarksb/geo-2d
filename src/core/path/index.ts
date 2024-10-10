@@ -45,6 +45,14 @@ export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
         return Path.fromCommands(commands);
     }
 
+    getArea() {
+        let area = 0;
+        for (const shape of this.shapes) {
+            area += shape.getArea();
+        }
+        return area;
+    }
+
     getBBox2(bbox2 = createBBox2()): BBox2 {
         for (const shape of this.shapes) {
             shape.getBBox2(bbox2);

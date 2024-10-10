@@ -2,6 +2,7 @@ import { vec2 } from "gl-matrix";
 import { Curve, LineCurve, BezierCurve, QuadraticCurve } from "../../curve";
 import { PathCommand, pathStringToPathCommands } from "../../utils";
 import { Shape } from "./base-shape";
+import { calPointsArea } from "../../math";
 
 /**
  * ## Shape of a single path
@@ -104,6 +105,14 @@ export class SingleShape extends Shape {
 
 }
 
+export const getShapesArea = (shapes: SingleShape[]) => {
+    const points = [];
+    for (const shape of shapes) {
+        points.push(...shape.curves.map(curve => curve.SPoint));
+    }
+    const area = calPointsArea(points);
+    return area;
+}
 
 if (import.meta.vitest) {
     const { it, expect, test } = import.meta.vitest

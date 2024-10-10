@@ -59,7 +59,7 @@ describe('test for quadratic curve', () => {
         }
     });
 
-    it("getMaxCurvature", () => {
+    it("getMaxCurvature 0", () => {
         for (const testData of TestDataArr) {
             const { input, maxCurvature } = testData;
             const startPoint = vec2.fromValues(input[0], input[1]);

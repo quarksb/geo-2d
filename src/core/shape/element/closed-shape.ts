@@ -57,18 +57,10 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
     }
 
     /**
-     * ### get the area of the polygon
-     * @returns the area of the polygon
-     */
-    getArea() {
-        return Math.abs(this.getSignArea());
-    }
-
-    /**
      * ### get the signed area of the polygon
      * @returns signed area
      */
-    getSignArea() {
+    getArea() {
         return calPointsArea(this.points);
     }
 
