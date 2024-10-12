@@ -110,6 +110,7 @@ export const getShapesArea = (shapes: SingleShape[]) => {
     for (const shape of shapes) {
         shape.curves.forEach(curve => {
             points.push(curve.SPoint);
+            points.push(curve.getPosition(0.5));
         })
         points.push(shape.EPoint);
     }

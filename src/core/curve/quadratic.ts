@@ -6,7 +6,7 @@ import { BBox2 } from "../base";
 import { cross } from "../math";
 import { vec2ToStr } from "../utils";
 
-const SPLIT_COUNT = 100;
+const SPLIT_COUNT = 20;
 export const QuadraticCurveType = "curve-quadratic";
 /**
  * ## QuadraticCurve
@@ -70,7 +70,7 @@ export class QuadraticCurve extends LineCurve {
         let len = 0;
         let lastPoint = this.getPosition(0);
         for (let i = 1; i <= SPLIT_COUNT; i++) {
-            let point = this.getPosition(i / 100);
+            let point = this.getPosition(i / SPLIT_COUNT);
             len += vec2.distance(lastPoint, point);
             lastPoint = point;
             this._lenArr[i - 1] = len;

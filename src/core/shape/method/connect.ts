@@ -19,7 +19,7 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd, angleL
     const angle = toAngle(vec2.angle(shape0.outDir, shape1.inDir));
 
     /**@todo isSameDirection 考虑三阶贝塞尔 */
-    if (isSameDirection && angle > 1 && angle < angleLimit) {
+    if (isSameDirection && angle > 1 && toAngle(vec2.angle(shape0.outDir, vec)) < angleLimit && toAngle(vec2.angle(vec, shape1.inDir)) < angleLimit) {
         // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
         curve = getQuadraticCurve(shape0, shape1);
     } else {

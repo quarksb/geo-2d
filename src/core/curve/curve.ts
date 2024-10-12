@@ -85,11 +85,11 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
     }
 
     /**
-     * Gets the deflection angle of the curve.
-     * @remarks this is the angle between the inDir and ouDir,
+     * Gets the deflection radian angle of the curve.
+     * @remarks this is the radian angle between the inDir and ouDir,
      * it is correct for most of the time, but it not correct for bezier curve sometimes.
      */
-    get deflection(): number {
+    get radian(): number {
         const { inDir, outDir } = this;
         return getRadianChange(inDir, outDir);
     }
