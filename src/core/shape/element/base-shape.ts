@@ -22,6 +22,9 @@ export abstract class Shape {
     protected _bbox2?: BBox2;
 
     constructor (curves: Curve[]) {
+        if (curves.length === 0) {
+            throw new Error('Shape must have at least one curve');
+        }
         this.curves = curves;
         this.initPoints();
     }
@@ -160,7 +163,7 @@ export abstract class Shape {
         const currentLen = percent * len;
         if (percent <= 0) {
             const curve = this.curves[0];
-            const per = percent * currentLen / this.curves[0].len;
+            const per = percent * currentLen / curve.len;
             return curve.getPosDataByPer(per);
         }
         if (percent >= 1) {

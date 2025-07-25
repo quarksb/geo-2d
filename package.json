@@ -40,16 +40,16 @@
     "coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@microsoft/tsdoc": "^0.15.0",
-    "@vitejs/plugin-vue": "^5.1.2",
-    "less": "^4.2.0",
-    "typedoc": "^0.26.6",
-    "typescript": "^5.0.2",
-    "vite": "^5.4.2",
-    "vite-plugin-dts": "^4.0.3",
-    "vitest": "^2.0.5",
-    "vue": "^3.3.4",
-    "vue-tsc": "^2.1.0"
+    "@microsoft/tsdoc": "^0.15.1",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "less": "^4.2.2",
+    "typedoc": "^0.26.11",
+    "typescript": "^5.8.2",
+    "vite": "^5.4.15",
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^2.1.9",
+    "vue": "^3.5.13",
+    "vue-tsc": "^2.2.8"
   },
   "peerDependencies": {
     "gl-matrix": "^3.4.3"
