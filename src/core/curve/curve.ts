@@ -222,6 +222,25 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
      */
     abstract applyFFDFn(fn: PointFn): void;
 
+    /**
+     * Scales the curve by the given factors.
+     * @param scaleX - The scale factor for the x-axis.
+     * @param scaleY - The scale factor for the y-axis (optional, defaults to scaleX for uniform scaling).
+     * @param origin - The origin point for scaling (optional, defaults to [0, 0]).
+     */
+    scale(scaleX: number, scaleY: number = scaleX, origin: vec2 = vec2.fromValues(0, 0)): void {
+        const scaleFn: PointFn = (point: vec2) => {
+            // Translate to origin
+            vec2.subtract(point, point, origin);
+            // Scale
+            point[0] *= scaleX;
+            point[1] *= scaleY;
+            // Translate back
+            vec2.add(point, point, origin);
+        };
+        this.applyFn(scaleFn);
+    }
+
     abstract reverse(): void;
 
     /**
