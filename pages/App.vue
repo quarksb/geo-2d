@@ -11,6 +11,7 @@ import { ref, watch, computed } from "vue";
 import { downloadCore, copySvgCode, throttle } from "./utils";
 import { gradientArr } from "./data";
 import { vec2 } from "gl-matrix";
+import * as styles from "./app.css";
 
 const msg = "quark_china";
 const url = "https://quarksb.com";
@@ -65,53 +66,40 @@ function renderSvgPath() {
       currentState.polygon = tempPolygon;
       handle = null;
     }
-  };
-  if (handle) {
-    resetPolygonState();
-  }
-  if (timeOutId) {
-    clearTimeout(timeOutId);
-    timeOutId = null;
-  }
-  console.log(typeof polygonNum.value);
-
-  const targetPolygon = getPolygon(
-    width,
-    height,
-    polygonNum.value,
-    ramada.value,
-    0,
-    randomSeed.value
-  );
-  if (currentState.polygon.length > 0) {
-    const animationTime = 3000;
-    let initTime = performance.now();
-    const baseRender = (time: number) => {
-      // const t = (time - initTime) / animationTime;
-      const t = getEaseElasticOut((time - initTime) / animationTime);
-      tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
-      console.log(degree.value);
-
-      const curves = getCurvesByPolygon(tempPolygon, degree.value);
-      if (isScaleToEdge.value) {
-        resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
-      }
-
-      d.value = getPathStr(curves);
-      handle = requestAnimationFrame(baseRender);
-    };
-    handle = requestAnimationFrame(baseRender);
-
-    timeOutId = setTimeout(
-      resetPolygonState,
-      animationTime
-    ) as unknown as number;
-  } else {
-    const curves = getCurvesByPolygon(targetPolygon, degree.value);
-    if (isScaleToEdge.value) {
-      resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+    if (timeOutId) {
+        clearTimeout(timeOutId);
+        timeOutId = null;
     }
-    d.value = getPathStr(curves);
+
+    const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
+    if (currentState.polygon.length > 0) {
+        const animationTime = 3000;
+        let initTime = performance.now();
+        const baseRender = (time: number) => {
+            // const t = (time - initTime) / animationTime;
+            const t = getEaseElasticOut((time - initTime) / animationTime);
+            tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
+            console.log(degree.value);
+
+            const curves = getCurvesByPolygon(tempPolygon, degree.value);
+            if (isScaleToEdge.value) {
+                resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+            }
+
+            d.value = getPathStr(curves);
+            handle = requestAnimationFrame(baseRender);
+        };
+        handle = requestAnimationFrame(baseRender);
+
+        timeOutId = setTimeout(resetPolygonState, animationTime) as unknown as number;
+    } else {
+        const curves = getCurvesByPolygon(targetPolygon, degree.value);
+        if (isScaleToEdge.value) {
+            resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
+        }
+        d.value = getPathStr(curves);
+        currentState.polygon = targetPolygon;
+    }
     currentState.polygon = targetPolygon;
   }
 }
@@ -199,436 +187,115 @@ smoothRender();
 </script>
 
 <template>
-  <div class="layout">
-    <div class="root">
-      <!-- <header class="header">
-                <h2>Glory to Ukraine and freedom will prevail!</h2>
-            </header> -->
-      <nav class="nav">
-        <div class="logo-container">
-          <img alt="quark" src="./assets/quark.png" />
-          <h1>
-            By
-            <a href="https://github.com/quarksb" target="_blank">{{ msg }}</a>
-          </h1>
-        </div>
-        <div class="logo-container">
-          <a
-            type="button"
-            href="https://github.com/quarksb/organic-svg"
-            class="share-button"
-          >
-            <div class="logo">
-              <img
-                src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-              />
-            </div>
-          </a>
-          <a type="button" :href="href" class="share-button">
-            <div class="logo">
-              <img src="./assets/twitter.svg" />
-            </div>
-          </a>
-        </div>
-      </nav>
-      <div class="flex">
-        <div class="body">
-          <svg
-            id="targetSvg"
-            :viewBox="viewBox"
-            focusable="false"
-            role="presentation"
-            class="css-1im46kq"
-          >
-            <defs>
-              <linearGradient
-                id="myGradient"
-                :gradientTransform="`rotate(${rotate})`"
-              >
-                <stop offset="5%" :stop-color="color0" />
-                <stop offset="95%" :stop-color="color1" />
-              </linearGradient>
-              <filter id="blurMe">
-                <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
-              </filter>
-            </defs>
-            <path
-              id="target"
-              fill="url(#myGradient)"
-              :d="d"
-              filter="url(#blurMe)"
-              stroke="red"
-            ></path>
-          </svg>
-          <div class="row-container">
-            <button class="button">
-              <img src="./assets/rand.svg" alt="random" @click="randomSelect" />
-            </button>
-            <button class="button">
-              <img
-                src="./assets/download.png"
-                alt="download"
-                @click="download(false)"
-              />
-            </button>
-          </div>
-        </div>
+    <div :class="[styles.themeClass, styles.layout]">
+        <div :class="styles.root">
+            <nav :class="styles.nav">
+                <div :class="styles.logoContainer">
+                    <img alt="quark" src="./assets/quark.png" :class="styles.logoImg" />
+                    <h1 :class="styles.logoText">
+                        By
+                        <a href="https://github.com/quarksb" target="_blank" :class="styles.link">{{ msg }}</a>
+                    </h1>
+                </div>
+                <div :class="styles.logoContainer">
+                    <a type="button" href="https://github.com/quarksb/organic-svg" :class="styles.shareButton">
+                        <div :class="styles.shareIcon">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" :class="styles.shareIcon" />
+                        </div>
+                    </a>
+                    <a type="button" :href="href" :class="styles.shareButton">
+                        <div :class="styles.shareIcon">
+                            <img src="./assets/twitter.svg" :class="styles.shareIcon" />
+                        </div>
+                    </a>
+                </div>
+            </nav>
+            <div :class="styles.content">
+                <div :class="styles.mainArea">
+                    <svg id="targetSvg" :viewBox="viewBox" focusable="false" role="presentation" :class="styles.svg">
+                        <defs>
+                            <linearGradient id="myGradient" :gradientTransform="`rotate(${rotate})`">
+                                <stop offset="5%" :stop-color="color0" />
+                                <stop offset="95%" :stop-color="color1" />
+                            </linearGradient>
+                            <filter id="blurMe">
+                                <feGaussianBlur in="SourceGraphic" :stdDeviation="blur" />
+                            </filter>
+                        </defs>
+                        <path id="target" fill="url(#myGradient)" :d="d" filter="url(#blurMe)" stroke="red"></path>
+                    </svg>
+                    <div :class="styles.actionButtons">
+                        <button :class="styles.circleButton">
+                            <img src="./assets/rand.svg" alt="random" @click="randomSelect" :class="styles.buttonIcon" />
+                        </button>
+                        <button :class="styles.circleButton">
+                            <img src="./assets/download.png" alt="download" @click="download(false)" :class="styles.buttonIcon" />
+                        </button>
+                    </div>
+                </div>
 
-        <aside class="aside">
-          <div class="control">
-            <input class="checkbox" type="checkbox" v-model="isColorSelected" />
-            <div class="param">color</div>
-            <input class="color-picker" type="color" v-model="color0" />
-            <input class="color-picker" type="color" v-model="color1" />
-            <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
-          </div>
-          <div class="control">
-            <input class="checkbox" type="checkbox" v-model="isScaleToEdge" />
-            <div class="param">isScaleToEdge</div>
-          </div>
-          <div class="control">
-            <input
-              class="checkbox"
-              type="checkbox"
-              v-model="isRotateSelected"
-            />
-            <div class="param">rotate</div>
-            <input
-              class="range"
-              type="range"
-              v-model="rotate"
-              min="0"
-              max="90"
-              step="1"
-            />
-            <!-- <ColorPicker class="color-picker" style="margin-left: -20px;" v-model="color0" /> -->
-          </div>
-          <div class="control">
-            <input
-              class="checkbox"
-              type="checkbox"
-              v-model="isDegreeSelected"
-            />
-            <div class="param">degree</div>
-            <input
-              class="range"
-              type="range"
-              v-model="degree"
-              :min="1"
-              :max="5"
-              step="1"
-            />
-          </div>
-          <div class="control">
-            <input
-              class="checkbox"
-              type="checkbox"
-              v-model="isPolygonNumSelected"
-            />
-            <div class="param">num</div>
-            <input
-              class="range"
-              type="range"
-              v-model="polygonNum"
-              :min="minPolygonNum"
-              :max="maxPolygonNum"
-              step="1"
-            />
-          </div>
-          <div class="control">
-            <input
-              class="checkbox"
-              type="checkbox"
-              v-model="isRamadaSelected"
-            />
-            <div class="param">flex</div>
-            <input
-              class="range"
-              type="range"
-              v-model="ramada"
-              min="0"
-              max="1"
-              step="0.01"
-            />
-          </div>
-          <div class="control">
-            <input class="checkbox" type="checkbox" v-model="isBlurSelected" />
-            <div class="param">blur</div>
-            <input
-              class="range"
-              type="range"
-              v-model="blur"
-              min="0"
-              max="20"
-              step="1"
-            />
-          </div>
-          <div class="control">
-            <button type="button" @click="randomSelect">Random Select</button>
-          </div>
+                <aside :class="styles.sidebar">
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isColorSelected" />
+                        <div :class="styles.label">color</div>
+                        <input :class="styles.colorInput" type="color" v-model="color0" />
+                        <input :class="styles.colorInput" type="color" v-model="color1" />
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isScaleToEdge" />
+                        <div :class="styles.label">isScaleToEdge</div>
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isRotateSelected" />
+                        <div :class="styles.label">rotate</div>
+                        <input :class="styles.rangeInput" type="range" v-model="rotate" min="0" max="90" step="1" />
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isDegreeSelected" />
+                        <div :class="styles.label">degree</div>
+                        <input :class="styles.rangeInput" type="range" v-model="degree" :min="1" :max="5" step="1" />
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isPolygonNumSelected" />
+                        <div :class="styles.label">num</div>
+                        <input :class="styles.rangeInput" type="range" v-model="polygonNum" :min="minPolygonNum" :max="maxPolygonNum" step="1" />
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isRamadaSelected" />
+                        <div :class="styles.label">flex</div>
+                        <input :class="styles.rangeInput" type="range" v-model="ramada" min="0" max="1" step="0.01" />
+                    </div>
+                    <div :class="styles.control">
+                        <input :class="styles.checkbox" type="checkbox" v-model="isBlurSelected" />
+                        <div :class="styles.label">blur</div>
+                        <input :class="styles.rangeInput" type="range" v-model="blur" min="0" max="20" step="1" />
+                    </div>
+                    <div :class="styles.control">
+                        <button type="button" @click="randomSelect" :class="styles.controlButton">Random Select</button>
+                    </div>
 
-          <div class="control">
-            <button type="button" @click="download(false)">
-              <img src="./assets/download.png" alt="download" />
-              svg
-            </button>
-          </div>
-          <div class="control">
-            <button type="button" @click="download(true)">
-              <img src="./assets/download.png" alt="download" />
-              png
-            </button>
-          </div>
-          <div class="control">
-            <button type="button" @click="copySvgCode">
-              <img src="./assets/code.png" alt="copy" />
-              copy
-            </button>
-          </div>
-          <!-- <div class="control">
-                <button
-                    type="button"
-                    @click="
-                        () => {
-                            isDebug = !isDebug;
-                        }
-                    "
-                >
-                    isDebug
-                </button>
-            </div> -->
-        </aside>
-      </div>
+                    <div :class="styles.control">
+                        <button type="button" @click="download(false)" :class="styles.controlButton">
+                            <img src="./assets/download.png" alt="download" :class="styles.controlIcon" />
+                            svg
+                        </button>
+                    </div>
+                    <div :class="styles.control">
+                        <button type="button" @click="download(true)" :class="styles.controlButton">
+                            <img src="./assets/download.png" alt="download" :class="styles.controlIcon" />
+                            png
+                        </button>
+                    </div>
+                    <div :class="styles.control">
+                        <button type="button" @click="copySvgCode" :class="styles.controlButton">
+                            <img src="./assets/code.png" alt="copy" :class="styles.controlIcon" />
+                            copy
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </div>
     </div>
   </div>
 </template>
 
-<style lang="less" scoped>
-@max-width: 1000px;
-@side-width: 300px;
-.layout {
-  display: flex;
-  justify-content: center;
-  .root {
-    width: 100%;
-    max-width: @max-width;
-    height: 100vh;
-    color: #393535;
-    font-family: Inter, system-ui, sans-serif;
-    display: flex;
-    flex-direction: column;
-    padding-top: 10px;
-    .header {
-      padding: 5px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      h1 {
-        margin: 0;
-      }
-    }
-    .nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 1em;
-      background-color: #fff;
-      box-shadow: 0 0 1em #00000033;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      .logo-container {
-        display: flex;
-        align-items: center;
-        img {
-          width: 40px;
-          height: 40px;
-          margin-right: 10px;
-        }
-        a {
-          color: #646cff;
-          text-decoration: none;
-          &:hover {
-            text-decoration: underline;
-          }
-        }
-        .share-button {
-          display: flex;
-          // height: 80%;
-          align-items: center;
-          justify-content: center;
-          padding: 0 5px;
-          border-radius: 5px;
-          color: #1b1717;
-          text-decoration: none;
-          &:hover {
-            box-shadow: 0 0 10px #00000033;
-          }
-          .logo {
-            width: 35px;
-            height: 35px;
-            img {
-              width: 35px;
-              height: 35px;
-              margin-right: 0px;
-            }
-          }
-        }
-      }
-    }
-    .flex {
-      padding-top: 50px;
-      display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: top;
-      .body {
-        width: calc(@max-width - @side-width - 16px);
-        max-width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        svg {
-          width: 500px;
-          height: 500px;
-          border: 3px dashed #00000033;
-        }
-        @media screen and (max-width: 500px) {
-          svg {
-            width: 300px;
-            height: 300px;
-          }
-        }
-        .row-container {
-          width: 60%;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-evenly;
-          align-items: center;
-
-          .button {
-            position: relative;
-            margin-top: 30px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            background-color: #eee;
-            cursor: pointer;
-            img {
-              width: 50px;
-              height: 50px;
-              background-color: #eee;
-            }
-            &:hover {
-              transition-duration: 0.5s;
-              background-color: #3a3a3a;
-              box-shadow: 0 0 10px #050505;
-              img {
-                filter: invert(86%);
-                transition-duration: 0.5s;
-              }
-            }
-          }
-
-          .button:after {
-            content: "";
-            display: block;
-            position: absolute;
-            border-radius: 4em;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: all 0.5s;
-            box-shadow: 0 0 10px 40px #050505;
-            z-index: -1;
-          }
-
-          .button:active:after {
-            box-shadow: 0 0 0 0 #050505;
-            position: absolute;
-            border-radius: 4em;
-            left: 0;
-            top: 0;
-            opacity: 1;
-            transition: 0s;
-          }
-
-          .button:active {
-            top: 1px;
-          }
-        }
-      }
-      .aside {
-        width: @side-width;
-        display: flex;
-        flex-direction: column;
-
-        .control {
-          padding: 2px 12px;
-          height: 40px;
-          margin-bottom: 10px;
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          border-radius: 5px;
-          // border-bottom: 1px solid #00000033;
-
-          .checkbox {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-          }
-          .param {
-            width: 20%;
-            font-size: 20px;
-            text-align: center;
-            margin-right: 10px;
-            text-align: left;
-          }
-          .color-picker {
-            width: 35px;
-            height: 35px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-          }
-          .range {
-            width: 60%;
-          }
-          button {
-            width: 100%;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            border-radius: 5px;
-            background-color: #eee;
-            cursor: pointer;
-            img {
-              width: 20px;
-              height: 20px;
-              margin-right: 10px;
-            }
-          }
-        }
-        .control:hover {
-          background-color: #cececeaa;
-        }
-      }
-    }
-
-    // .footer {
-    //     grid-area: footer;
-    // }
-  }
-}
-</style>
