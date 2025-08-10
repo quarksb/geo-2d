@@ -7,19 +7,6 @@
   ],
   "main": "dist/geometry.umd.js",
   "module": "dist/geometry.es.js",
-  "exports": {
-    ".": {
-      "import": {
-        "types": [
-          "./dist/index.d.ts"
-        ],
-        "default": "./dist/geometry.es.js"
-      },
-      "require": "./dist/geometry.umd.js"
-    },
-    "./package.json": "./package.json",
-    "./README.md": "./README.md"
-  },
   "types": "dist/index.d.ts",
   "typesVersions": {
     "*": {
