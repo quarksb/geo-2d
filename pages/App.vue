@@ -51,7 +51,7 @@ let currentState: {
     polygonNum: number;
 } = { polygon: [], polygonNum: polygonNum.value };
 let handle: number | null = null;
-let timeOutId: number | null = null;
+let timeOutId: ReturnType<typeof setTimeout> | null = null;
 let tempPolygon: vec2[] = [];
 
 // 生成svg path, 并赋值给d, 如果有旧数据，则利用新旧数据插值生成动画
@@ -62,42 +62,43 @@ function renderSvgPath() {
             currentState.polygon = tempPolygon;
             handle = null;
         }
-        if (timeOutId) {
-            clearTimeout(timeOutId);
-            timeOutId = null;
-        }
+    };
+    if (handle) {
+        resetPolygonState();
+    }
+    if (timeOutId) {
+        clearTimeout(timeOutId);
+        timeOutId = null;
+    }
 
-        const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
-        if (currentState.polygon.length > 0) {
-            const animationTime = 3000;
-            let initTime = performance.now();
-            const baseRender = (time: number) => {
-                // const t = (time - initTime) / animationTime;
-                const t = getEaseElasticOut((time - initTime) / animationTime);
-                tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
-                console.log(degree.value);
+    const targetPolygon = getPolygon(width, height, polygonNum.value, ramada.value, 0, randomSeed.value);
+    if (currentState.polygon.length > 0) {
+        const animationTime = 3000;
+        let initTime = performance.now();
+        const baseRender = (time: number) => {
+            // const t = (time - initTime) / animationTime;
+            const t = getEaseElasticOut((time - initTime) / animationTime);
+            tempPolygon = interpolatePolygon(currentState.polygon, targetPolygon, t);
 
-                const curves = getCurvesByPolygon(tempPolygon, degree.value);
-                if (isScaleToEdge.value) {
-                    resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
-                }
-
-                d.value = getPathStr(curves);
-                handle = requestAnimationFrame(baseRender);
-            };
-            handle = requestAnimationFrame(baseRender);
-
-            timeOutId = setTimeout(resetPolygonState, animationTime) as unknown as number;
-        } else {
-            const curves = getCurvesByPolygon(targetPolygon, degree.value);
+            const curves = getCurvesByPolygon(tempPolygon, degree.value);
             if (isScaleToEdge.value) {
                 resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
             }
+
             d.value = getPathStr(curves);
-            currentState.polygon = targetPolygon;
+            handle = requestAnimationFrame(baseRender);
+        };
+        handle = requestAnimationFrame(baseRender);
+
+        timeOutId = setTimeout(resetPolygonState, animationTime);
+    } else {
+        const curves = getCurvesByPolygon(targetPolygon, degree.value);
+        if (isScaleToEdge.value) {
+            resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });
         }
+        d.value = getPathStr(curves);
         currentState.polygon = targetPolygon;
-    };
+    }
 }
 
 const smoothRender = throttle(renderSvgPath, 100);
