@@ -1,0 +1,18 @@
+{
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": false,
+    "printWidth": 120,
+    "tabWidth": 4,
+    "useTabs": false,
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "quoteProps": "as-needed",
+    "jsxSingleQuote": false,
+    "vueIndentScriptAndStyle": false,
+    "embeddedLanguageFormatting": "auto",
+    "htmlWhitespaceSensitivity": "css",
+    "proseWrap": "preserve"
+}

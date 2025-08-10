@@ -5,7 +5,7 @@ import { ClosedShape } from "./closed-shape";
 export const getEllipse = (cx: number, cy: number, rx: number, ry: number, count = 20) => {
     let lastPoint = vec2.fromValues(cx + rx, cy);
     let lastTan = vec2.fromValues(0, 1);
-    const step = Math.PI * 2 / count;
+    const step = (Math.PI * 2) / count;
     const curves = [];
     for (let i = 1; i <= count; i++) {
         const angle = i * step;
@@ -20,15 +20,14 @@ export const getEllipse = (cx: number, cy: number, rx: number, ry: number, count
     }
     const shape = new ClosedShape(curves);
     return shape;
-}
-
+};
 
 if (import.meta.vitest) {
     const { expect, test, describe } = import.meta.vitest;
-    test('ellipse', () => {
+    test("ellipse", () => {
         const shape = getEllipse(100, 50, 80, 40, 4);
         console.log(shape.toPathString(0));
 
-        expect(shape.toPathString()).toBe("M 180 50 Q 180 90 100 90 Q 20 90 20 50 Q 20 10 100 10 Q 180 10 180 50 Z")
+        expect(shape.toPathString()).toBe("M 180 50 Q 180 90 100 90 Q 20 90 20 50 Q 20 10 100 10 Q 180 10 180 50 Z");
     });
 }

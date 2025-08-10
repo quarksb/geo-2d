@@ -11,8 +11,10 @@ declare type WindingRule = "NONZERO" | "EVENODD";
  * a collection of shapes
  */
 export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
-    constructor (public shapes: ClosedShape[], public windingRule: WindingRule | "NONE" = "NONZERO") {
-    }
+    constructor(
+        public shapes: ClosedShape[],
+        public windingRule: WindingRule | "NONE" = "NONZERO"
+    ) {}
     static fromCommands(commands: PathCommand[]): Path {
         // 先遍历一遍 commands, 拆分 commands，每个 M 命令之间的命令为一个 shape
         const commandsArr: PathCommand[][] = [];
@@ -37,7 +39,6 @@ export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
         });
 
         return new Path(shapes);
-
     }
 
     static fromPathString(pathStr: string) {
@@ -150,10 +151,8 @@ export class Path implements IncludeAble<vec2>, InterSectAble<LineCurve> {
     }
 }
 
-
-
 if (import.meta.vitest) {
-    const { it, expect, test } = import.meta.vitest
+    const { it, expect, test } = import.meta.vitest;
     test("Path", () => {
         const pathStr = "M 100 100 L 200 100 L 200 200 Z";
         const path = Path.fromPathString(pathStr);
@@ -172,5 +171,5 @@ if (import.meta.vitest) {
         const path = Path.fromPathString(pathStr);
         expect(path.include(vec2.fromValues(10, 50))).toBeTruthy();
         expect(path.include(vec2.fromValues(40, 50))).toBeFalsy();
-    })
+    });
 }

@@ -7,7 +7,7 @@ export class Node<T> {
     value: T;
     next: Node<T> | null = null;
 
-    constructor (value: T) {
+    constructor(value: T) {
         this.value = value;
     }
 }
@@ -26,7 +26,7 @@ export class LinkedList<T> {
     //
     static fromArray<T>(arr: T[]) {
         const linkedList = new LinkedList<T>();
-        arr.forEach(value => linkedList.append(value));
+        arr.forEach((value) => linkedList.append(value));
         return linkedList;
     }
 
@@ -41,7 +41,7 @@ export class LinkedList<T> {
     }
     /**
      * ### append a value to the linked list
-     * @param value 
+     * @param value
      */
     append(value: T): void {
         const newNode = new Node(value);
@@ -57,7 +57,7 @@ export class LinkedList<T> {
 
     /**
      * ### prepend a value to the linked list
-     * @param value 
+     * @param value
      */
     prepend(value: T): void {
         const newNode = new Node(value);
@@ -73,8 +73,8 @@ export class LinkedList<T> {
 
     /**
      * ### delete a value from the linked list
-     * @param value 
-     * @returns 
+     * @param value
+     * @returns
      */
     delete(value: T): void {
         if (!this.head) return;
@@ -102,8 +102,8 @@ export class LinkedList<T> {
 
     /**
      * ### find a value from the linked list
-     * @param value 
-     * @returns 
+     * @param value
+     * @returns
      */
     find(value: T): Node<T> | null {
         let currentNode = this.head;
@@ -118,7 +118,7 @@ export class LinkedList<T> {
 
     /**
      * ### convert the linked list to string
-     * @returns 
+     * @returns
      */
     toString(): string {
         let currentNode = this.head;
@@ -132,7 +132,7 @@ export class LinkedList<T> {
 
     /**
      * ### get the size of the linked list
-     * @returns 
+     * @returns
      */
     getSize(): number {
         return this.size;
@@ -157,25 +157,25 @@ if (import.meta.vitest) {
     linkedList.prepend(5);
 
     const { it, expect } = import.meta.vitest;
-    it('linked list', () => {
-        expect(linkedList.toString()).toBe('5 -> 10 -> 20 -> 30');
+    it("linked list", () => {
+        expect(linkedList.toString()).toBe("5 -> 10 -> 20 -> 30");
         expect(linkedList.getSize()).toBe(4);
-    })
+    });
 
-    it('linked list delete', () => {
+    it("linked list delete", () => {
         linkedList.delete(20);
-        expect(linkedList.toString()).toBe('5 -> 10 -> 30');
+        expect(linkedList.toString()).toBe("5 -> 10 -> 30");
         expect(linkedList.getSize()).toBe(3);
-    })
+    });
 
-    it('linked list find', () => {
+    it("linked list find", () => {
         const node = linkedList.find(10);
         expect(node?.value).toBe(10);
-    })
+    });
 
-    it('linked list clear', () => {
+    it("linked list clear", () => {
         linkedList.clear();
-        expect(linkedList.toString()).toBe('');
+        expect(linkedList.toString()).toBe("");
         expect(linkedList.getSize()).toBe(0);
-    })
+    });
 }

@@ -1,53 +1,57 @@
 {
-  "name": "geo-2d",
-  "version": "1.0.10",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/geometry.umd.js",
-  "module": "dist/geometry.es.js",
-  "types": "dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "dist/index.d.ts"
-      ]
+    "name": "geo-2d",
+    "version": "1.0.10",
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "dist/geometry.umd.js",
+    "module": "dist/geometry.es.js",
+    "types": "dist/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "dist/index.d.ts"
+            ]
+        }
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "pnpm run build:demo",
+        "build:demo": "vite build --mode demo",
+        "build:lib": "vite build --mode lib",
+        "doc": "typedoc src/index.ts --excludeInternal",
+        "preview": "vite preview",
+        "publish:lib": "vite build --mode lib && npm publish",
+        "test": "vitest",
+        "coverage": "vitest run --coverage",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "format:staged": "prettier --write"
+    },
+    "devDependencies": {
+        "@vanilla-extract/css": "^1.17.4",
+        "@vanilla-extract/vite-plugin": "^5.1.1",
+        "@vitejs/plugin-vue": "^6.0.0",
+        "prettier": "^3.6.2",
+        "typedoc": "^0.26.11",
+        "typescript": "^5.9.2",
+        "vite": "^7.1.1",
+        "vite-plugin-dts": "^4.5.4",
+        "vitest": "^3.2.4",
+        "vue": "^3.5.18",
+        "vue-tsc": "^3.0.5"
+    },
+    "peerDependencies": {
+        "gl-matrix": "^3.4.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/quarksb/geo-2d.git"
+    },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/",
+        "tag": "latest"
     }
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "pnpm run build:demo",
-    "build:demo": "vite build --mode demo",
-    "build:lib": "vite build --mode lib",
-    "doc": "typedoc src/index.ts --excludeInternal",
-    "preview": "vite preview",
-    "publish:lib": "vite build --mode lib && npm publish",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
-  },
-  "devDependencies": {
-    "@vanilla-extract/css": "^1.17.4",
-    "@vanilla-extract/vite-plugin": "^5.1.1",
-    "@vitejs/plugin-vue": "^6.0.0",
-    "typedoc": "^0.26.11",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.1",
-    "vite-plugin-dts": "^4.5.4",
-    "vitest": "^3.2.4",
-    "vue": "^3.5.18",
-    "vue-tsc": "^3.0.5"
-  },
-  "peerDependencies": {
-    "gl-matrix": "^3.4.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/quarksb/geo-2d.git"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "tag": "latest"
-  }
 }

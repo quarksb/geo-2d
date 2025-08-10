@@ -6,11 +6,11 @@ import { PathCommand, pathStringToPathCommands } from "../../utils";
 import { BBox2, includeBBox2 } from "../../base";
 
 export class ClosedShape extends SingleShape implements IncludeAble<vec2>, InterSectAble<LineCurve> {
-    constructor (public curves: Curve[]) {
+    constructor(public curves: Curve[]) {
         super(curves);
         // check whether it's closed
         const { EPoint, SPoint } = this;
-        if (vec2.distance(EPoint, SPoint) > 1E-1) {
+        if (vec2.distance(EPoint, SPoint) > 1e-1) {
             console.error("ClosedShape must be closed");
         }
         this.initPoints();
@@ -18,8 +18,8 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
 
     /**
      * judge if the point is in the polygon
-     * @param point 
-     * @returns 
+     * @param point
+     * @returns
      */
     include(point: vec2): boolean {
         // bbox check
@@ -63,14 +63,12 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
     getArea() {
         return calPointsArea(this.points);
     }
-
 }
 
 export function isInBBox2(point: vec2, bbox2: BBox2): boolean {
     const { xMin, xMax, yMin, yMax } = bbox2;
     return point[0] >= xMin && point[0] <= xMax && point[1] >= yMin && point[1] <= yMax;
 }
-
 
 export interface IncludeAble<T> {
     include(point: T): boolean;
@@ -99,13 +97,12 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         }
     }
 
-
     // the BShape should be right hand, if not, then we should reverse the path
     if (!BShape.isClockwise) {
         console.warn("outShape should be right hand, and now I will reverse it");
         shapes.forEach((shape) => {
             shape.reverse();
-        })
+        });
     }
 
     const outSideShapeArr: ClosedShape[] = [];
@@ -130,8 +127,8 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         const index = outSideShapeArr.findIndex((outSideShape) => {
             return includeBBox2(outSideShape.bbox2, inSideShape.bbox2);
         });
-        return index
-    }
+        return index;
+    };
 
     const indexMatrix: number[][] = new Array(outSideShapeArr.length).fill(0).map(() => []);
     // 便利所有的内圈，即 isClockwise 为 false 的 shape
@@ -147,7 +144,6 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
 
     // console.log("indexMatrix:", indexMatrix);
 
-
     // 不能直接 fill([]) 会导致所有的 indexMatrix[i] 都是同一个数组
     const result: ClosedShape[][] = new Array(outSideShapeArr.length).fill(0).map(() => []);
     for (let i = 0; i < indexMatrix.length; i++) {
@@ -155,7 +151,7 @@ export function splitByBBox(shapes: ClosedShape[]): ClosedShape[][] {
         const indexArr = indexMatrix[i];
         indexArr.forEach((index) => {
             result[i].push(inSideShapeArr[index]);
-        })
+        });
     }
     // console.log("result:", result);
 

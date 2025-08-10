@@ -118,7 +118,14 @@ export function getCurvesByPolygon(polygon: vec2[], degree = 3): Curve[] {
  * @param ramada
  * @param randomSeed
  */
-export function getRandomPathStr(width = 100, height = 100, polygonNum = 6, ramada = 0.5, randomSeed = Math.random(), degree = 3) {
+export function getRandomPathStr(
+    width = 100,
+    height = 100,
+    polygonNum = 6,
+    ramada = 0.5,
+    randomSeed = Math.random(),
+    degree = 3
+) {
     const polygon = getPolygon(width, height, polygonNum, ramada, randomSeed);
     const curves = getCurvesByPolygon(polygon, degree);
     resizeCurvesByBBox(curves, { x: 0, y: 0, width, height });

@@ -6,10 +6,10 @@ import { SingleShape } from "../element/single-shape";
 
 /**
  * get connect curve for two shapes
- * @param shape0 
- * @param shape1 
+ * @param shape0
+ * @param shape1
  * @param angleLimit 用曲线连接还是折线连接的判定角度
- * @returns 
+ * @returns
  */
 export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd, angleLimit = 30) {
     const vec = vec2.sub(vec2.create(), shape1.SPoint, shape0.EPoint);
@@ -19,7 +19,12 @@ export function getConnectCurve(shape0: ConnectStart, shape1: ConnectEnd, angleL
     const angle = toAngle(vec2.angle(shape0.outDir, shape1.inDir));
 
     /**@todo isSameDirection 考虑三阶贝塞尔 */
-    if (isSameDirection && angle > 1 && toAngle(vec2.angle(shape0.outDir, vec)) < angleLimit && toAngle(vec2.angle(vec, shape1.inDir)) < angleLimit) {
+    if (
+        isSameDirection &&
+        angle > 1 &&
+        toAngle(vec2.angle(shape0.outDir, vec)) < angleLimit &&
+        toAngle(vec2.angle(vec, shape1.inDir)) < angleLimit
+    ) {
         // 如果角度太大，则用二阶贝塞尔曲线插值, 其 ControlPint1 为 polyline0.outDir 和 polyline1.inDir 的交点
         curve = getQuadraticCurve(shape0, shape1);
     } else {
@@ -43,9 +48,9 @@ export function getQuadraticCurve(shape0: ConnectStart, shape1: ConnectEnd) {
 
 /**
  * connect two shapes
- * @param shape0 
- * @param shape1 
- * @returns 
+ * @param shape0
+ * @param shape1
+ * @returns
  */
 export function connectShape(shape0: Shape, shape1: Shape): SingleShape {
     const vec = vec2.sub(vec2.create(), shape1.SPoint, shape0.EPoint);
@@ -62,24 +67,19 @@ export function connectShape(shape0: Shape, shape1: Shape): SingleShape {
      * polyline1 是否是 polyline0 的一部分
      * @remarks 如果 合并序列首尾相同，如 [2,4,2] 则 polyline1(2) 是 polyline0(2->4) 的一部分, 此时需要避免添加重复点
      */
-    const isl1PartOfl0 = (shape0 === shape1) || shape1.points.every((p, i) => vec2.dist(p, shape0.points[i]) < 1);
+    const isl1PartOfl0 = shape0 === shape1 || shape1.points.every((p, i) => vec2.dist(p, shape0.points[i]) < 1);
     if (!isl1PartOfl0) {
         curves = curves.concat(shape1.curves);
     }
     return new SingleShape(curves);
 }
 
-
 if (import.meta.vitest) {
     const { describe, it, expect } = import.meta.vitest;
-    describe('test connect', () => {
-        it('getConnectCurve: QuadraticCurve0', () => {
-            const shape0 = new SingleShape([
-                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
-            ]);
-            const shape1 = new SingleShape([
-                new LineCurve(vec2.fromValues(2, 0.5), vec2.fromValues(2.5, 1))
-            ]);
+    describe("test connect", () => {
+        it("getConnectCurve: QuadraticCurve0", () => {
+            const shape0 = new SingleShape([new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))]);
+            const shape1 = new SingleShape([new LineCurve(vec2.fromValues(2, 0.5), vec2.fromValues(2.5, 1))]);
             const curve = getConnectCurve(shape0, shape1);
             const output = new QuadraticCurve(vec2.fromValues(1, 0), vec2.fromValues(1.5, 0), vec2.fromValues(2, 0.5));
             expect(curve).toEqual(output);
@@ -97,30 +97,20 @@ if (import.meta.vitest) {
         //     expect(curve).toEqual(output);
         // });
 
-        it('getConnectCurve: LineCurve0', () => {
-            const shape0 = new SingleShape([
-                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
-            ]);
-            const shape1 = new SingleShape([
-                new LineCurve(vec2.fromValues(2, 0), vec2.fromValues(2.5, 1))
-            ]);
+        it("getConnectCurve: LineCurve0", () => {
+            const shape0 = new SingleShape([new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))]);
+            const shape1 = new SingleShape([new LineCurve(vec2.fromValues(2, 0), vec2.fromValues(2.5, 1))]);
             const curve = getConnectCurve(shape0, shape1);
             const output = new LineCurve(vec2.fromValues(1, 0), vec2.fromValues(2, 0));
             expect(curve).toEqual(output);
         });
 
-        it('getConnectCurve: LineCurve1', () => {
-            const shape0 = new SingleShape([
-                new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))
-            ]);
-            const shape1 = new SingleShape([
-                new LineCurve(vec2.fromValues(1, -1), vec2.fromValues(2, 0))
-            ]);
+        it("getConnectCurve: LineCurve1", () => {
+            const shape0 = new SingleShape([new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 0))]);
+            const shape1 = new SingleShape([new LineCurve(vec2.fromValues(1, -1), vec2.fromValues(2, 0))]);
             const curve = getConnectCurve(shape0, shape1);
             const output = new LineCurve(vec2.fromValues(1, 0), vec2.fromValues(1, -1));
             expect(curve).toEqual(output);
         });
     });
 }
-
-

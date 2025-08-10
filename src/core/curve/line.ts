@@ -17,7 +17,7 @@ export class LineCurve extends Curve {
      * @param startPoint The starting point of the line curve.
      * @param endPoint The ending point of the line curve.
      */
-    constructor (startPoint: vec2, endPoint: vec2) {
+    constructor(startPoint: vec2, endPoint: vec2) {
         super(startPoint, endPoint);
         this.type = LineCurveType;
         this.tangent = vec2.normalize(vec2.create(), vec2.sub(vec2.create(), endPoint, startPoint));
@@ -46,9 +46,9 @@ export class LineCurve extends Curve {
     }
 
     /**
-    * Gets the normal vector of the line curve.
-    * @returns The normal vector.
-    */
+     * Gets the normal vector of the line curve.
+     * @returns The normal vector.
+     */
     getNormal(_?: number): vec2 {
         return this.normal;
     }
@@ -67,7 +67,7 @@ export class LineCurve extends Curve {
 
     /**
      * ### get the max curvature of this curve
-     * @returns 
+     * @returns
      */
     getMaxCurvature() {
         return 0;
@@ -91,7 +91,7 @@ export class LineCurve extends Curve {
      * @param per The parameter value.
      * @returns An object containing the position and tangent vectors.
      */
-    getPosDataByPer(per: number): { pos: vec2, tan: vec2 } {
+    getPosDataByPer(per: number): { pos: vec2; tan: vec2 } {
         const pos = this.getPosition(per);
         const tan = this.tangent;
         return { pos, tan };
@@ -107,26 +107,26 @@ export class LineCurve extends Curve {
         const { SPoint: p1, EPoint: p2 } = this;
         const { mode, val } = data;
         const answer: number[] = [];
-        if (mode === 'x' && val >= x && val <= x + width) {
+        if (mode === "x" && val >= x && val <= x + width) {
             answer.push((val - p1[0]) / (p2[0] - p1[0]));
-        } else if (mode === 'y' && val >= y && val <= y + height) {
+        } else if (mode === "y" && val >= y && val <= y + height) {
             answer.push((val - p1[1]) / (p2[1] - p1[1]));
         }
         return answer;
     }
 
     /**
-    * @inheritdoc
-    */
+     * @inheritdoc
+     */
     getLineIntersects(line: LineCurve): vec2[] {
-        const [x1, y1] = this.SPoint
+        const [x1, y1] = this.SPoint;
         const [x2, y2] = this.EPoint;
         const [x3, y3] = line.SPoint;
         const [x4, y4] = line.EPoint;
 
         const intersect: vec2[] = [];
         const d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-        if (Math.abs(d) > 1E-10) {
+        if (Math.abs(d) > 1e-10) {
             const a = x1 * y2 - y1 * x2;
             const b = x3 * y4 - y3 * x4;
 
@@ -144,8 +144,8 @@ export class LineCurve extends Curve {
 
     /**
      * Gets the distance from a given point to the line curve.
-     * @param pos 
-     * @returns 
+     * @param pos
+     * @returns
      */
     getDisToPos(pos: vec2): number {
         const { SPoint: SPt, EPoint: EPt, tangent: tan } = this;
@@ -207,10 +207,8 @@ export class LineCurve extends Curve {
         const d1 = vec2.distance(SPt, point);
         const d2 = vec2.distance(EPt, point);
         const d = vec2.distance(SPt, EPt);
-        return Math.abs(d1 + d2 - d) < 1E-10;
+        return Math.abs(d1 + d2 - d) < 1e-10;
     }
-
-
 
     /**
      * Converts the line curve to a path string.
@@ -262,12 +260,12 @@ export function lineInterSect(p1: vec2, p2: vec2, p3: vec2, p4: vec2): vec2 {
  * ### Check if two line curves intersect
  * @description 不考虑端点相交
  * 倘若相交，则通过线段 line1 的两点必定在线段 line2 的两侧, 反之亦然
- * @param line1 
- * @param line2 
- * @returns 
+ * @param line1
+ * @param line2
+ * @returns
  */
 export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boolean {
-    const [x1, y1] = line1.SPoint
+    const [x1, y1] = line1.SPoint;
     const [x2, y2] = line1.EPoint;
     const [x3, y3] = line2.SPoint;
     const [x4, y4] = line2.EPoint;
@@ -276,7 +274,6 @@ export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boo
     const cross0 = (x1 - x3) * (y4 - y3) - (y1 - y3) * (x4 - x3);
     const cross1 = (x2 - x3) * (y4 - y3) - (y2 - y3) * (x4 - x3);
 
-
     // line2 的两点必定在线段 line1 的两侧
     const cross2 = (x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1);
     const cross3 = (x4 - x1) * (y2 - y1) - (y4 - y1) * (x2 - x1);
@@ -284,12 +281,11 @@ export function checkLineCurveIntersect(line1: LineCurve, line2: LineCurve): boo
     return cross0 * cross1 < 0 && cross2 * cross3 < 0;
 }
 
-
 // 源码内的测试套件
 if (import.meta.vitest) {
     const { it, test, expect, describe } = import.meta.vitest;
 
-    describe('test for line curve', () => {
+    describe("test for line curve", () => {
         /**point arr */
         const p = [
             vec2.fromValues(0, 0),
@@ -299,7 +295,7 @@ if (import.meta.vitest) {
             vec2.fromValues(0.5, 0.5),
         ];
         const line = new LineCurve(p[0], p[1]);
-        it('get function test', () => {
+        it("get function test", () => {
             expect(line.bbox).toEqual({ x: 0, y: 0, width: 1, height: 1 });
             expect(line.len).toBeCloseTo(Math.SQRT2);
             const normal = line.getNormal();
@@ -311,11 +307,11 @@ if (import.meta.vitest) {
             const posData = line.getPosDataByPer(0.5);
             expect(posData.pos).toEqual(vec2.fromValues(0.5, 0.5));
             expect(posData.tan).toEqual(vec2.fromValues(Math.SQRT1_2, Math.SQRT1_2));
-            expect(line.getSplitT({ mode: 'x', val: 0.5 })).toEqual([0.5]);
-            expect(line.getSplitT({ mode: 'y', val: 0.5 })).toEqual([0.5]);
+            expect(line.getSplitT({ mode: "x", val: 0.5 })).toEqual([0.5]);
+            expect(line.getSplitT({ mode: "y", val: 0.5 })).toEqual([0.5]);
         });
 
-        it('to function test', () => {
+        it("to function test", () => {
             expect(line.toPathString()).toBe("L 1 1");
             expect(line.toDebugPathString()).toBe("L 1 1");
         });
@@ -327,14 +323,13 @@ if (import.meta.vitest) {
         //     expect(line.isPointOnCurve([0.5, 0.5])).toBe(true);
         //     expect(line.clone()).toEqual(line);
         // });
+    });
 
-    })
-
-    describe('test for checkLineCurveIntersect', () => {
-        it('checkLineCurveIntersect', () => {
+    describe("test for checkLineCurveIntersect", () => {
+        it("checkLineCurveIntersect", () => {
             const line1 = new LineCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1));
             const line2 = new LineCurve(vec2.fromValues(0, 1), vec2.fromValues(1, 0));
             expect(checkLineCurveIntersect(line1, line2)).toBe(true);
         });
-    })
+    });
 }

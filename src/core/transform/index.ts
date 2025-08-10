@@ -1,1 +1,1 @@
-export {transformPoint} from './ffd';
+export { transformPoint } from "./ffd";

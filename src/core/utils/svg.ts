@@ -29,7 +29,10 @@ export function getDebugPathStr(curves: Curve[], digits = 1): string {
 }
 
 // todo: 重构
-export type PathCommand = { type: 'Z'; args?: number[] } | { type: string; args?: number[] } | { type: string; args?: number[], x: number, y: number, x1?: number, y1?: number, x2?: number, y2?: number };
+export type PathCommand =
+    | { type: "Z"; args?: number[] }
+    | { type: string; args?: number[] }
+    | { type: string; args?: number[]; x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number };
 
 /**
  * ### 将单条 pathStr(只含一个M)拆分成一个个子命令
@@ -85,7 +88,8 @@ export function interpolatePolygon(startPolygon: vec2[], targetPolygon: vec2[], 
 
 if (import.meta.vitest) {
     const { describe, it, expect } = import.meta.vitest;
-    const pathStr = "M55.5437 22.9059 C40.1922 7.60225 20.0901 -0.0301725 0 8.96355e-05 L0.0562527 78.4342 L55.7169 133.921 C86.3252 103.217 86.2476 53.5142 55.5437 22.9059 Z";
+    const pathStr =
+        "M55.5437 22.9059 C40.1922 7.60225 20.0901 -0.0301725 0 8.96355e-05 L0.0562527 78.4342 L55.7169 133.921 C86.3252 103.217 86.2476 53.5142 55.5437 22.9059 Z";
     describe("svg util test", () => {
         it("pathStringToPathCommands", () => {
             const commands = pathStringToPathCommands(pathStr);

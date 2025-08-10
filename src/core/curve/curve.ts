@@ -16,8 +16,8 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
     protected _isDirty: boolean = true;
 
     /**
-    * The start point of the curve.
-    */
+     * The start point of the curve.
+     */
     protected _SPoint: vec2 = vec2.create();
 
     /**
@@ -41,7 +41,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
      * @param startPoint - The start point of the curve.
      * @param endPoint - The end point of the curve.
      */
-    constructor (startPoint: vec2, endPoint: vec2) {
+    constructor(startPoint: vec2, endPoint: vec2) {
         this.SPoint = startPoint;
         this.EPoint = endPoint;
         this._isDirty = false;
@@ -140,7 +140,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
      * @param per - The length percentage.
      * @returns The position data.
      */
-    abstract getPosDataByPer(per: number): { pos: vec2, tan: vec2 };
+    abstract getPosDataByPer(per: number): { pos: vec2; tan: vec2 };
 
     /**
      * Gets the tangent vector on the curve at the given parameter value.
@@ -172,7 +172,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
 
     /**
      * Gets the distance to the given position.
-     * @param pos 
+     * @param pos
      */
     abstract getDisToPos(pos: vec2): number;
 
@@ -187,7 +187,7 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
         tArr.sort((a, b) => a - b);
         let currentCurve: Curve = this;
         const curves: Curve[] = new Array(tArr.length + 1);
-        let lastT = 0
+        let lastT = 0;
         for (let i = 0; i < tArr.length; i++) {
             let t = tArr[i];
             t = (t - lastT) / (1 - lastT);
@@ -264,7 +264,6 @@ export abstract class Curve implements CloneAble<Curve>, SplitAble<Curve>, Conne
     abstract clone(): Curve;
 }
 
-
 export interface CloneAble<T> {
     /**
      * Clones the curve.
@@ -297,16 +296,16 @@ export interface SplitAble<T> {
 }
 
 export interface ConnectStart {
-    EPoint: vec2,
-    outDir: vec2
+    EPoint: vec2;
+    outDir: vec2;
 }
 
 export interface ConnectEnd {
-    SPoint: vec2,
-    inDir: vec2
+    SPoint: vec2;
+    inDir: vec2;
 }
 
-export interface ConnectAble extends ConnectStart, ConnectEnd { };
+export interface ConnectAble extends ConnectStart, ConnectEnd {}
 
 export interface CoordData {
     mode: "x" | "y";

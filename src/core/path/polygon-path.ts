@@ -8,12 +8,9 @@ declare type WindingRule = "NONZERO" | "EVENODD";
  */
 export class PolygonPath {
     shapes: Polygon[];
-    constructor (shapes: Polygon[]) {
+    constructor(shapes: Polygon[]) {
         this.shapes = shapes;
     }
-
-
 }
 
-
-// function 
+// function

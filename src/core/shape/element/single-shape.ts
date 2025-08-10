@@ -11,7 +11,7 @@ import { calPointsArea } from "../../math";
 export class SingleShape extends Shape {
     /**temp sign point when create Shape from data */
     private currentPos: vec2 = vec2.create();
-    constructor (curves: Curve[]) {
+    constructor(curves: Curve[]) {
         super(curves);
     }
 
@@ -26,7 +26,12 @@ export class SingleShape extends Shape {
     }
 
     bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
-        const bezier = new BezierCurve(this.currentPos, vec2.fromValues(cp1x, cp1y), vec2.fromValues(cp2x, cp2y), vec2.fromValues(x, y));
+        const bezier = new BezierCurve(
+            this.currentPos,
+            vec2.fromValues(cp1x, cp1y),
+            vec2.fromValues(cp2x, cp2y),
+            vec2.fromValues(x, y)
+        );
         this.curves.push(bezier);
         this.currentPos = vec2.fromValues(x, y);
     }
@@ -57,9 +62,15 @@ export class SingleShape extends Shape {
             const { type, args = [] } = command;
             const len = args.length;
             // @ts-ignore
-            const { x = args[len - 2], y = args[len - 1], x1 = args[0],
+            const {
+                x = args[len - 2],
+                y = args[len - 1],
+                x1 = args[0],
                 // @ts-ignore
-                y1 = args[1], x2 = args[2], y2 = args[3] } = command;
+                y1 = args[1],
+                x2 = args[2],
+                y2 = args[3],
+            } = command;
 
             // console.log(i, "type", type, args, x, y, x1, y1, x2, y2);
 
@@ -88,7 +99,7 @@ export class SingleShape extends Shape {
                     shape.bezierCurveTo(x1, y1, x2, y2, x, y);
                     break;
                 case "Q":
-                    shape.quadraticCurveTo(x1, y1, x, y,);
+                    shape.quadraticCurveTo(x1, y1, x, y);
                     break;
                 case "Z":
                     shape.closePath();
@@ -102,76 +113,73 @@ export class SingleShape extends Shape {
         const commands = pathStringToPathCommands(pathStr);
         return SingleShape.fromCommands(commands);
     }
-
 }
 
 export const getShapesArea = (shapes: SingleShape[]) => {
     const points = [];
     for (const shape of shapes) {
-        shape.curves.forEach(curve => {
+        shape.curves.forEach((curve) => {
             points.push(curve.SPoint);
             points.push(curve.getPosition(0.5));
-        })
+        });
         points.push(shape.EPoint);
     }
     const area = calPointsArea(points);
     return area;
-}
+};
 
 if (import.meta.vitest) {
-    const { it, expect, test } = import.meta.vitest
-    test('SingleShape', () => {
-
+    const { it, expect, test } = import.meta.vitest;
+    test("SingleShape", () => {
         const commands: PathCommand[] = [
             {
-                "type": "M",
-                "x": 0,
-                "y": 0
+                type: "M",
+                x: 0,
+                y: 0,
             },
             {
-                "type": "L",
-                "x": 0,
-                "y": 100
+                type: "L",
+                x: 0,
+                y: 100,
             },
             {
-                "type": "L",
-                "x": 100,
-                "y": 100
+                type: "L",
+                x: 100,
+                y: 100,
             },
 
             {
-                "type": "Z" as const
-            }
+                type: "Z" as const,
+            },
         ];
         const shape = SingleShape.fromCommands(commands);
         const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
         const result = shape.getLineIntersects(line);
 
         expect(result).toEqual([vec2.fromValues(0, 50), vec2.fromValues(50, 50)]);
-    })
+    });
 
-    test('SingleShape', () => {
+    test("SingleShape", () => {
         const commands: PathCommand[] = [
             {
-                "type": "M",
-                "x": 0,
-                "y": 0
+                type: "M",
+                x: 0,
+                y: 0,
             },
             {
-                "type": "Q",
-                "x": 100,
-                "y": 100,
-                "x1": 0,
-                "y1": 100
+                type: "Q",
+                x: 100,
+                y: 100,
+                x1: 0,
+                y1: 100,
             },
             {
-                "type": "Q",
-                "x": 0,
-                "y": 0,
-                "x1": 100,
-                "y1": 0
+                type: "Q",
+                x: 0,
+                y: 0,
+                x1: 100,
+                y1: 0,
             },
-
         ];
         const shape = SingleShape.fromCommands(commands);
         const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
@@ -181,127 +189,126 @@ if (import.meta.vitest) {
         expect(result[0][1]).toBeCloseTo(50);
         expect(result[1][0]).toBeCloseTo(74.06);
         expect(result[1][1]).toBeCloseTo(50);
-    })
+    });
 
-    test('SingleShape', () => {
+    test("SingleShape", () => {
         const commands: PathCommand[] = [
             {
-                "type": "M",
-                "x": 1146,
-                "y": 0
+                type: "M",
+                x: 1146,
+                y: 0,
             },
             {
-                "type": "L",
-                "x": 689,
-                "y": 0
+                type: "L",
+                x: 689,
+                y: 0,
             },
             {
-                "type": "L",
-                "x": 689,
-                "y": 290
+                type: "L",
+                x: 689,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 771,
-                "y": 290
+                type: "L",
+                x: 771,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 746,
-                "y": 417
+                type: "L",
+                x: 746,
+                y: 417,
             },
             {
-                "type": "L",
-                "x": 468,
-                "y": 417
+                type: "L",
+                x: 468,
+                y: 417,
             },
             {
-                "type": "L",
-                "x": 443,
-                "y": 290
+                type: "L",
+                x: 443,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 527,
-                "y": 290
+                type: "L",
+                x: 527,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 527,
-                "y": 0
+                type: "L",
+                x: 527,
+                y: 0,
             },
             {
-                "type": "L",
-                "x": 70,
-                "y": 0
+                type: "L",
+                x: 70,
+                y: 0,
             },
             {
-                "type": "L",
-                "x": 70,
-                "y": 290
+                type: "L",
+                x: 70,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 147,
-                "y": 290
+                type: "L",
+                x: 147,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 403,
-                "y": 1571
+                type: "L",
+                x: 403,
+                y: 1571,
             },
             {
-                "type": "L",
-                "x": 811,
-                "y": 1571
+                type: "L",
+                x: 811,
+                y: 1571,
             },
             {
-                "type": "L",
-                "x": 1067,
-                "y": 290
+                type: "L",
+                x: 1067,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 1146,
-                "y": 290
+                type: "L",
+                x: 1146,
+                y: 290,
             },
             {
-                "type": "L",
-                "x": 1146,
-                "y": 0
+                type: "L",
+                x: 1146,
+                y: 0,
             },
             {
-                "type": "Z"
+                type: "Z",
             },
             {
-                "type": "M",
-                "x": 607,
-                "y": 1110
+                type: "M",
+                x: 607,
+                y: 1110,
             },
             {
-                "type": "L",
-                "x": 527,
-                "y": 707
+                type: "L",
+                x: 527,
+                y: 707,
             },
             {
-                "type": "L",
-                "x": 688,
-                "y": 707
+                type: "L",
+                x: 688,
+                y: 707,
             },
             {
-                "type": "L",
-                "x": 607,
-                "y": 1110
+                type: "L",
+                x: 607,
+                y: 1110,
             },
             {
-                "type": "Z" as const
-            }
+                type: "Z" as const,
+            },
         ];
         const shape = SingleShape.fromCommands(commands);
         const line = new LineCurve(vec2.fromValues(0, 1), vec2.fromValues(3, 1));
         const result = shape.getLineIntersects(line);
 
         expect(result).toEqual([vec2.fromValues(1, 1), vec2.fromValues(2, 1)]);
-    })
-
+    });
 }

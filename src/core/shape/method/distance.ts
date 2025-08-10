@@ -14,10 +14,10 @@ export interface DisData {
  * @param shape1 - the second shape, which was also composed of multiple curves
  * @param baseLen - @default 20 the least distance between points
  * @param check - @default true whether to check the correctness of the shape
- * @returns 
+ * @returns
  */
 export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 20, check = true): DisData {
-    const [ps0, ps1] = [shape0, shape1].map(shape => {
+    const [ps0, ps1] = [shape0, shape1].map((shape) => {
         const { len } = shape;
         const count = Math.ceil(len / baseLen);
         if (!count) {
@@ -32,7 +32,6 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
     };
 
     if (check) {
-
         // 当 shape 均闭合时，进行相交性检测（ 倘若 shape 闭合，则其首尾已经相交）
 
         // 首尾相交性检测
@@ -45,7 +44,6 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
             return defaultDisData;
         }
 
-
         const newPoints = [...ps0, ...ps1];
         const isClockwise = calPointsArea(newPoints) > 0;
         // 正确的多边形应该是顺时针的（逆时针表示有效区为外部）
@@ -57,14 +55,8 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
     const { length: l0 } = ps0;
     const { length: l1 } = ps1;
 
-    const indexMatrix = [
-        new Int16Array(l0),
-        new Int16Array(l1),
-    ]
-    const distMatrix = [
-        new Float32Array(l0).fill(Infinity),
-        new Float32Array(l1).fill(Infinity),
-    ]
+    const indexMatrix = [new Int16Array(l0), new Int16Array(l1)];
+    const distMatrix = [new Float32Array(l0).fill(Infinity), new Float32Array(l1).fill(Infinity)];
 
     for (let i0 = 0; i0 < l0; i0++) {
         for (let i1 = 0; i1 < l1; i1++) {
@@ -83,7 +75,7 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
 
     const disDatas: DisData[] = distMatrix.map((distArr) => {
         const mean = distArr.reduce((a, b) => a + b, 0) / distArr.length;
-        const std = Math.sqrt(distArr.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / distArr.length);
+        const std = Math.sqrt(distArr.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / distArr.length);
         return { mean, std };
     });
 

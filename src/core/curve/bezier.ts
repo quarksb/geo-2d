@@ -16,7 +16,7 @@ export const BezierCurveType = "curve-bezier";
 export class BezierCurve extends QuadraticCurve {
     /** The second control point of the curve. */
     protected _CPoint2: vec2 = vec2.create();
-    constructor (startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
+    constructor(startPoint: vec2, controlPoint1: vec2, controlPoint2: vec2, endPoint: vec2) {
         super(startPoint, controlPoint1, endPoint);
         this.type = BezierCurveType;
         this.CPoint2 = controlPoint2;
@@ -150,7 +150,7 @@ export class BezierCurve extends QuadraticCurve {
 
     /**
      * ### Apply a free form deformation (FFD) to the curve.
-     * @param fn 
+     * @param fn
      */
     applyFFDFn(fn: PointFn): void {
         const { SPoint, EPoint } = this;
@@ -164,7 +164,7 @@ export class BezierCurve extends QuadraticCurve {
             // 应用 fn 求出变换后 p 的位置
             fn(p);
             return p;
-        })
+        });
 
         // 更新收尾两点位置
         fn(SPoint);
@@ -216,7 +216,7 @@ export class BezierCurve extends QuadraticCurve {
             vec2.fromValues(xMin, yMin),
             vec2.fromValues(xMax, yMin),
             vec2.fromValues(xMax, yMax),
-            vec2.fromValues(xMin, yMax)
+            vec2.fromValues(xMin, yMax),
         ];
 
         // 如果 bbox四点 都在 line 一侧，则不可能相交
@@ -306,7 +306,12 @@ export class BezierCurve extends QuadraticCurve {
     }
 
     clone(): BezierCurve {
-        return new BezierCurve(vec2.clone(this.SPoint), vec2.clone(this.CPoint1), vec2.clone(this.CPoint2), vec2.clone(this.EPoint));
+        return new BezierCurve(
+            vec2.clone(this.SPoint),
+            vec2.clone(this.CPoint1),
+            vec2.clone(this.CPoint2),
+            vec2.clone(this.EPoint)
+        );
     }
 }
 

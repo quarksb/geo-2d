@@ -4,7 +4,6 @@ import { BBox2, createBBox2, mergeBBox2 } from "../../base";
 import { calPointsArea } from "../../math";
 import { vec2ToStr } from "../../utils";
 
-
 /**
  * ## Represents an abstract class for shape.
  * This class is used to extract common code and unify types.
@@ -21,9 +20,9 @@ export abstract class Shape {
     protected _lenArr: number[] = [];
     protected _bbox2?: BBox2;
 
-    constructor (curves: Curve[]) {
+    constructor(curves: Curve[]) {
         if (curves.length === 0) {
-            throw new Error('Shape must have at least one curve');
+            throw new Error("Shape must have at least one curve");
         }
         this.curves = curves;
         this.initPoints();
@@ -38,7 +37,7 @@ export abstract class Shape {
         this.points = new Array<vec2>(n + 1);
         this.points[0] = curves[0].SPoint;
         for (let i = 0; i < n; i++) {
-            this.points[i + 1] = curves[i].EPoint
+            this.points[i + 1] = curves[i].EPoint;
         }
     }
 
@@ -51,7 +50,7 @@ export abstract class Shape {
     }
 
     get isClosed() {
-        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1E-2;
+        return this.curves.length > 0 && vec2.dist(this.SPoint, this.EPoint) < 1e-2;
     }
 
     /** ### the bbox2 of the shape */
@@ -108,7 +107,7 @@ export abstract class Shape {
 
     /**
      * ### get the direction of a shape
-     * @returns 
+     * @returns
      */
     private getIsClockwise() {
         const { points } = this;
@@ -117,7 +116,7 @@ export abstract class Shape {
 
     /**
      * ### get the length of the shape
-     * @returns 
+     * @returns
      */
     private _getLen() {
         this._lenArr = this.curves.map((curve) => curve.len);
@@ -131,8 +130,8 @@ export abstract class Shape {
 
     /**
      * ### get the BBox2 of the shape
-     * @param bbox2 
-     * @returns 
+     * @param bbox2
+     * @returns
      */
     getBBox2(outBBox2 = createBBox2()): BBox2 {
         for (const { bbox2 } of this.curves) {
@@ -154,7 +153,7 @@ export abstract class Shape {
     }
 
     getPosDataByPer(percent: number) {
-        const { len } = this
+        const { len } = this;
 
         if (this.isClosed) {
             percent = (percent + 1) % 1;
@@ -163,12 +162,12 @@ export abstract class Shape {
         const currentLen = percent * len;
         if (percent <= 0) {
             const curve = this.curves[0];
-            const per = percent * currentLen / curve.len;
+            const per = (percent * currentLen) / curve.len;
             return curve.getPosDataByPer(per);
         }
         if (percent >= 1) {
             const curve = this.curves[this.curves.length - 1];
-            const per = (percent - 1) * currentLen / curve.len + 1;
+            const per = ((percent - 1) * currentLen) / curve.len + 1;
             return curve.getPosDataByPer(per);
         }
 
@@ -266,8 +265,6 @@ export abstract class Shape {
         this._len = this._getLen();
     }
 
-
-
     toPathString(digits = 0): string {
         let originPoint = this.curves[0].SPoint;
         let pathStr = `M ${originPoint[0].toFixed(digits)} ${originPoint[1].toFixed(digits)} `;
@@ -306,8 +303,6 @@ export abstract class Shape {
     }
 }
 
-
 if (import.meta.vitest) {
     const point = vec2.fromValues(655, -208);
-
 }

@@ -3,7 +3,7 @@ import { it, test, expect, describe } from "vitest";
 import { vec2 } from "gl-matrix";
 import { BezierCurve } from "../../src";
 
-describe('test for quadratic curve', () => {
+describe("test for quadratic curve", () => {
     const TestDataArr = [
         // {
         //     input: [100, 0, 200, 0, 300, 0, 400, 0],
@@ -38,13 +38,13 @@ describe('test for quadratic curve', () => {
         {
             input: [74.87, 127.58, -74.96, 39.46, 39.85, -38.02, 78.87, 20.89],
             bbox: {
-                "height": 127.27870574593544,
-                "width": 78.86941333918367,
-                "x": 0.000589407398365438,
-                "y": 0.30129608511924744,
+                height: 127.27870574593544,
+                width: 78.86941333918367,
+                x: 0.000589407398365438,
+                y: 0.30129608511924744,
             },
             maxCurvature: 0.026469714599991784,
-        }
+        },
     ];
 
     it("bbox", () => {
@@ -69,8 +69,8 @@ describe('test for quadratic curve', () => {
             const bezierCurve = new BezierCurve(startPoint, controlPoint1, controlPoint2, endPoint);
 
             const realMaxCurvature = bezierCurve.getMaxCurvature(100);
-            const k = maxCurvature / realMaxCurvature
+            const k = maxCurvature / realMaxCurvature;
             expect(k + 1 / k).toBeCloseTo(2, 0.01);
         }
     });
-})
+});

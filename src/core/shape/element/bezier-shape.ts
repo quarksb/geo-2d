@@ -8,7 +8,7 @@ import { SingleShape } from "./single-shape";
 export class BezierShape extends SingleShape {
     curves: BezierCurve[];
     /**记录每段曲线终点到 shape 起点的长度 */
-    constructor (curves: BezierCurve[]) {
+    constructor(curves: BezierCurve[]) {
         super(curves);
         this.curves = curves;
     }

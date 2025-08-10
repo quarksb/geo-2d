@@ -38,7 +38,9 @@ export function getEaseElasticOut(t: number): number {
 
 export function getEaseElasticInOut(t: number): number {
     const p = 0.9;
-    return t < 0.5 ? 0.5 * Math.pow(2, 20 * t - 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p) : 0.5 * (2 - Math.pow(2, -20 * t + 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
+    return t < 0.5
+        ? 0.5 * Math.pow(2, 20 * t - 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p)
+        : 0.5 * (2 - Math.pow(2, -20 * t + 10) * Math.sin(((20 * t - 11.125) * (2 * Math.PI)) / p));
 }
 
 /**
@@ -50,12 +52,11 @@ export function getDigit(num: number, scale = 4): number {
     return Math.max(scale - Math.floor(Math.log10(num)), 0);
 }
 
-
 /**
  * ### merge couples
- * @param couple 
- * @returns 
- * @example 
+ * @param couple
+ * @returns
+ * @example
  * ```ts
  * mergeCouple([[1, 2], [2, 3], [3, 4], [5, 6]])
  * // [[1, 2, 3, 4], [5, 6]]
@@ -111,17 +112,14 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
 
 /**
  * get the angle of the curve
- * @param lastCurve 
- * @param curve 
- * @returns 
+ * @param lastCurve
+ * @param curve
+ * @returns
  */
 export function getCurveAngle(lastCurve: ConnectStart, curve: ConnectEnd) {
     const radian = getRadianChange(lastCurve.outDir, curve.inDir);
     return toAngle(radian);
 }
-
-
-
 
 /**
  * get the angle change between two vectors
@@ -140,30 +138,61 @@ export function getRadianChange(v1: vec2, v2: vec2, tol = Math.PI / 180) {
     return radian;
 }
 
-
 if (import.meta.vitest) {
     const { it, expect } = import.meta.vitest;
-    it('mergeCouple', () => {
+    it("mergeCouple", () => {
         let couples: Array<[number, number]>;
         couples = [[2, 4]];
         expect(mergeCouple(couples)).toEqual([[2, 4]]);
 
-        couples = [[2, 4], [1, 3]];
-        expect(mergeCouple(couples)).toEqual([[2, 4], [1, 3]]);
+        couples = [
+            [2, 4],
+            [1, 3],
+        ];
+        expect(mergeCouple(couples)).toEqual([
+            [2, 4],
+            [1, 3],
+        ]);
 
-        couples = [[1, 2], [2, 3], [3, 4], [5, 6]];
-        expect(mergeCouple(couples)).toEqual([[1, 2, 3, 4], [5, 6]]);
+        couples = [
+            [1, 2],
+            [2, 3],
+            [3, 4],
+            [5, 6],
+        ];
+        expect(mergeCouple(couples)).toEqual([
+            [1, 2, 3, 4],
+            [5, 6],
+        ]);
 
-        couples = [[1, 2], [2, 3], [4, 1], [5, 6]];
-        expect(mergeCouple(couples)).toEqual([[4, 1, 2, 3], [5, 6]]);
+        couples = [
+            [1, 2],
+            [2, 3],
+            [4, 1],
+            [5, 6],
+        ];
+        expect(mergeCouple(couples)).toEqual([
+            [4, 1, 2, 3],
+            [5, 6],
+        ]);
 
-        couples = [[1, 4], [3, 6], [5, 0], [7, 2]];
-        expect(mergeCouple(couples)).toEqual([[1, 4], [3, 6], [5, 0], [7, 2]]);
+        couples = [
+            [1, 4],
+            [3, 6],
+            [5, 0],
+            [7, 2],
+        ];
+        expect(mergeCouple(couples)).toEqual([
+            [1, 4],
+            [3, 6],
+            [5, 0],
+            [7, 2],
+        ]);
     });
-    it('getRadianChange', () => {
+    it("getRadianChange", () => {
         expect(getRadianChange([1, 0], [0, 1])).toBeCloseTo(Math.PI / 2);
         expect(getRadianChange([1, 0], [1, 0])).toBeCloseTo(0);
         expect(getRadianChange([1, 0], [-1, 0])).toBeCloseTo(Math.PI);
         expect(getRadianChange([-1, -1], [0, -1])).toBeCloseTo(Math.PI / 4);
-    })
+    });
 }

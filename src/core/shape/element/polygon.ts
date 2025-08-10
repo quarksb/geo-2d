@@ -3,7 +3,7 @@ import { ClosedShape } from "./closed-shape";
 import { LineCurve } from "../../curve";
 
 export class Polygon extends ClosedShape {
-    constructor (curves: LineCurve[]) {
+    constructor(curves: LineCurve[]) {
         super(curves);
     }
 
@@ -30,13 +30,19 @@ export class Polygon extends ClosedShape {
 
     /**
      * judge if the polygon is in the polygon
-     * @param polygon 
-     * @returns 
+     * @param polygon
+     * @returns
      */
     includePolygon(polygon: Polygon): boolean {
         // bbox check
         const { xMin, xMax, yMin, yMax } = this.bbox2;
-        if (polygon.bbox2.xMin < xMin || polygon.bbox2.xMax > xMax || polygon.bbox2.yMin < yMin || polygon.bbox2.yMax > yMax) return false;
+        if (
+            polygon.bbox2.xMin < xMin ||
+            polygon.bbox2.xMax > xMax ||
+            polygon.bbox2.yMin < yMin ||
+            polygon.bbox2.yMax > yMax
+        )
+            return false;
         for (let point of polygon.points) {
             if (!this.include(point)) return false;
         }
@@ -45,8 +51,8 @@ export class Polygon extends ClosedShape {
 
     /**
      * judge if the polygon is intersect with the polygon
-     * @param polygon 
-     * @returns 
+     * @param polygon
+     * @returns
      */
     intersectPolygon(polygon: Polygon): boolean {
         for (let point of polygon.points) {
@@ -54,9 +60,7 @@ export class Polygon extends ClosedShape {
         }
         return false;
     }
-
 }
-
 
 if (import.meta.vitest) {
     const { it, expect } = import.meta.vitest;
@@ -68,11 +72,11 @@ if (import.meta.vitest) {
         [1, 1],
         [0, 1],
     ].map(([x, y]) => vec2.fromValues(x, y));
-    polygon = Polygon.fromPoints(points)
+    polygon = Polygon.fromPoints(points);
 
     it("includePoint-0", () => {
         expect(polygon.include([0.5, 0.5])).toBe(true);
         expect(polygon.include([1.5, 0.5])).toBe(false);
         expect(polygon.getArea()).toBe(1);
-    })
+    });
 }

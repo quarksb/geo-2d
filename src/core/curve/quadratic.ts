@@ -20,7 +20,7 @@ export class QuadraticCurve extends LineCurve {
      * The length of the curve at each split point.
      */
     protected _lenArr: number[] = new Array(SPLIT_COUNT).fill(0);
-    constructor (startPoint: vec2, controlPoint1: vec2, endPoint: vec2) {
+    constructor(startPoint: vec2, controlPoint1: vec2, endPoint: vec2) {
         super(startPoint, endPoint);
         this.type = QuadraticCurveType;
         this.CPoint1 = controlPoint1;
@@ -88,7 +88,7 @@ export class QuadraticCurve extends LineCurve {
     }
 
     // todo 溢出部分 per < 0 || per > 1 时 pos is not correct
-    getPosDataByPer(per: number): { pos: vec2, tan: vec2 } {
+    getPosDataByPer(per: number): { pos: vec2; tan: vec2 } {
         // 二分查找
         let left = 0;
         let right = this._lenArr.length - 1;
@@ -103,7 +103,7 @@ export class QuadraticCurve extends LineCurve {
             }
         }
         const preLen = this._lenArr[left - 1] || 0;
-        let t = left / SPLIT_COUNT
+        let t = left / SPLIT_COUNT;
 
         t += (currentLen - preLen) / (this._lenArr[left] - preLen) / SPLIT_COUNT;
 
@@ -128,13 +128,21 @@ export class QuadraticCurve extends LineCurve {
         const { mode, val } = data;
         if (mode === "x") {
             if (val >= x && val <= x + width) {
-                const derivation = [this.SPoint[0] - 2 * this.CPoint1[0] + this.EPoint[0], 2 * (this.CPoint1[0] - this.EPoint[0]), this.EPoint[0] - val];
+                const derivation = [
+                    this.SPoint[0] - 2 * this.CPoint1[0] + this.EPoint[0],
+                    2 * (this.CPoint1[0] - this.EPoint[0]),
+                    this.EPoint[0] - val,
+                ];
                 const roots = getRoots(derivation);
                 return roots.filter((root) => root > 0 && root < 1);
             }
         } else {
             if (val >= y && val <= y + height) {
-                const derivation = [this.SPoint[1] - 2 * this.CPoint1[1] + this.EPoint[1], 2 * (this.CPoint1[1] - this.EPoint[1]), this.EPoint[1] - val];
+                const derivation = [
+                    this.SPoint[1] - 2 * this.CPoint1[1] + this.EPoint[1],
+                    2 * (this.CPoint1[1] - this.EPoint[1]),
+                    this.EPoint[1] - val,
+                ];
                 const roots = getRoots(derivation);
                 return roots.filter((root) => root > 0 && root < 1);
             }
@@ -151,7 +159,7 @@ export class QuadraticCurve extends LineCurve {
             vec2.fromValues(xMin, yMin),
             vec2.fromValues(xMax, yMin),
             vec2.fromValues(xMax, yMax),
-            vec2.fromValues(xMin, yMax)
+            vec2.fromValues(xMin, yMax),
         ];
 
         // 如果 bbox四点 都在 line 一侧，则不可能相交
@@ -201,8 +209,8 @@ export class QuadraticCurve extends LineCurve {
 
     /**
      * ### Gets the distance from a given point to the quadratic curve by numerical method.
-     * @param pos 
-     * @returns 
+     * @param pos
+     * @returns
      */
     getDisToPos(pos: vec2): number {
         let count = 100;
@@ -220,8 +228,8 @@ export class QuadraticCurve extends LineCurve {
 
     /**
      * Gets the distance from a given point to the quadratic curve by Analytical method
-     * @param pos 
-     * @returns 
+     * @param pos
+     * @returns
      */
     getDisToPos2(pos: vec2): number {
         const [x1, y1] = this.SPoint;
@@ -240,21 +248,19 @@ export class QuadraticCurve extends LineCurve {
         // x0 = 2 * (x1 - 2 * x2 + x3) * t + 2 * (x2 - x1)
         // y0 = 2 * (y1 - 2 * y2 + y3) * t + 2 * (y2 - y1)
 
-
-
         // 垂足 p0 到 pos 对应的向量为
         // x1 = - (x1-2*x2+x3)*t^2 - 2*(x2-x1)*t - x1 + x4
         // y1 = - (y1-2*y2+y3)*t^2 - 2*(y2-y1)*t - y1 + y4
         /**向量：垂足 p0 -> pos */
         const offVecArr = [
-            [- (x1 - 2 * x2 + x3), - 2 * (x2 - x1), x4 - x1],
-            [- (y1 - 2 * y2 + y3), - 2 * (y2 - y1), y4 - y1]
+            [-(x1 - 2 * x2 + x3), -2 * (x2 - x1), x4 - x1],
+            [-(y1 - 2 * y2 + y3), -2 * (y2 - y1), y4 - y1],
         ];
 
         /**切线向量 */
         const tanArr = [
             [2 * (x1 - 2 * x2 + x3), 2 * (x2 - x1)],
-            [2 * (y1 - 2 * y2 + y3), 2 * (y2 - y1)]
+            [2 * (y1 - 2 * y2 + y3), 2 * (y2 - y1)],
         ];
 
         // 两个向量的点积为 0 （ 一次方程 点乘 二次方程）
@@ -262,9 +268,12 @@ export class QuadraticCurve extends LineCurve {
         // 整理，合并得到 一个一元三次方程
         /**一元三次方程的参数，共 4 个 */
         const equation = new Array(2 + 3 - 1).fill(0);
-        for (let i = 0; i < 2; i++) { // x, y
-            for (let j = 0; j < 2; j++) { // tanArr
-                for (let k = 0; k < 3; k++) { // offVecArr
+        for (let i = 0; i < 2; i++) {
+            // x, y
+            for (let j = 0; j < 2; j++) {
+                // tanArr
+                for (let k = 0; k < 3; k++) {
+                    // offVecArr
                     // 合并同次项
                     equation[j + k] += tanArr[i][j] * offVecArr[i][k] + tanArr[i][j] * offVecArr[i][k];
                 }
@@ -272,7 +281,7 @@ export class QuadraticCurve extends LineCurve {
         }
 
         const roots = getRoots(equation);
-        const rootArr = [...roots.filter(t => t * (t - 1) < 0), 0, 1]
+        const rootArr = [...roots.filter((t) => t * (t - 1) < 0), 0, 1];
         let minDistance = Infinity;
         for (let t of rootArr) {
             const pedal = this.getPosition(t);
@@ -304,11 +313,11 @@ export class QuadraticCurve extends LineCurve {
         const [x1, y1] = this.getDerivative(t);
         const [x2, y2] = this.getSecondDerivative(t);
         const numerator = x1 * y2 - y1 * x2;
-        if (Math.abs(numerator) < 1E-20) {
-            return 0
+        if (Math.abs(numerator) < 1e-20) {
+            return 0;
         }
         const dominator = x1 ** 2 + y1 ** 2;
-        const curvature = dominator < 1E-20 ? Infinity : numerator / dominator ** 1.5;
+        const curvature = dominator < 1e-20 ? Infinity : numerator / dominator ** 1.5;
         return curvature;
     }
 
@@ -335,9 +344,9 @@ export class QuadraticCurve extends LineCurve {
     }
 
     /**
-     *### 数值法计算曲率极值点对应的参数，可以是多个 
+     *### 数值法计算曲率极值点对应的参数，可以是多个
      * @param n 分割点数量(数值越大精度越高)
-     * @returns 曲率半径极值点对应的参数 
+     * @returns 曲率半径极值点对应的参数
      */
     getCusps(n = 10): number[] {
         // 计算 count 个点的曲率
@@ -362,11 +371,11 @@ export class QuadraticCurve extends LineCurve {
 
         // 分析首尾是否是极值点
         if (CArr[0] * (CArr[0] - CArr[1]) > 0) {
-            cusps.unshift(0)
+            cusps.unshift(0);
         }
 
         if (CArr[n] * (CArr[n] - CArr[n - 1]) > 0) {
-            cusps.push(1)
+            cusps.push(1);
         }
 
         return cusps;
@@ -383,7 +392,10 @@ export class QuadraticCurve extends LineCurve {
     applyFFDFn(fn: PointFn): void {
         // todo, consider use solver equations to calculate the control point position
         this.applyFn(fn);
-        const diff = vec2.fromValues(this.CPoint1[0] - 0.5 * (this.SPoint[0] + this.EPoint[0]), this.CPoint1[1] - 0.5 * (this.SPoint[1] + this.EPoint[1]));
+        const diff = vec2.fromValues(
+            this.CPoint1[0] - 0.5 * (this.SPoint[0] + this.EPoint[0]),
+            this.CPoint1[1] - 0.5 * (this.SPoint[1] + this.EPoint[1])
+        );
         vec2.add(this.CPoint1, this.CPoint1, diff);
     }
 
@@ -430,7 +442,7 @@ export class QuadraticCurve extends LineCurve {
 
     /**
      * ### use polyline to represent the curve
-     * 
+     *
      */
     toPoints(count = 10): vec2[] {
         const points: vec2[] = new Array(count);

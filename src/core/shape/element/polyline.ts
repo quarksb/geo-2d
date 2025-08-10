@@ -7,12 +7,12 @@ import { connectShape } from "../method/connect";
 export class Polyline extends SingleShape {
     public curves: LineCurve[];
     /**
-     * the tangent array 
-     * @remarks the polyline with tangent array is actually a curve, because it easy to calculate 
+     * the tangent array
+     * @remarks the polyline with tangent array is actually a curve, because it easy to calculate
      * the quadratic curve by the polyline with tangent array which control point is the intersection of two tangent
      */
     public tanArr: vec2[] = [];
-    constructor (curves: LineCurve[], tanArr?: vec2[]) {
+    constructor(curves: LineCurve[], tanArr?: vec2[]) {
         super(curves);
         this.curves = curves;
         if (tanArr) {
@@ -69,7 +69,7 @@ export class Polyline extends SingleShape {
     }
 
     getPosDataByPer(percent: number) {
-        const { isClosed, len, curves } = this
+        const { isClosed, len, curves } = this;
 
         if (isClosed) {
             percent = (percent + 1) % 1;
@@ -78,12 +78,12 @@ export class Polyline extends SingleShape {
         const currentLen = percent * len;
         if (percent <= 0) {
             const curve = curves[0];
-            const per = percent * currentLen / curves[0].len;
+            const per = (percent * currentLen) / curves[0].len;
             return curve.getPosDataByPer(per);
         }
         if (percent >= 1) {
             const curve = curves[curves.length - 1];
-            const per = (percent - 1) * currentLen / curve.len + 1;
+            const per = ((percent - 1) * currentLen) / curve.len + 1;
             return curve.getPosDataByPer(per);
         }
 
@@ -108,7 +108,6 @@ export class Polyline extends SingleShape {
     }
 }
 
-
 /**
  * 多段线自交检测
  */
@@ -130,7 +129,7 @@ export function isSelfIntersect(polyline: Polyline) {
 }
 
 // 计算 singleRail 的延伸线
-// 
+//
 export function calExtendCurve(polyline: Polyline) {
     const { points: p, bbox2 } = polyline;
     // todo: 应该取曲率最大的点后的部分的 5 个点，现在为了简单取的是 5 个点
@@ -143,10 +142,9 @@ export function calExtendCurve(polyline: Polyline) {
     const { k, b, R2 } = linearRegression(x, y);
     // console.log(k, b, R2);
 
-    // 此时延长线为直线 
+    // 此时延长线为直线
     return { k, b, R2 };
 }
-
 
 if (import.meta.vitest) {
     const { it, expect } = import.meta.vitest;
@@ -179,5 +177,5 @@ if (import.meta.vitest) {
             [3, 3],
             [4, 4],
         ]);
-    })
+    });
 }

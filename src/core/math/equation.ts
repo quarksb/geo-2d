@@ -2,7 +2,7 @@ const TOL = 1e-12;
 
 /**
  * ### solve the equation
- * @param coefficients An array of polynomial coefficients, 
+ * @param coefficients An array of polynomial coefficients,
  *  from highest order coefficients to constant terms
  * @returns An array of all solutions
  */
@@ -37,8 +37,8 @@ export function getRoots(coefficients: number[]): number[] {
 
 /**
  * ### solve the quadratic equation
- * @param coefficients 
- * @returns 
+ * @param coefficients
+ * @returns
  */
 function getQuadraticRoots(coefficients: number[]) {
     const a = coefficients[0];
@@ -55,8 +55,8 @@ function getQuadraticRoots(coefficients: number[]) {
 
 /**
  * ### solve the cubic equation
- * @param coefficients 
- * @returns 
+ * @param coefficients
+ * @returns
  */
 function getCubicRoots(coefficients: number[]) {
     const a = coefficients[0];
@@ -81,7 +81,11 @@ function getCubicRoots(coefficients: number[]) {
     } else {
         const theta = Math.acos(R / Math.sqrt(-Q * Q * Q));
         const sqrtQ = Math.sqrt(-Q);
-        return [2 * sqrtQ * Math.cos(theta / 3) - A / 3, 2 * sqrtQ * Math.cos((theta + 2 * Math.PI) / 3) - A / 3, 2 * sqrtQ * Math.cos((theta + 4 * Math.PI) / 3) - A / 3];
+        return [
+            2 * sqrtQ * Math.cos(theta / 3) - A / 3,
+            2 * sqrtQ * Math.cos((theta + 2 * Math.PI) / 3) - A / 3,
+            2 * sqrtQ * Math.cos((theta + 4 * Math.PI) / 3) - A / 3,
+        ];
     }
 }
 
@@ -138,10 +142,9 @@ export function gaussElimination(matrix: number[][]) {
     return ans;
 }
 
-
 // vitest 测试
 if (import.meta.vitest) {
-    const { it, expect, test } = import.meta.vitest
+    const { it, expect, test } = import.meta.vitest;
     // it('gaussElimination 0', () => {
     //     const matrix = [
     //         [1, 2, 3, 6],
@@ -161,50 +164,15 @@ if (import.meta.vitest) {
     //     expect(gaussElimination(matrix)).toEqual([0, 0, 1])
     // })
 
-    it('gaussElimination 2', () => {
+    it("gaussElimination 2", () => {
         const matrix = [
-            [
-                734449,
-                875031.2611694336,
-                1042522.6367300786,
-                857,
-                1021.0399780273438,
-                1
-            ],
-            [
-                734449,
-                875665.4851074219,
-                1044034.4282699227,
-                857,
-                1021.780029296875,
-                1
-            ],
-            [
-                734449,
-                876299.6567382812,
-                1045547.1903421879,
-                857,
-                1022.52001953125,
-                1
-            ],
-            [
-                734449,
-                876933.8283691406,
-                1047061.047585547,
-                857,
-                1023.260009765625,
-                1
-            ],
-            [
-                734449,
-                877568,
-                1048576,
-                857,
-                1024,
-                1
-            ]
-        ]
-        const ans = [0, 0, 0, 1 / 857, 0]
-        gaussElimination(matrix).forEach((x, i) => expect(x).toBeCloseTo(ans[i]))
-    })
+            [734449, 875031.2611694336, 1042522.6367300786, 857, 1021.0399780273438, 1],
+            [734449, 875665.4851074219, 1044034.4282699227, 857, 1021.780029296875, 1],
+            [734449, 876299.6567382812, 1045547.1903421879, 857, 1022.52001953125, 1],
+            [734449, 876933.8283691406, 1047061.047585547, 857, 1023.260009765625, 1],
+            [734449, 877568, 1048576, 857, 1024, 1],
+        ];
+        const ans = [0, 0, 0, 1 / 857, 0];
+        gaussElimination(matrix).forEach((x, i) => expect(x).toBeCloseTo(ans[i]));
+    });
 }

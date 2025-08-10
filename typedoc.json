@@ -1,9 +1,9 @@
 {
-  "entryPoints": ["src/index.ts"], // 替换为您的项目入口文件
-  "out": "docs", // 输出文档的目录
-  "tsconfig": "./tsconfig.json", // TypeScript 配置文件
-  "includeVersion": true, // 是否包含版本信息
-  "excludePrivate": true, // 排除私有成员
-  "excludeProtected": true, // 排除受保护的成员
-  "excludeExternals": true // 排除外部模块
+    "entryPoints": ["src/index.ts"], // 替换为您的项目入口文件
+    "out": "docs", // 输出文档的目录
+    "tsconfig": "./tsconfig.json", // TypeScript 配置文件
+    "includeVersion": true, // 是否包含版本信息
+    "excludePrivate": true, // 排除私有成员
+    "excludeProtected": true, // 排除受保护的成员
+    "excludeExternals": true // 排除外部模块
 }
