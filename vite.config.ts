@@ -15,11 +15,19 @@ export default ({ mode }) => {
                 lib: {
                     entry: "src/index.ts",
                     name: "geometry",
-                    formats: ["es", "umd"],
-                    fileName: (format) => `geometry.${format}.js`,
+                    formats: ["es"],
+                    fileName: "index",
                 },
                 outDir: "dist",
                 emptyOutDir: true,
+                rollupOptions: {
+                    external: ["gl-matrix"],
+                    output: {
+                        globals: {
+                            "gl-matrix": "glMatrix",
+                        },
+                    },
+                },
             },
         }),
     };

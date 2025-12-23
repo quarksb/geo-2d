@@ -1,13 +1,19 @@
 {
     "name": "geo-2d",
-    "version": "1.0.10",
+    "version": "1.1.0",
     "type": "module",
+    "sideEffects": false,
     "files": [
         "dist"
     ],
-    "main": "dist/geometry.umd.js",
-    "module": "dist/geometry.es.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
     "typesVersions": {
         "*": {
             "*": [
@@ -17,12 +23,12 @@
     },
     "scripts": {
         "dev": "vite",
-        "build": "pnpm run build:demo",
+        "build": "bun run build:demo",
         "build:demo": "vite build --mode demo",
         "build:lib": "vite build --mode lib",
         "doc": "typedoc src/index.ts --excludeInternal",
         "preview": "vite preview",
-        "publish:lib": "vite build --mode lib && npm publish",
+        "pub": "bun run build:lib && npm publish",
         "test": "vitest",
         "coverage": "vitest run --coverage",
         "format": "prettier --write .",
@@ -51,7 +57,7 @@
     },
     "publishConfig": {
         "access": "public",
-        "registry": "https://registry.npmjs.org/",
+        "registry": "https://registry.npmjs.org",
         "tag": "latest"
     }
 }

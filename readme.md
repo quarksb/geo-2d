@@ -26,8 +26,8 @@ You can install `geo-2d` using npm:
 npm install geo-2d
 # or use yarn
 yarn add geo-2d
-# or use pnpm
-pnpm add geo-2d
+# or use bun
+bun add geo-2d
 ```
 
 ## Usage
