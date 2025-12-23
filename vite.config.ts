@@ -13,16 +13,28 @@ export default ({ mode }) => {
         ...(isLib && {
             build: {
                 lib: {
-                    entry: "src/index.ts",
-                    name: "geometry",
+                    entry: {
+                        index: "src/index.ts",
+                        "core/index": "src/core/index.ts",
+                        "core/base/index": "src/core/base/index.ts",
+                        "core/math/index": "src/core/math/index.ts",
+                        "core/curve/index": "src/core/curve/index.ts",
+                        "core/shape/index": "src/core/shape/index.ts",
+                        "core/path/index": "src/core/path/index.ts",
+                        "core/transform/index": "src/core/transform/index.ts",
+                        "core/utils/index": "src/core/utils/index.ts",
+                        "struct/index": "src/struct/index.ts",
+                    },
                     formats: ["es"],
-                    fileName: "index",
                 },
                 outDir: "dist",
                 emptyOutDir: true,
                 rollupOptions: {
                     external: ["gl-matrix"],
                     output: {
+                        preserveModules: true,
+                        preserveModulesRoot: "src",
+                        entryFileNames: "[name].js",
                         globals: {
                             "gl-matrix": "glMatrix",
                         },

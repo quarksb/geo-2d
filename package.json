@@ -1,6 +1,6 @@
 {
     "name": "geo-2d",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "type": "module",
     "sideEffects": false,
     "files": [
@@ -12,10 +12,73 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
+        },
+        "./core": {
+            "types": "./dist/core/index.d.ts",
+            "import": "./dist/core/index.js"
+        },
+        "./struct": {
+            "types": "./dist/struct/index.d.ts",
+            "import": "./dist/struct/index.js"
+        },
+        "./math": {
+            "types": "./dist/core/math/index.d.ts",
+            "import": "./dist/core/math/index.js"
+        },
+        "./curve": {
+            "types": "./dist/core/curve/index.d.ts",
+            "import": "./dist/core/curve/index.js"
+        },
+        "./shape": {
+            "types": "./dist/core/shape/index.d.ts",
+            "import": "./dist/core/shape/index.js"
+        },
+        "./base": {
+            "types": "./dist/core/base/index.d.ts",
+            "import": "./dist/core/base/index.js"
+        },
+        "./path": {
+            "types": "./dist/core/path/index.d.ts",
+            "import": "./dist/core/path/index.js"
+        },
+        "./transform": {
+            "types": "./dist/core/transform/index.d.ts",
+            "import": "./dist/core/transform/index.js"
+        },
+        "./utils": {
+            "types": "./dist/core/utils/index.d.ts",
+            "import": "./dist/core/utils/index.js"
         }
     },
     "typesVersions": {
         "*": {
+            "core": [
+                "dist/core/index.d.ts"
+            ],
+            "struct": [
+                "dist/struct/index.d.ts"
+            ],
+            "math": [
+                "dist/core/math/index.d.ts"
+            ],
+            "curve": [
+                "dist/core/curve/index.d.ts"
+            ],
+            "shape": [
+                "dist/core/shape/index.d.ts"
+            ],
+            "base": [
+                "dist/core/base/index.d.ts"
+            ],
+            "path": [
+                "dist/core/path/index.d.ts"
+            ],
+            "transform": [
+                "dist/core/transform/index.d.ts"
+            ],
+            "utils": [
+                "dist/core/utils/index.d.ts"
+            ],
             "*": [
                 "dist/index.d.ts"
             ]
@@ -28,7 +91,7 @@
         "build:lib": "vite build --mode lib",
         "doc": "typedoc src/index.ts --excludeInternal",
         "preview": "vite preview",
-        "pub": "bun run build:lib && npm publish",
+        "pub": "bun run build:lib && bun publish",
         "test": "vitest",
         "coverage": "vitest run --coverage",
         "format": "prettier --write .",
@@ -42,7 +105,7 @@
         "prettier": "^3.6.2",
         "typedoc": "^0.26.11",
         "typescript": "^5.9.2",
-        "vite": "^7.1.1",
+        "vite": "^7.3.0",
         "vite-plugin-dts": "^4.5.4",
         "vitest": "^3.2.4",
         "vue": "^3.5.18",
