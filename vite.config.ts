@@ -9,6 +9,9 @@ export default ({ mode }) => {
 
     return {
         plugins: [vue(), vanillaExtractPlugin(), ...(isLib ? [dts({ rollupTypes: true })] : [])],
+        define: {
+            "import.meta.vitest": "undefined",
+        },
         root: "./",
         ...(isLib && {
             build: {
@@ -20,6 +23,9 @@ export default ({ mode }) => {
                 },
                 outDir: "dist",
                 emptyOutDir: true,
+                rollupOptions: {
+                    external: ["gl-matrix"],
+                },
             },
         }),
     };
