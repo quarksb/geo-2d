@@ -1,7 +1,8 @@
 import { vec2 } from "gl-matrix";
 import { BBox, BBox2 } from "../base";
 import { type LineCurve } from "./line";
-import { getRadianChange } from "../math";
+import { getRadianChange } from "../math/utils";
+import { ConnectAble, ConnectEnd, ConnectStart } from "./types";
 
 export type PointFn = (vec: vec2) => void;
 /**
@@ -294,18 +295,6 @@ export interface SplitAble<T> {
      */
     splitAtArray(paramArr: number[]): T[];
 }
-
-export interface ConnectStart {
-    EPoint: vec2;
-    outDir: vec2;
-}
-
-export interface ConnectEnd {
-    SPoint: vec2;
-    inDir: vec2;
-}
-
-export interface ConnectAble extends ConnectStart, ConnectEnd {}
 
 export interface CoordData {
     mode: "x" | "y";

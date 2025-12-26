@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { LineCurve, lineInterSect } from "../../curve";
+import { LineCurve, lineInterSect } from "../../curve/line";
 import { SingleShape } from "./single-shape";
 import { linearRegression } from "../../math";
 import { connectShape } from "../method/connect";
@@ -19,6 +19,10 @@ export class Polyline extends SingleShape {
             this.tanArr = tanArr;
         } else {
             const { length: n } = curves;
+            if (n === 0) {
+                this.tanArr = [];
+                return;
+            }
             const arr = new Array(n + 1);
             for (let i = 0; i < n; i++) {
                 arr[i] = curves[i].inDir;
@@ -68,8 +72,11 @@ export class Polyline extends SingleShape {
         return maxDeflection;
     }
 
-    getPosDataByPer(percent: number) {
+    getPosDataByPer(percent: number): { pos: vec2; tan: vec2 } {
         const { isClosed, len, curves } = this;
+        if (curves.length === 0) {
+            return { pos: vec2.create(), tan: vec2.create() };
+        }
 
         if (isClosed) {
             percent = (percent + 1) % 1;
@@ -171,7 +178,7 @@ if (import.meta.vitest) {
             [4, 4],
         ]);
         polyline = connectShape(polyline0, polyline2);
-        expect(polyline.points).toEqual([
+        expect(polyline.points.map((p) => Array.from(p))).toEqual([
             [0, 0],
             [2, 2],
             [3, 3],

@@ -4,8 +4,8 @@ import { PointFn, CoordData, Curve } from "./curve";
 import { getRoots } from "../math/equation";
 import { LineCurve } from "./line";
 import { BBox2 } from "../base";
-import { cross } from "../math";
-import { vec2ToStr } from "../utils";
+import { cross } from "../math/utils";
+import { vec2ToStr } from "../utils/util";
 
 export const BezierCurveType = "curve-bezier";
 

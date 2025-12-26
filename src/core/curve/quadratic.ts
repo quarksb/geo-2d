@@ -3,8 +3,8 @@ import { LineCurve } from "./line";
 import { PointFn, CoordData } from "./curve";
 import { getRoots } from "../math/equation";
 import { BBox2 } from "../base";
-import { cross } from "../math";
-import { vec2ToStr } from "../utils";
+import { cross } from "../math/utils";
+import { vec2ToStr } from "../utils/util";
 
 const SPLIT_COUNT = 20;
 export const QuadraticCurveType = "curve-quadratic";

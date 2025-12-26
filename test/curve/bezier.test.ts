@@ -1,7 +1,7 @@
 // 源码内的测试套件
 import { it, test, expect, describe } from "vitest";
 import { vec2 } from "gl-matrix";
-import { BezierCurve } from "../../src";
+import { BezierCurve } from "../../src/core/curve/bezier";
 
 describe("test for quadratic curve", () => {
     const TestDataArr = [

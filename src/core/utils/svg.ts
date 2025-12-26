@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { Curve } from "../curve";
+import { Curve } from "../curve/curve";
 
 export function createSvgByPath(pathStr: string): SVGSVGElement {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -10,6 +10,7 @@ export function createSvgByPath(pathStr: string): SVGSVGElement {
 }
 
 export function getPathStr(curves: Curve[], digits = 1): string {
+    if (curves.length === 0) return "";
     const startPoint = curves[0].SPoint;
     let pathStr = `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
     curves.forEach((curve) => {
@@ -20,6 +21,7 @@ export function getPathStr(curves: Curve[], digits = 1): string {
 }
 
 export function getDebugPathStr(curves: Curve[], digits = 1): string {
+    if (curves.length === 0) return "";
     const startPoint = curves[0].SPoint;
     let pathStr = `M ${startPoint[0].toFixed(digits)} ${startPoint[1].toFixed(digits)} `;
     curves.forEach((curve) => {
@@ -101,7 +103,6 @@ if (import.meta.vitest) {
     describe("svg util test", () => {
         it("pathStringToPathCommands", () => {
             const commands = pathStringToPathCommands(pathStr);
-            console.log(commands);
             expect(commands).toEqual([
                 { type: "M", args: [55.5437, 22.9059] },
                 { type: "C", args: [40.1922, 7.60225, 20.0901, -0.0301725, 0, 8.96355e-5] },

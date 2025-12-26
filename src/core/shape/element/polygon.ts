@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
 import { ClosedShape } from "./closed-shape";
-import { LineCurve } from "../../curve";
+import { LineCurve } from "../../curve/line";
 
 export class Polygon extends ClosedShape {
     constructor(curves: LineCurve[]) {
@@ -9,14 +9,17 @@ export class Polygon extends ClosedShape {
 
     static fromPoints(points: vec2[]) {
         let curves = [];
-        for (let i = 0; i <= points.length; i++) {
-            curves.push(new LineCurve(points[i], points[(i + 1) % points.length]));
+        const { length } = points;
+        for (let i = 0; i < length; i++) {
+            curves.push(new LineCurve(points[i], points[(i + 1) % length]));
         }
         return new Polygon(curves);
     }
 
-    getCentroid() {
+    getCentroid(): vec2 {
+        if (this.points.length === 0) return vec2.create();
         let area = this.getArea();
+        if (area === 0) return vec2.clone(this.points[0]);
         let cx = 0;
         let cy = 0;
         for (let i = 0; i < this.points.length; i++) {
@@ -25,7 +28,7 @@ export class Polygon extends ClosedShape {
             cx += (xi + xj) * (xi * yj - xj * yi);
             cy += (yi + yj) * (xi * yj - xj * yi);
         }
-        return [cx / 6 / area, cy / 6 / area];
+        return vec2.fromValues(cx / 6 / area, cy / 6 / area);
     }
 
     /**

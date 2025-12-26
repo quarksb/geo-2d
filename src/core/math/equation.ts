@@ -137,7 +137,6 @@ export function gaussElimination(matrix: number[][]) {
             matrix[j][n] -= matrix[j][i] * ans[i];
         }
     }
-    console.log(matrix);
 
     return ans;
 }

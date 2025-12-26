@@ -1,5 +1,7 @@
 import { vec2 } from "gl-matrix";
-import { Curve, CoordData, LineCurve, PointFn } from "../../curve";
+import { Curve, PointFn } from "../../curve/curve";
+import { LineCurve } from "../../curve/line";
+import { CoordData } from "../../curve/curve";
 import { BBox2, createBBox2, mergeBBox2 } from "../../base";
 import { calPointsArea } from "../../math";
 import { vec2ToStr } from "../../utils";
@@ -21,11 +23,10 @@ export abstract class Shape {
     protected _bbox2?: BBox2;
 
     constructor(curves: Curve[]) {
-        if (curves.length === 0) {
-            throw new Error("Shape must have at least one curve");
-        }
         this.curves = curves;
-        this.initPoints();
+        if (curves.length > 0) {
+            this.initPoints();
+        }
     }
 
     initPoints() {
@@ -72,28 +73,28 @@ export abstract class Shape {
      * ### the start point of the shape
      */
     get SPoint() {
-        return this.curves[0].SPoint;
+        return this.curves[0]?.SPoint;
     }
 
     /**
      * ### the end point of the shape
      */
     get EPoint() {
-        return this.curves[this.curves.length - 1].EPoint;
+        return this.curves[this.curves.length - 1]?.EPoint;
     }
 
     /**
      * ### the in direction of this curve
      */
     get inDir() {
-        return this.curves[0].inDir;
+        return this.curves[0]?.inDir;
     }
 
     /**
      * ### the out direction of this curve
      */
     get outDir() {
-        return this.curves[this.curves.length - 1].outDir;
+        return this.curves[this.curves.length - 1]?.outDir;
     }
 
     getMaxCurvature(n = 10) {
@@ -119,6 +120,7 @@ export abstract class Shape {
      * @returns
      */
     private _getLen() {
+        if (this.curves.length === 0) return 0;
         this._lenArr = this.curves.map((curve) => curve.len);
         const { length } = this.curves;
 
@@ -152,7 +154,10 @@ export abstract class Shape {
         return result.flat();
     }
 
-    getPosDataByPer(percent: number) {
+    getPosDataByPer(percent: number): { pos: vec2; tan: vec2 } {
+        if (this.curves.length === 0) {
+            return { pos: vec2.create(), tan: vec2.create() };
+        }
         const { len } = this;
 
         if (this.isClosed) {
@@ -266,6 +271,7 @@ export abstract class Shape {
     }
 
     toPathString(digits = 0): string {
+        if (this.curves.length === 0) return "";
         let originPoint = this.curves[0].SPoint;
         let pathStr = `M ${originPoint[0].toFixed(digits)} ${originPoint[1].toFixed(digits)} `;
         let curPos = originPoint;
@@ -303,6 +309,3 @@ export abstract class Shape {
     }
 }
 
-if (import.meta.vitest) {
-    const point = vec2.fromValues(655, -208);
-}

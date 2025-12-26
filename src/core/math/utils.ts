@@ -1,5 +1,5 @@
+import type { ConnectEnd, ConnectStart } from "../curve/types";
 import { vec2 } from "gl-matrix";
-import { ConnectEnd, ConnectStart } from "../curve";
 import { toAngle } from "./circle";
 
 export function arrEquals<T>(v0: Array<T>, v1: Array<T>): boolean {

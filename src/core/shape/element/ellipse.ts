@@ -1,5 +1,5 @@
 import { vec2 } from "gl-matrix";
-import { getQuadraticCurve } from "../method";
+import { getQuadraticCurve } from "../method/connect";
 import { ClosedShape } from "./closed-shape";
 
 export const getEllipse = (cx: number, cy: number, rx: number, ry: number, count = 20) => {
@@ -26,7 +26,6 @@ if (import.meta.vitest) {
     const { expect, test, describe } = import.meta.vitest;
     test("ellipse", () => {
         const shape = getEllipse(100, 50, 80, 40, 4);
-        console.log(shape.toPathString(0));
 
         expect(shape.toPathString()).toBe("M 180 50 Q 180 90 100 90 Q 20 90 20 50 Q 20 10 100 10 Q 180 10 180 50 Z");
     });

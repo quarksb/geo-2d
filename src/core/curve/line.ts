@@ -1,7 +1,7 @@
 import { vec2 } from "gl-matrix";
 import { Curve, PointFn, CoordData } from "./curve";
 import { BBox2 } from "../base";
-import { vec2ToStr } from "../utils";
+import { vec2ToStr } from "../utils/util";
 
 export const LineCurveType = "curve-line";
 

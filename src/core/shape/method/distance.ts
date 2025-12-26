@@ -1,6 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { checkLineCurveIntersect, LineCurve } from "../../curve";
-import { SingleShape } from "../element";
+import { checkLineCurveIntersect, LineCurve } from "../../curve/line";
+import { SingleShape } from "../element/single-shape";
 import { calPointsArea } from "../../math";
 
 export interface DisData {
@@ -35,8 +35,11 @@ export function calDisData(shape0: SingleShape, shape1: SingleShape, baseLen = 2
         // 当 shape 均闭合时，进行相交性检测（ 倘若 shape 闭合，则其首尾已经相交）
 
         // 首尾相交性检测
-        const LineCurve0 = new LineCurve(shape0.EPoint, shape1.SPoint);
-        const LineCurve1 = new LineCurve(shape1.EPoint, shape0.SPoint);
+        if (shape0.curves.length === 0 || shape1.curves.length === 0) {
+            return defaultDisData;
+        }
+        const LineCurve0 = new LineCurve(shape0.EPoint!, shape1.SPoint!);
+        const LineCurve1 = new LineCurve(shape1.EPoint!, shape0.SPoint!);
         const isIntersect = checkLineCurveIntersect(LineCurve0, LineCurve1);
 
         // 导轨两连接线交叉，不合理，直接跳过后续计算

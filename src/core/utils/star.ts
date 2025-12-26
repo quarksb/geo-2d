@@ -1,10 +1,10 @@
 import { vec2 } from "gl-matrix";
 import { Curve } from "../curve/curve";
-import { getRandomGenerate } from "../math";
+import { getRandomGenerate } from "../math/utils";
 import { BBox } from "../base";
 import { getPathStr } from "./svg";
 import { getBSpline } from "../shape/element/bSpline";
-import { QuadraticCurve } from "../curve";
+import { QuadraticCurve } from "../curve/quadratic";
 
 /**
  * get the vertexes of a polygon

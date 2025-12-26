@@ -1,9 +1,7 @@
 // 源码内的测试套件
 import { it, test, expect, describe } from "vitest";
 import { vec2 } from "gl-matrix";
-import { QuadraticCurve } from "../../src";
-
-console.log("quarksb");
+import { QuadraticCurve } from "../../src/core/curve/quadratic";
 
 describe("test for quadratic curve", () => {
     let curve = new QuadraticCurve(vec2.fromValues(0, 0), vec2.fromValues(1, 1), vec2.fromValues(2, 0));

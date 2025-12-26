@@ -1,5 +1,6 @@
 import { vec2 } from "gl-matrix";
-import { checkLineCurveIntersect, Curve, LineCurve } from "../../curve";
+import { checkLineCurveIntersect, LineCurve } from "../../curve/line";
+import { Curve } from "../../curve/curve";
 import { SingleShape } from "./single-shape";
 import { calPointsArea, isPointInPoints } from "../../math";
 import { PathCommand, pathStringToPathCommands } from "../../utils";
@@ -8,9 +9,10 @@ import { BBox2, includeBBox2 } from "../../base";
 export class ClosedShape extends SingleShape implements IncludeAble<vec2>, InterSectAble<LineCurve> {
     constructor(public curves: Curve[]) {
         super(curves);
+        if (curves.length === 0) return;
         // check whether it's closed
         const { EPoint, SPoint } = this;
-        if (vec2.distance(EPoint, SPoint) > 1e-1) {
+        if (vec2.distance(EPoint!, SPoint!) > 1e-1) {
             console.error("ClosedShape must be closed");
         }
         this.initPoints();

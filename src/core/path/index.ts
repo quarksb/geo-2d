@@ -2,7 +2,8 @@ import { vec2 } from "gl-matrix";
 import { ClosedShape, IncludeAble, InterSectAble, splitByBBox } from "../shape";
 import { PathCommand, pathStringToPathCommands } from "../utils/svg";
 import { BBox2, createBBox2 } from "../base";
-import { CoordData, LineCurve, PointFn } from "../curve";
+import { CoordData, PointFn } from "../curve/curve";
+import { LineCurve } from "../curve/line";
 
 declare type WindingRule = "NONZERO" | "EVENODD";
 

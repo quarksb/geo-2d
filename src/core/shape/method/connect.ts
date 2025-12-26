@@ -1,7 +1,10 @@
 import { vec2 } from "gl-matrix";
 import { Shape } from "../element/base-shape";
 import { cross, toAngle } from "../../math";
-import { ConnectEnd, ConnectStart, Curve, LineCurve, lineInterSect, QuadraticCurve } from "../../curve";
+import { ConnectEnd, ConnectStart } from "../../curve/types";
+import { Curve } from "../../curve/curve";
+import { LineCurve, lineInterSect } from "../../curve/line";
+import { QuadraticCurve } from "../../curve/quadratic";
 import { SingleShape } from "../element/single-shape";
 
 /**
@@ -53,7 +56,10 @@ export function getQuadraticCurve(shape0: ConnectStart, shape1: ConnectEnd) {
  * @returns
  */
 export function connectShape(shape0: Shape, shape1: Shape): SingleShape {
-    const vec = vec2.sub(vec2.create(), shape1.SPoint, shape0.EPoint);
+    if (shape0.curves.length === 0) return new SingleShape([...shape1.curves]);
+    if (shape1.curves.length === 0) return new SingleShape([...shape0.curves]);
+
+    const vec = vec2.sub(vec2.create(), shape1.SPoint!, shape0.EPoint!);
     const dist = vec2.len(vec);
     let curves = shape0.curves;
     const isContinuous = dist < 1;

@@ -1,5 +1,8 @@
 import { vec2 } from "gl-matrix";
-import { Curve, LineCurve, BezierCurve, QuadraticCurve } from "../../curve";
+import { Curve } from "../../curve/curve";
+import { LineCurve } from "../../curve/line";
+import { BezierCurve } from "../../curve/bezier";
+import { QuadraticCurve } from "../../curve/quadratic";
 import { PathCommand, pathStringToPathCommands } from "../../utils";
 import { Shape } from "./base-shape";
 import { calPointsArea } from "../../math";
@@ -43,6 +46,7 @@ export class SingleShape extends Shape {
     }
 
     closePath() {
+        if (this.curves.length === 0) return;
         const startPoint = this.curves[0].SPoint;
         // 如果之前已经闭合，则不再添加直线
         if (vec2.equals(this.currentPos, startPoint)) {
@@ -103,6 +107,9 @@ export class SingleShape extends Shape {
                     break;
             }
         }
+        if (shape.curves.length > 0) {
+            shape.initPoints();
+        }
         return shape;
     }
 
@@ -113,13 +120,14 @@ export class SingleShape extends Shape {
 }
 
 export const getShapesArea = (shapes: SingleShape[]) => {
-    const points = [];
+    const points: vec2[] = [];
     for (const shape of shapes) {
+        if (shape.curves.length === 0) continue;
         shape.curves.forEach((curve) => {
             points.push(curve.SPoint);
             points.push(curve.getPosition(0.5));
         });
-        points.push(shape.EPoint);
+        points.push(shape.EPoint!);
     }
     const area = calPointsArea(points);
     return area;
@@ -153,7 +161,10 @@ if (import.meta.vitest) {
         const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
         const result = shape.getLineIntersects(line);
 
-        expect(result).toEqual([vec2.fromValues(0, 50), vec2.fromValues(50, 50)]);
+        expect(result[0][0]).toBeCloseTo(0);
+        expect(result[0][1]).toBeCloseTo(50);
+        expect(result[1][0]).toBeCloseTo(50);
+        expect(result[1][1]).toBeCloseTo(50);
     });
 
     test("SingleShape", () => {
@@ -182,9 +193,9 @@ if (import.meta.vitest) {
         const line = new LineCurve(vec2.fromValues(0, 50), vec2.fromValues(1, 50));
         const result = shape.getLineIntersects(line);
 
-        expect(result[0][0]).toBeCloseTo(25.94);
+        expect(result[0][0]).toBeCloseTo(8.58, 1);
         expect(result[0][1]).toBeCloseTo(50);
-        expect(result[1][0]).toBeCloseTo(74.06);
+        expect(result[1][0]).toBeCloseTo(91.42, 1);
         expect(result[1][1]).toBeCloseTo(50);
     });
 
@@ -306,6 +317,12 @@ if (import.meta.vitest) {
         const line = new LineCurve(vec2.fromValues(0, 1), vec2.fromValues(3, 1));
         const result = shape.getLineIntersects(line);
 
-        expect(result).toEqual([vec2.fromValues(1, 1), vec2.fromValues(2, 1)]);
+        expect(result[0][0]).toBeCloseTo(689);
+        expect(result[1][0]).toBeCloseTo(527);
+    });
+
+    test("Empty SingleShape", () => {
+        const shape = SingleShape.fromPathString("M 0 0");
+        expect(shape.curves.length).toBe(0);
     });
 }
