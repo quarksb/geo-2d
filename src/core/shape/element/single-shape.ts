@@ -57,16 +57,13 @@ export class SingleShape extends Shape {
 
         let countOfM = 0;
 
-        for (let i = 0; i < commands.length; i++) {
-            const command = commands[i];
+        for (const command of commands) {
             const { type, args = [] } = command;
             const len = args.length;
-            // @ts-ignore
             const {
                 x = args[len - 2],
                 y = args[len - 1],
                 x1 = args[0],
-                // @ts-ignore
                 y1 = args[1],
                 x2 = args[2],
                 y2 = args[3],

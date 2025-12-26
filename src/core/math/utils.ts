@@ -63,7 +63,7 @@ export function getDigit(num: number, scale = 4): number {
  * ```
  */
 
-export function mergeCouple<T>(couples: T[][]): T[][] {
+export function mergeCouple<T extends {}>(couples: T[][]): T[][] {
     // when couples is empty or only one couple, return couples
     if (couples.length <= 1) {
         return couples;
@@ -82,7 +82,7 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
     const result: T[][] = [];
     let maxCount = couples.length ** 2;
     while ((toRightMap.size || toLeftMap.size) && maxCount-- > 0) {
-        let cur = toRightMap.keys().next().value;
+        let cur = toRightMap.keys().next().value!;
         const values = [cur];
         let current = toRightMap.get(cur);
         while (current !== undefined && current !== cur && maxCount-- > 0) {
@@ -104,7 +104,7 @@ export function mergeCouple<T>(couples: T[][]): T[][] {
             cur = current;
             current = toLeftMap.get(current);
         }
-        result.push(values);
+        result.push(values as T[]);
     }
 
     return result;

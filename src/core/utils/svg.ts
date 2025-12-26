@@ -29,10 +29,18 @@ export function getDebugPathStr(curves: Curve[], digits = 1): string {
 }
 
 // todo: 重构
-export type PathCommand =
-    | { type: "Z"; args?: number[] }
-    | { type: string; args?: number[] }
-    | { type: string; args?: number[]; x: number; y: number; x1?: number; y1?: number; x2?: number; y2?: number };
+export type PathCommandType = "M" | "L" | "H" | "V" | "C" | "S" | "Q" | "T" | "A" | "Z" | (string & {});
+
+export interface PathCommand {
+    type: PathCommandType;
+    args?: number[];
+    x?: number;
+    y?: number;
+    x1?: number;
+    y1?: number;
+    x2?: number;
+    y2?: number;
+}
 
 /**
  * ### 将单条 pathStr(只含一个M)拆分成一个个子命令
