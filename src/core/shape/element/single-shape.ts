@@ -91,10 +91,35 @@ export class SingleShape extends Shape {
                     }
                     break;
                 case "H":
-                    shape.lineTo(x, shape.currentPos[1]);
+                    shape.lineTo(args[0], shape.currentPos[1]);
+                    break;
+                case "h":
+                    shape.lineTo(shape.currentPos[0] + args[0], shape.currentPos[1]);
                     break;
                 case "V":
                     shape.lineTo(shape.currentPos[0], y);
+                    break;
+                case "v":
+                    shape.lineTo(shape.currentPos[0], shape.currentPos[1] + args[0]);
+                    break;
+                case "l":
+                    shape.lineTo(shape.currentPos[0] + x, shape.currentPos[1] + y);
+                    break;
+                case "m":
+                    shape.moveTo(shape.currentPos[0] + x, shape.currentPos[1] + y);
+                    break;
+                case "c":
+                    shape.bezierCurveTo(
+                        shape.currentPos[0] + x1, shape.currentPos[1] + y1,
+                        shape.currentPos[0] + x2, shape.currentPos[1] + y2,
+                        shape.currentPos[0] + x, shape.currentPos[1] + y
+                    );
+                    break;
+                case "q":
+                    shape.quadraticCurveTo(
+                        shape.currentPos[0] + x1, shape.currentPos[1] + y1,
+                        shape.currentPos[0] + x, shape.currentPos[1] + y
+                    );
                     break;
                 case "C":
                     shape.bezierCurveTo(x1, y1, x2, y2, x, y);
@@ -102,6 +127,7 @@ export class SingleShape extends Shape {
                 case "Q":
                     shape.quadraticCurveTo(x1, y1, x, y);
                     break;
+                case "z":
                 case "Z":
                     shape.closePath();
                     break;
@@ -324,5 +350,14 @@ if (import.meta.vitest) {
     test("Empty SingleShape", () => {
         const shape = SingleShape.fromPathString("M 0 0");
         expect(shape.curves.length).toBe(0);
+    });
+
+    test("SingleShape with relative commands (v, h, z)", () => {
+        const shape = SingleShape.fromPathString("M1720.6,2000V0H279.4v2000H1720.6z");
+        const bbox = shape.bbox2;
+        expect(bbox.xMin).toBeCloseTo(279.4);
+        expect(bbox.xMax).toBeCloseTo(1720.6);
+        expect(bbox.yMin).toBeCloseTo(0);
+        expect(bbox.yMax).toBeCloseTo(2000);
     });
 }
