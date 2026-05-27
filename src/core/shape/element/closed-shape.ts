@@ -46,8 +46,8 @@ export class ClosedShape extends SingleShape implements IncludeAble<vec2>, Inter
     static fromCommands(commands: PathCommand[]) {
         // 检查是否闭合
         const { length } = commands;
-        if (commands[0].type !== "M" || commands[length - 1].type !== "Z") {
-            console.error("ClosedShape must start with M and end with Z");
+        if (commands[0].type !== "M") {
+            console.warn("ClosedShape must start with M");
         }
         const sb = super.fromCommands(commands);
         return new ClosedShape(sb.curves);
